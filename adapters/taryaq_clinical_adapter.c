@@ -21,10 +21,12 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
 
     if (!rx || !rx->primary_drug) return res;
 
-    /* 1. Deterministic Renal + CYP3A4 Fatal Interaction Check */
-    if (rx->patient_egfr_ml_min < 30.0 &&
-        strcmp(rx->primary_drug, "Colchicine") == 0 &&
-        rx->concurrent_drug && strcmp(rx->concurrent_drug, "Clarithromycin") == 0) {
+    /* 1. Deterministic Renal + CYP3A4 Fatal Interaction Check (Commutative / Order-Independent) */
+    bool has_colchicine = (strcmp(rx->primary_drug, "Colchicine") == 0) ||
+                          (rx->concurrent_drug && strcmp(rx->concurrent_drug, "Colchicine") == 0);
+    bool has_clarithro  = (strcmp(rx->primary_drug, "Clarithromycin") == 0) ||
+                          (rx->concurrent_drug && strcmp(rx->concurrent_drug, "Clarithromycin") == 0);
+    if (rx->patient_egfr_ml_min < 30.0 && has_colchicine && has_clarithro) {
         res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
         strncpy(res.alert_code, "FATAL_CYP3A4_RENAL_CONTRAINDICATION", sizeof(res.alert_code) - 1);
         strncpy(res.clinical_rationale,
@@ -34,8 +36,9 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
     }
 
     /* 1b. Deterministic Metformin Severe Renal Cutoff (eGFR < 30 mL/min -> Lactic Acidosis) */
-    if (rx->patient_egfr_ml_min < 30.0 &&
-        strcmp(rx->primary_drug, "Metformin") == 0) {
+    bool has_metformin = (strcmp(rx->primary_drug, "Metformin") == 0) ||
+                         (rx->concurrent_drug && strcmp(rx->concurrent_drug, "Metformin") == 0);
+    if (rx->patient_egfr_ml_min < 30.0 && has_metformin) {
         res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
         strncpy(res.alert_code, "METFORMIN_SEVERE_RENAL_CUTOFF_EGFR_LT_30", sizeof(res.alert_code) - 1);
         strncpy(res.clinical_rationale,
@@ -136,6 +139,21 @@ int main(void) {
     taryaq_result_t r5 = taryaq_verify_prescription_and_claim(&metformin_renal);
     assert(r5.verdict == CLINICAL_CONTRAINDICATION_BLOCK);
     assert(strcmp(r5.alert_code, "METFORMIN_SEVERE_RENAL_CUTOFF_EGFR_LT_30") == 0);
+
+    /* Test 6: Commutative Check (Inverted primary/concurrent drug order) */
+    taryaq_rx_context_t inverted_order_case = {
+        .primary_drug = "Clarithromycin",
+        .concurrent_drug = "Colchicine",
+        .patient_egfr_ml_min = 22.0,
+        .is_controlled_substance = false,
+        .has_controlled_id_verified = false,
+        .icd10_code = "M10.0",
+        .submission_delay_days = 0,
+        .has_ejadah_lab_justification = true
+    };
+    taryaq_result_t r6 = taryaq_verify_prescription_and_claim(&inverted_order_case);
+    assert(r6.verdict == CLINICAL_CONTRAINDICATION_BLOCK);
+    assert(strcmp(r6.alert_code, "FATAL_CYP3A4_RENAL_CONTRAINDICATION") == 0);
 
     printf("[PASS] All Taryaq C99 Pharmacovigilance & DHA SN 03/2019 Claim Scrubber tests passed successfully!\n");
     return 0;
