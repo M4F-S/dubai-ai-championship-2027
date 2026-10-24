@@ -72,11 +72,14 @@
 - [ ] **M-09:** Pilot Letter Outreach (Dubai Pharmacy / Clinic)
 - [ ] **M-10:** Final Submission Package Synchronization (Decks, Video, Report)
 
-### Phase 3: Pitch Decks, Summary Reports & Video Production (December 2026)
+### Phase 3: Pitch Decks, Summary Reports & Video Production (December 2026 - DEFERRED TO POST-BUILD)
+> [!NOTE]  
+> **BUILD-FIRST PRINCIPLE (MEDIA FREEZE):** By operator directive (2026-10-24), all pitch deck drafting (`docs/pitch_decks/`), video screenplay production (`docs/video_script.md`), and marketing collateral are **FROZEN** until all core engineering tasks (M-03 through M-08) and physical benchmark measurements are completed. This eliminates repeated thrashing and ensures final media directly captures the verified, production systems.
+
 - [ ] Ensure all team members complete individual profile enrolment on `dubaichamberdigital.com` before **December 2026**
-- [x] Draft 10-Slide Pitch Decks for `Qala`, `Nibras Executive`, and `Taryaq` (`docs/pitch_decks/`)
-- [x] Produce 2.5-minute demonstration video script showing the live air-gapped cable pull and HUD (`docs/video_script.md`)
-- [x] Complete the DCDE Architecture Summary Report (`docs/architecture_summary_report.md`)
+- [ ] Finalize 10-Slide Pitch Decks for `Qala`, `Nibras Executive`, and `Taryaq` (`docs/pitch_decks/`) using finalized empirical benchmarks
+- [ ] Record 2.5-minute demonstration video showing live air-gapped cable pull and HUD telemetry (`docs/video_script.md`) using real running binaries
+- [ ] Synchronize and finalize the DCDE Architecture Summary Report (`docs/architecture_summary_report.md`)
 
 ### Phase 4: Final Submission & Tech Accelerator (January – May 2027)
 - [ ] Submit all final deliverables on the DCDE portal by **January 2027**

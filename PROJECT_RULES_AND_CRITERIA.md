@@ -31,6 +31,10 @@ The official DCDE rules permit a single team to submit multiple applications wit
 * **Envelope Isolation:** Intermediate tool outputs, raw grep traces, file dumps, and multi-step investigation logs must be contained within the subagent's execution envelope and discarded after synthesis, returning only concise, actionable findings to the primary agent.
 * **Recursion Guard:** Subagents must operate with bounded turn limits (max 5 turns) and must never spawn unbounded recursive child agent chains.
 
+### 1.5 Build-First Principle (Media & Pitch Decks Deferred Post-Build)
+* **Official Invariant:** To maximize engineering velocity and prevent wasteful thrashing, all pitch deck slides (`docs/pitch_decks/`), demonstration video screenplays (`docs/video_script.md`), and marketing copy are **FROZEN** until the core software products, runnable CLI daemons, and empirical benchmarks (Tasks M-03 through M-08) are fully built and verified.
+* **Ground-Truth Media:** Final decks, architecture reports, and demo videos will be authored in a single coherent pass at the conclusion of Phase 2, populated directly with measured latencies, actual memory footprints, real HUD telemetry screen recordings, and audited benchmark results from the finished systems.
+
 ---
 
 ## 2. Technical & Architectural Standards

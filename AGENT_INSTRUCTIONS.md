@@ -38,6 +38,7 @@ Before writing any new feature or modifying any file:
 4. **Zero Cloud Exfiltration:** All agent communication must assume an air-gapped environment. Never echo API secrets, Telegram bot tokens, or private customer records.
 5. **Strict C99 Standards:** All new C code must compile cleanly with `-std=c99 -Wall -Wextra -Werror -O2`.
 6. **Mandatory Subagent Delegation for Context Hygiene:** Whenever conducting codebase searches, documentation audits, deep research, or running multi-step diagnostics, you MUST spawn isolated subagents. Never dump raw grep outputs, directory scans, or multi-page tool outputs into the primary agent context. The main context is reserved for high-level reasoning and synthesis. Subagents must return distilled, actionable findings and terminate within bounded turns.
+7. **Build-First Media Freeze:** Do not edit, rewrite, or update pitch decks (`docs/pitch_decks/`), the demonstration video script (`docs/video_script.md`), or marketing collateral during Phase 2. All media production is deferred to Phase 3 (Post-Build) when working software, physical benchmarks, and real telemetry are finalized.
 
 ---
 
