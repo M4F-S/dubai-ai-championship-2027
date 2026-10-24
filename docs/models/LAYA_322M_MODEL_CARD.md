@@ -4,7 +4,7 @@
 **Championship:** Dubai AI Agents Championship 2026-2027  
 **Task Reference:** Task M-07 (RECOMMENDATIONS_2026-10-24.md)  
 **Date:** October 2026  
-**License:** Apache 2.0 (Convai / Dubai Sovereign Fork)  
+**License:** Apache 2.0 (Upstream Convai Laya Foundation Model)  
 
 ---
 
@@ -12,7 +12,7 @@
 
 The **Laya Multilingual 322M** model (Convai, September 2026, Apache 2.0) is a high-speed, non-autoregressive encoder backbone fine-tuned for typed clinical, operational, and regulatory decision triage. Unlike autoregressive large language models that generate free-form text token-by-token, Laya processes structured state representations and evaluates typed decision heads directly in a single forward pass.
 
-On the target edge platform—the **Minisforum UM790 Pro** (AMD Ryzen 9 7940HS with 64 GB DDR5-5600)—Laya executes entirely on CPU cores in under **0.05 ms** (sub-millisecond latency, verified < 40 ms SLA) consuming **< 1 GB of system RAM**. This enables Laya to operate continuously alongside Jais 3 7B running on the Radeon 780M iGPU, creating a decoupled two-tier architecture:
+On the target edge platform—the **Minisforum UM790 Pro** (AMD Ryzen 9 7940HS with 64 GB DDR5-5600)—upstream Convai benchmarks report ~33 ms inference on Nvidia T4 hardware, with an edge CPU SLA target under 40 ms consuming **< 1 GB of system RAM** (the local Python triage decision layer executes feature classification in < 1 ms). This enables Laya to operate continuously alongside Jais 3 7B running on the Radeon 780M iGPU, creating a decoupled two-tier architecture:
 1. **Laya 322M (CPU):** Rapid gatekeeper, intention routing, clinical urgency classification, and uncertainty-gated abstention.
 2. **Jais 3 7B (iGPU / Vulkan):** High-level multilingual clinical planning, Arabic dialogue, and structured tool-call generation.
 3. **C99 Deterministic Shield & Verifiers (Native):** Authoritative hard enforcement of renal dose limits, CYP3A4 contraindications, and DHA SN 03/2019 billing penalties.
@@ -172,9 +172,8 @@ flowchart LR
 
 - **Benchmark Platform:** Minisforum UM790 Pro (AMD Ryzen 9 7940HS, 8 cores / 16 threads, 64 GB DDR5-5600, Radeon 780M iGPU).
 - **Operating System:** macOS / Ubuntu 24.04 LTS (Air-Gapped Enclave).
-- **CPU Latency (Single Decision):**
-  - Mean: **0.050 ms** (< 40.0 ms target).
-  - p95: **0.092 ms** (< 50.0 ms target).
-  - p99: **0.145 ms**.
+- **Inference Latency Profile:**
+  - Upstream 322M Encoder (Nvidia T4 Reference): **~33 ms** (target edge CPU SLA: **< 40 ms**).
+  - Local Calibrated Triage Adapter (Feature/Decision Head): Mean **0.050 ms**, p95 **0.092 ms**, p99 **0.145 ms**.
 - **RAM Footprint:** **< 850 MB** during active inference.
 - **Network Exfiltration:** **Zero bytes (100% offline air-gap execution)**.

@@ -24,7 +24,8 @@ Key Capabilities:
 4. Abstention Mechanism:
    If max_k P(y=k|x) < tau (default tau = 0.85), emits "ABSTAIN" and routes
    to human physician override or deterministic C99 verifier.
-5. Fast CPU inference latency (< 40 ms per decision, benchmarked at < 1 ms).
+5. Fast CPU decision-layer latency (< 40 ms full transformer SLA target; < 1 ms local triage head execution).
+6. Note: Upstream Convai Laya is 322M/421M Apache 2.0; this module acts as the calibrated decision head and triage harness.
 """
 
 import os
