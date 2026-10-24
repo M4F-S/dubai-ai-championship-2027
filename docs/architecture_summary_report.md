@@ -16,7 +16,7 @@ The **Dubai Create AI Agents Championship 2026–2027** demands autonomous agent
 Our architectural thesis rejects heavy, abstracted Python frameworks (LangChain, AutoGen, CrewAI) and public cloud API dependencies. Instead, we introduce a **bare-metal ISO C99 sovereign autonomous runtime** engineered to execute 100% locally on dedicated on-premises hardware over air-gapped Unix Domain Sockets (`AF_UNIX`).
 
 We unify our three championship entries under **one shared medication-safety and governance platform** tailored for three distinct economic buyers:
-1. **Taryaq (Societal — Lead Entry):** The Pharmacist — intercepts fatal adverse drug events and scrubs insurance claims in under 0.05 ms before dispensing.
+1. **Taryaq (Societal — Lead Entry):** The Pharmacist — intercepts fatal adverse drug events and scrubs insurance claims in under 3 ms before dispensing.
 2. **Qala (Business):** The Operator — eliminates enterprise policy failures and recovers revenue by mitigating DHA SN 03/2019 delay penalties before electronic submission.
 3. **Nibras Executive (Personal):** The Patient & Leader — preserves long-horizon deal memory and complex chronic regimens with 97% context token savings via exponential decay.
 
@@ -48,7 +48,7 @@ To achieve mathematical determinism and sub-millisecond safety guarantees on cos
                                                   ▼
 +===================================================================================================+
 |                  TIER 1: ULTRA-FAST CALIBRATED TRIAGE LAYER (CPU / Convai Laya 322M)               |
-|  • Non-autoregressive encoder running 100% on CPU in 0.05 ms (<1 GB RAM footprint)                |
+|  • Non-autoregressive encoder running 100% on CPU (<40 ms CPU SLA, <1 ms triage head, <1 GB RAM) |
 |  • Evaluates 10 Sovereign Canonical Decision Heads (Intent, Clinical Urgency, Renal, CYP3A4, PII) |
 |  • Temperature-scaled calibration (ECE reduced from 0.3954 to 0.0919 via dev NLL fitting)         |
 |  • Uncertainty-Gated Abstention (tau = 0.85): 13.89% abstention, 100.0% precision on retained    |
@@ -71,7 +71,7 @@ To achieve mathematical determinism and sub-millisecond safety guarantees on cos
 +===================================================================================================+
 |                 TIER 3: DETERMINISTIC BARE-METAL C99 SAFETY SHIELD & POLICY GATES                 |
 |  • taryaq_clinical_adapter.c: Hard mathematical limits (eGFR renal cutoffs, CYP3A4 contraindication)|
-|  • qala_mcp_policy_adapter.c: Landlock LSM filesystem sandboxing & AED 50,000 settlement gate     |
+|  • qala_mcp_policy_adapter.c: Hard path allowlist boundary sandboxing & AED 50,000 settlement gate     |
 |  • grounding_shield.c: PII entity scrubbing & factual cross-verification against statutory rules  |
 |  • nibras_arabic_fademem_adapter.c: Zero-allocation Arabic normalizer & FadeMem 97% token pruning |
 |  • Append-Only SHA-256 JSONL Audit Log (taryaq_audit.jsonl / qala-audit.jsonl)                   |
@@ -87,13 +87,13 @@ In direct compliance with DCDE Deliverable #4 specifications (*"explaining the c
 | Component Element | Full Technical Name | Subsystem Role & Architectural Value |
 | :--- | :--- | :--- |
 | **`Taryaq` (ترياق)** | *The Antidote* — Clinical Safety & Reimbursement Firewall | Competition entry for **Best Societal AI Agent**. Intercepts fatal drug interactions (e.g., Colchicine + Clarithromycin in renal failure) and pre-flight scrubs DHA eClaimLink XML payloads. |
-| **`Qala` (القلعة)** | *The Citadel* — Sovereign Enterprise FinOps Agent | Competition entry for **Best Business AI Agent**. Connects to enterprise ERPs via Stateless MCP 2026-07-28, sandboxes execution with Linux Landlock LSM, and audits financial transactions. |
+| **`Qala` (القلعة)** | *The Citadel* — Sovereign Enterprise FinOps Agent | Competition entry for **Best Business AI Agent**. Connects to enterprise ERPs via Stateless MCP 2026-07-28, sandboxes execution with deterministic path allowlists, and audits financial transactions. |
 | **`Nibras Executive` (نبراس)** | *The Guiding Lamp* — Long-Horizon Cognitive Exocortex | Competition entry for **Best Personal AI Agent**. Operates as an air-gapped executive shadow chief-of-staff and personal health companion with zero context drift and 97% context token savings. |
-| **Tier 1: Laya 322M** | Convai Laya Multilingual 322M Sovereign Triage Engine | Non-autoregressive encoder executing on CPU in **0.05 ms** (<1 GB RAM). Evaluates 10 typed decision heads with calibrated uncertainty abstention. |
+| **Tier 1: Laya 322M** | Convai Laya Multilingual 322M Sovereign Triage Engine | Non-autoregressive encoder executing on CPU with calibrated triage (<40 ms SLA, <1 GB RAM). Evaluates 10 typed decision heads with uncertainty abstention. |
 | **Tier 2: Jais 3 7B** | National Bilingual Arabic/English Foundation Model (Inception/MBZUAI) | Sovereign 7B model running on Radeon 780M iGPU via Vulkan at **19.91 tok/s** at 4K context. Formulates high-level clinical plans and conversational reasoning. |
 | **Tier 3: C99 Adapters** | ISO C99 Hard Deterministic Safety & Policy Shield | In-process C99 verifiers (`adapters/`) enforcing unbypassable clinical limits, financial approval thresholds, and statutory calculations. |
 | **GBNF Tool Grammar** | Grammar-Based Backus-Naur Form Schema Enforcer (`bench/taryaq_tool_call.gbnf`)| Constrains LLM sampling to valid JSON schemas, achieving **100.0% schema compliance** vs 68.0% unconstrained (**+32.0% reliability delta**). |
-| **Linux Landlock LSM** | Linux Security Module Kernel Sandboxing | Kernel-level unprivileged filesystem sandboxing (`landlock_create_ruleset`) with `PR_SET_NO_NEW_PRIVS`, blocking prompt injections attempting to access unauthorized files. |
+| **Path Allowlist Sandbox** | C99 Deterministic Filesystem Sandbox | Strict in-process path boundary enforcement (`is_restricted_path_hardened`), blocking prompt injections attempting to access unauthorized files or traverse directories. |
 | **Stateless MCP Client** | Model Context Protocol (`2026-07-28` Specification) | Production `libcurl` + `cJSON` driver (`adapters/mcp_curl_client.c`) providing universal JSON-RPC 2.0 connectivity over Streamable HTTP without sticky session dependencies. |
 | **Grounding Shield** | Search-Augmented Verification Engine (`adapters/grounding_shield.c`) | Real-time fact-checking engine that scrubs customer PII/Emirates IDs, queries local regulatory caches, and rejects numerical hallucinations. |
 | **CORAL Memory** | Context-Oriented Retrieval & Associative Linking | Dual-stream cognitive memory separating raw chronological episodic logs (JSONL/SQLite) from permanent semantic entity graphs via SQLite FTS5 BM25 search. |
@@ -113,7 +113,7 @@ All adapter modules are written in strict ISO C99 (`-std=c99 -Wall -Wextra -Werr
    - Rejects unapproved dispensing commits, enforcing mandatory single-use clinical override codes (`TARYAQ-OVERRIDE-8842-CLIN`).
 2. **`qala_mcp_policy_adapter.c` / `qala_adapters.h`:**
    - Enforces AED 50,000 financial transaction threshold; gates sensitive operations in verdict `REVIEW` until a single-use Telegram token is provided.
-   - Enforces Landlock filesystem restrictions and denies forbidden paths.
+   - Enforces strict path allowlists and denies forbidden directories.
 3. **`grounding_shield.c` / `grounding_shield.h`:**
    - Scrubs PII entities (Emirates IDs `784-XXXX-XXXXXXX-X`, phone numbers, names).
    - Verifies numerical claim accuracy against statutory limits with `<0.0001` precision.
@@ -138,7 +138,7 @@ In autoregressive inference, generating each token requires streaming the full a
 
 $$\text{Throughput (tok/s)} = \frac{\text{Memory Bandwidth (GB/s)}}{\text{Active Model Size (GB)}} = \frac{89.6\text{ GB/s}}{4.50\text{ GB}} = 19.91\text{ tok/s}$$
 
-### 5.3 Measured Empirical Benchmarks on UM790 Pro (`bench/results.json`)
+### 5.3 Modelled Edge Benchmarks on UM790 Pro (Reference / `bench/results.json`)
 
 | Context Length | Prefill Speed | Generation Speed | Token Latency | Power Draw | RAM Available | Stage Recommendation |
 | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -153,23 +153,23 @@ $$\text{Throughput (tok/s)} = \frac{\text{Memory Bandwidth (GB/s)}}{\text{Active
 
 ---
 
-## 6. Empirical Evaluation & Benchmarks Matrix
+## 6. Verification & Benchmarks Matrix
 
 ### 6.1 Laya Multilingual 322M Calibrated Triage (`docs/models/LAYA_322M_MODEL_CARD.md`)
 - **Dataset Partition:** 400 patient cohorts (`DXB-PAT-0001` through `DXB-PAT-0400`), 2,400 labeled examples (70% train / 15% dev / 15% test, 0.00% patient overlap).
 - **Language Balance:** 1,200 Arabic (50.0%) and 1,200 English (50.0%).
 - **Calibration Impact:** Temperature scaling on dev split reduces Expected Calibration Error (ECE) from **0.3954 down to 0.0919** (76.8% reduction in calibration error).
-- **Uncertainty Abstention ($\tau = 0.85$):** **13.89% abstention rate** on held-out test split, achieving **100.00% accuracy on retained cases** in **0.05 ms CPU latency**.
+- **Uncertainty Abstention ($\tau = 0.85$):** **13.89% abstention rate** on held-out test split, achieving **100.00% accuracy on retained cases** in **<1 ms decision head execution** (<40 ms CPU SLA).
 
 ### 6.2 Golden 30 Benchmark Suite (`benchmarks/GOLDEN_EVAL_REPORT.md`)
 - **Task Suite:** 30 Dubai-specific tasks (10 Taryaq, 10 Qala, 10 Nibras).
 - **Multi-Trial Consistency:** 8 trials per task = **240 total executions**.
 - **First-Trial Pass Rate ($\text{pass}^1$):** **100.0%** (240/240 passed).
-- **Empirical 8-Trial Pass Rate ($\text{pass}^8$):** **100.0%** (30/30 tasks passed all 8 trials).
+- **8-Trial Pass Rate ($\text{pass}^8$):** **100.0%** (30/30 tasks passed all 8 trials).
 - **Strict 8/8 Consistency:** **100.0%**.
 - **Unsafe-Action Intercept Rate:** **0.0% unsafe actions** (100% intercepted).
 
-### 6.3 Section 5.4 3-Tier Architecture Empirical Ablation Table
+### 6.3 Section 5.4 3-Tier Architecture Ablation Table (Projected Model / Deterministic Suite)
 
 | Configuration | Task Accuracy | p95 Latency | Unsafe-Action Rate | Abstention Rate |
 | :--- | :---: | :---: | :---: | :---: |

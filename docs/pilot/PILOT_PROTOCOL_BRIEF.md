@@ -85,7 +85,7 @@ To ensure 100% compliance with UAE Federal Law No. 2 of 2019 and DESC Informatio
   * Physical air-gap: No external WAN connection; physical Ethernet loopback to the clinic switch with no default gateway.
   * Zero telemetry: All outbound sockets blocked via Linux `iptables` and local kernel namespaces.
 * **On-Device Model Stack:**
-  * **Laya Multilingual (322M):** On-CPU calibrated triage engine running temperature-scaled intent routing and safety classification in 0.05 ms.
+  * **Laya Multilingual (322M):** On-CPU calibrated triage engine running temperature-scaled intent routing and safety classification in under 40 ms CPU SLA (<1 ms decision head).
   * **Jais 3 (7B Q4_K_M):** Sovereign Arabic-bilingual LLM operating under strict context-free GBNF grammar constraints (`taryaq_tool_call.gbnf`), guaranteeing zero hallucinated tool calls.
   * **C99 Deterministic Safety Core:** Zero-allocation, compiled bare-metal safety rules (`taryaq_clinical_adapter.c`, `grounding_shield.c`) executing in 0.015 ms.
 

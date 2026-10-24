@@ -9,7 +9,7 @@
 ### Slide 1: Title & Executive Hook
 * **Headline:** QALA (القلعة): The Sovereign Bare-Metal Enterprise Agent
 * **Sub-headline:** Eliminating Enterprise Policy Failure and Cloud Data Leakage for Dubai D33 with Deterministic C99 Systems and UAE Foundation Models.
-* **Core Value Proposition:** Built for Dubai's D33 digital transformation, Qala connects to any enterprise ERP via Stateless MCP 2026-07-28, assists Dubai Government Entities in fulfilling DESC ISR v3.1 data residency at the Linux kernel level, and guarantees deterministic multi-turn policy compliance where cloud prompt-wrappers collapse.
+* **Core Value Proposition:** Built for Dubai's D33 digital transformation, Qala connects to any enterprise ERP via Stateless MCP 2026-07-28, assists Dubai Government Entities in fulfilling DESC ISR v3.1 data residency with air-gapped deterministic policy gates, and guarantees deterministic multi-turn policy compliance where cloud prompt-wrappers collapse.
 * **Target Audience:** Dubai Government Chief AI Officers (22 CAIOs), corporate enterprise leaders (DP World, DEWA, Emirates, Dubai Customs), and regional FinOps teams.
 
 ---
@@ -36,7 +36,7 @@
 ### Slide 4: The Live Demo Walkthrough
 * **100% Air-Gapped Demonstration:** Demonstrated on stage with the physical Ethernet cable pulled. Zero external network telemetry.
 * **Step 1: Sub-Millisecond Cold Start (<0.025 ms):** Bare-metal C99 daemon initializes in **0.013 ms**, communicating over local POSIX domain sockets (`AF_UNIX`).
-* **Step 2: Adversarial Injection Block:** An operator injects a prompt attack: `fs_read("/confidential/uae_citizens.db")`. Linux Landlock LSM sandboxing blocks the syscall at the kernel level with zero bytes leaked.
+* **Step 2: Adversarial Injection Block:** An operator injects a prompt attack: `fs_read("/confidential/uae_citizens.db")`. The C99 Policy Gate path allowlist intercepts the traversal attempt before filesystem access with zero bytes leaked.
 * **Step 3: Grounding Shield PII Scrubbing:** Inbound vendor invoice contains customer PII; the C99 Grounding Shield scrubs names and Emirates IDs in real-time, verifying VAT calculations against statutory 5% rules.
 * **Step 4: High-Value Settlement Policy Interception:** An automated trade settlement of **AED 125,000** triggers the C99 Policy Gate threshold (>AED 50,000). The state is locked in verdict `REVIEW`.
 * **Step 5: Single-Use Cryptographic Approval:** The operator receives an encrypted prompt on Telegram and verifies with a single-use token: `DUBAI-APPROVE-9941-X`.
@@ -44,17 +44,17 @@
 
 ---
 
-### Slide 5: Measured Results & Empirical Benchmarks
+### Slide 5: Edge Performance & Verification Benchmarks
 * **M-06 UM790 Pro Hardware Benchmark (`bench/RESULTS.md`):**
   * AMD Ryzen 9 7940HS / Radeon 780M / 64GB DDR5-5600 dual channel (**89.6 GB/s** bandwidth).
-  * Jais 3 7B Q4_K_M (4.50 GB): **19.91 tok/s at 4K context (50.23 ms/tok)**, **16.42 tok/s at 8K context (60.90 ms/tok)**.
+  * Jais 3 7B Q4_K_M (4.50 GB): **19.91 tok/s at 4K context (50.23 ms/tok)**, **16.42 tok/s at 8K context (60.90 ms/tok)** (published reference baseline).
   * GBNF Tool Grammar (`bench/taryaq_tool_call.gbnf`): **100.0% schema compliance** vs 68.0% unconstrained (**+32.0% reliability delta**, eliminating 32/100 syntax failures).
 * **M-07 Laya Multilingual 322M Calibrated Triage (`docs/models/LAYA_322M_MODEL_CARD.md`):**
   * 10 canonical decision heads across 2,400 labeled examples (1,200 AR / 1,200 EN, 400 patients, zero data leakage).
   * Dev temperature scaling reduces Expected Calibration Error (ECE) from **0.3954 down to 0.0919** (76.8% error reduction).
-  * Uncertainty-gated abstention at $\tau=0.85$: **13.89% abstention**, achieving **100.00% accuracy on retained cases** in **0.05 ms CPU latency**.
+  * Uncertainty-gated abstention at $\tau=0.85$: **13.89% abstention**, achieving **100.00% accuracy on retained cases** with local decision head in **<1 ms** (<40 ms CPU SLA).
 * **M-08 Golden 30 Benchmark Suite (`benchmarks/GOLDEN_EVAL_REPORT.md`):**
-  * 30 tasks $\times$ 8 trials = **240 test executions**: **100.0% first-trial pass rate ($\text{pass}^1$)**, **100.0% empirical 8-trial pass rate ($\text{pass}^8$)**, and **0.0% unsafe actions**.
+  * 30 tasks $\times$ 8 trials = **240 deterministic test executions**: **100.0% first-trial pass rate ($\text{pass}^1$)**, **100.0% 8-trial pass rate ($\text{pass}^8$)**, and **0.0% unsafe actions**.
 
 ---
 
@@ -67,21 +67,21 @@
 ---
 
 ### Slide 7: 3-Tier Sovereign Architecture & Enterprise Edge Stack
-* **Tier 1: Fast Calibrated Triage (Laya Multilingual 322M on CPU):**
-  * Non-autoregressive encoder evaluating 10 canonical heads in **0.05 ms** (<1 GB RAM).
+* **Tier 1: Fast Calibrated Triage (Laya Multilingual 322M on CPU — Coupled via IPC):**
+  * Non-autoregressive encoder evaluating 10 canonical heads (<40 ms CPU SLA, local decision head in <1 ms, <1 GB RAM).
   * Rapidly classifies administrative intent, detects potential PII leakage, and triggers safety abstention when uncertainty is detected.
-* **Tier 2: Sovereign Multilingual Generator (Jais 3 7B on Radeon 780M iGPU):**
-  * UAE national bilingual foundation model running locally at **19.91 tok/s** via Vulkan.
+* **Tier 2: Sovereign Multilingual Generator (Jais 3 7B on Radeon 780M iGPU — Coupled via IPC / GBNF):**
+  * UAE national bilingual foundation model running locally at **19.91 tok/s** reference rate via Vulkan.
   * Formulates structured tool calls strictly constrained by GBNF grammars, preventing malformed JSON-RPC payloads.
-* **Tier 3: Deterministic Policy Gate & Enterprise C99 Adapters:**
+* **Tier 3: Deterministic Policy Gate & Enterprise C99 Adapters (Bare-Metal ISO C99 — Shipped Binary):**
   * `qala_mcp_policy_adapter.c`: Hard in-process interception of tool calls before execution.
-  * C99 AST Symbol Indexer: Resolves caller/callee blast radius in **3.4 ms** with **90% fewer prompt tokens** than LLM chunking.
-  * Linux Landlock LSM & `AF_UNIX` Sockets: Kernel-enforced file sandboxing with zero network exfiltration.
+  * In-Process Policy Engine: Enforces DESC ISR v3.1 access control allowlists and constant-time token verification in 0.015 ms.
+  * C99 Path Allowlist & `AF_UNIX` Sockets: In-process filesystem boundary sandbox with zero network exfiltration.
 
 ---
 
 ### Slide 8: Section 5.4 Ablation Study (The Technical Proof)
-* **Empirical Ablation Across 200 Tasks on Physical UM790 Hardware:**
+* **Ablation Study Across 200 Tasks (Projected Model / Deterministic Suite):**
 
 | Configuration | Task Accuracy | p95 Latency | Unsafe-Action Rate | Abstention Rate |
 | :--- | :---: | :---: | :---: | :---: |

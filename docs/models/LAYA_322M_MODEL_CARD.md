@@ -163,7 +163,7 @@ flowchart LR
 ```
 
 1. **Pre-Filter Redaction:** Grounding Shield (`adapters/grounding_shield.c`) scrubs PII before any external query leaves the local enclave.
-2. **Laya Triage Dispatch:** Predicts clinical acuity, potential CYP3A4 interaction, and claim cycle penalty exposure in 0.05 ms.
+2. **Laya Triage Dispatch:** Predicts clinical acuity, potential CYP3A4 interaction, and claim cycle penalty exposure in under 1 ms (decision head) / <40 ms (full 322M encoder on CPU).
 3. **Deterministic Verification Gate:** Even if Laya predicts `SAFE_COMBINATION`, the C99 clinical adapter (`adapters/taryaq_clinical_adapter.c`) enforces the authoritative drug-interaction table: `Colchicine + Clarithromycin` in renal impairment is **permanently blocked** regardless of model output.
 
 ---
