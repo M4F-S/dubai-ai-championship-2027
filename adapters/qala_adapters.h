@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "grounding_shield.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,12 +15,13 @@ extern "C" {
 
 /* Standard Qala Verdict Envelopes */
 typedef enum {
-    VERDICT_SAFE      = 0, /* Safe to execute immediately */
-    VERDICT_CAUTION   = 1, /* Low-risk warning logged; execution permitted */
-    VERDICT_REVIEW    = 2, /* Gated mutation: requires single-use approval code */
-    VERDICT_UNSAFE    = 3, /* Hard block: Landlock / DESC ISR v3 violation */
-    VERDICT_AUTH_BLK  = 4, /* Upstream credential missing or expired */
-    VERDICT_ERROR     = 5  /* Malformed tool arguments or transport fault */
+    VERDICT_SAFE            = 0, /* Safe to execute immediately */
+    VERDICT_CAUTION         = 1, /* Low-risk warning logged; execution permitted */
+    VERDICT_REVIEW          = 2, /* Gated mutation: requires single-use approval code */
+    VERDICT_UNSAFE          = 3, /* Hard block: Landlock / DESC ISR v3 violation */
+    VERDICT_AUTH_BLK        = 4, /* Upstream credential missing or expired */
+    VERDICT_HALLUCINATION   = 5, /* Grounding Shield blocked unverified/hallucinated claim */
+    VERDICT_ERROR           = 6  /* Malformed tool arguments or transport fault */
 } qala_verdict_t;
 
 /* Single-use, scope-bound human approval token slot */
@@ -32,13 +34,16 @@ typedef struct {
 
 /* Tool call inspection context */
 typedef struct {
-    const char *tool_name;        /* e.g., "fs_read", "erp_customs_settlement" */
-    const char *target_path;      /* Target filesystem path */
-    const char *raw_args_json;    /* Raw JSON arguments payload */
-    double      amount_aed;       /* Transaction value in AED */
-    bool        is_mutating;      /* True if tool modifies state/database/APIs */
-    const char *required_scope;   /* Required scope token */
-    const char *supplied_code;    /* Approval code supplied by caller */
+    const char               *tool_name;        /* e.g., "fs_read", "erp_customs_settlement" */
+    const char               *target_path;      /* Target filesystem path */
+    const char               *raw_args_json;    /* Raw JSON arguments payload */
+    double                    amount_aed;       /* Transaction value in AED */
+    bool                      is_mutating;      /* True if tool modifies state/database/APIs */
+    const char               *required_scope;   /* Required scope token */
+    const char               *supplied_code;    /* Approval code supplied by caller */
+    const grounding_claim_t  *grounding_claim;  /* Optional factual claim to verify */
+    const grounding_source_t *grounding_corpus; /* Retrieved authoritative references */
+    size_t                    grounding_count;  /* Number of grounding reference sources */
 } qala_tool_call_ctx_t;
 
 /* Result envelope */

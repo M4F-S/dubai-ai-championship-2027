@@ -97,12 +97,13 @@ static bool is_restricted_path_hardened(const char *raw_path, const char *raw_ar
 
 static const char *verdict_to_str(qala_verdict_t v) {
     switch (v) {
-        case VERDICT_SAFE:     return "SAFE";
-        case VERDICT_CAUTION:  return "CAUTION";
-        case VERDICT_REVIEW:   return "REVIEW";
-        case VERDICT_UNSAFE:   return "UNSAFE";
-        case VERDICT_AUTH_BLK: return "AUTH_BLOCKED";
-        default:               return "ERROR";
+        case VERDICT_SAFE:          return "SAFE";
+        case VERDICT_CAUTION:       return "CAUTION";
+        case VERDICT_REVIEW:        return "REVIEW";
+        case VERDICT_UNSAFE:        return "UNSAFE";
+        case VERDICT_AUTH_BLK:      return "AUTH_BLOCKED";
+        case VERDICT_HALLUCINATION: return "HALLUCINATION_BLOCKED";
+        default:                    return "ERROR";
     }
 }
 
@@ -168,7 +169,24 @@ qala_policy_result_t policy_verify_call(
         return res;
     }
 
-    /* 2. Hard Financial & State Mutation Gate */
+    /* 2. Grounding Shield Anti-Hallucination Gate */
+    if (ctx->grounding_claim && ctx->grounding_corpus && ctx->grounding_count > 0) {
+        grounding_result_t g_res = grounding_verify_claim(
+            ctx->grounding_claim,
+            ctx->grounding_corpus,
+            ctx->grounding_count
+        );
+        if (g_res.verdict == GROUNDING_HALLUCINATION_TRIPPED) {
+            res.verdict = VERDICT_HALLUCINATION;
+            strncpy(res.code, "grounding_hallucination_blocked", sizeof(res.code) - 1);
+            snprintf(res.reason, sizeof(res.reason),
+                     "Grounding Shield Intercept: %s", g_res.discrepancy_note);
+            write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
+            return res;
+        }
+    }
+
+    /* 3. Hard Financial & State Mutation Gate */
     bool requires_human_gate = ctx->is_mutating || (ctx->amount_aed > 50000.0);
     if (requires_human_gate) {
         if (!ctx->supplied_code || ctx->supplied_code[0] == '\0') {
@@ -327,7 +345,37 @@ int main(void) {
     assert(strstr(http_buf, "MCP-Protocol-Version: 2026-07-28") != NULL);
     assert(strstr(http_buf, "Mcp-Method: tools/call") != NULL);
 
-    printf("[PASS] All Qala C99 Hardened Policy Gate & Stateless MCP tests passed successfully!\n");
+    /* Test 6: Grounding Shield integration in Policy Gate (Catches Hallucinated Penalty) */
+    grounding_source_t corpus[1] = {{
+        .source_id = "DHA_SN_03_2019",
+        .source_title = "DHA Standards Notice SN 03/2019 Payment Rules",
+        .snippet_text = "Late payment delay penalty is 0.03% per calendar day.",
+        .source_numerical = 0.03
+    }};
+    grounding_claim_t hallucinated_claim = {
+        .claim_text = "Late payment delay penalty is 0.05% daily",
+        .entity_name = "DHA",
+        .numerical_value = 0.05,
+        .has_numerical = true
+    };
+    qala_tool_call_ctx_t grounded_ctx = {
+        .tool_name = "apply_dha_penalty",
+        .target_path = "/workspace/billing.json",
+        .raw_args_json = NULL,
+        .amount_aed = 0.0,
+        .is_mutating = false,
+        .required_scope = NULL,
+        .supplied_code = NULL,
+        .grounding_claim = &hallucinated_claim,
+        .grounding_corpus = corpus,
+        .grounding_count = 1
+    };
+    qala_policy_result_t r6 = policy_verify_call(&grounded_ctx, slots, 1, 1792600000ULL, NULL);
+    assert(r6.verdict == VERDICT_HALLUCINATION);
+    assert(strcmp(r6.code, "grounding_hallucination_blocked") == 0);
+    assert(strstr(r6.reason, "mandates 0.0300") != NULL);
+
+    printf("[PASS] All Qala C99 Hardened Policy Gate, Grounding Shield & Stateless MCP tests passed!\n");
     return 0;
 }
 #endif

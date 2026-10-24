@@ -51,6 +51,7 @@
     <button onclick="simTimeFastForward()">2. Fast-Forward 7d (10080x)</button>
     <button onclick="simTelegramApproval()">3. Single-Use Code Approve</button>
     <button onclick="simTaryaqClinical()">4. Taryaq Pharmacovigilance</button>
+    <button onclick="simGroundingFactCheck()">5. Grounding Shield Fact-Check</button>
   </div>
   <div style="display:flex; gap:8px;">
     <span class="badge badge-airgap">AIR-GAPPED: 0 B EXFILTRATED</span>
@@ -181,6 +182,20 @@ function simTaryaqClinical() {
   box.className = 'alert-box alert-danger';
   box.innerHTML = '<strong>🚨 TARYAQ CLINICAL GATE INTERCEPT:</strong> Blocked concurrent <code>Colchicine + Clarithromycin</code> in patient with eGFR = 22 ml/min (<30). Fatal CYP3A4 toxicity prevented in C99 before prescription sign-off.';
   document.getElementById('audit-log').textContent += '\n{"timestamp_utc":1792600120,"agent":"Taryaq","tool":"rx_prescribe","primary_drug":"Colchicine","egfr":22.0,"verdict":"CLINICAL_CONTRAINDICATION_BLOCK","code":"FATAL_CYP3A4_RENAL_CONTRAINDICATION"}';
+}
+
+function simGroundingFactCheck() {
+  const gate = document.getElementById('gate-status');
+  gate.textContent = 'HALLUCINATION BLOCKED (CORRECTED)';
+  gate.style.color = '#f59e0b';
+  const box = document.getElementById('approval-box');
+  box.className = 'alert-box alert-warn';
+  box.innerHTML = '<strong>🛡️ GROUNDING SHIELD INTERCEPT:</strong><br>' +
+    '1. <em>PII Scrubber:</em> Redacted patient name & Emirates ID (784-1988-...). Clean Query: <code>[DHA eClaimLink Ejadah SN 03/2019]</code>.<br>' +
+    '2. <em>Factual Check:</em> Local model drafted <code>0.05% daily penalty</code>.<br>' +
+    '3. <em>Authoritative Grounding:</em> DHA SN 03/2019 mandates <code>0.03% daily penalty</code>.<br>' +
+    '<strong>Status:</strong> Discrepancy caught in C99. Corrected to 0.03% with zero cloud telemetry.';
+  document.getElementById('audit-log').textContent += '\n{"timestamp_utc":1792600155,"agent":"Qala/Taryaq","tool":"grounding_verify","claimed_val":0.05,"grounded_val":0.03,"citation":"DHA_SN_03_2019","verdict":"HALLUCINATION_BLOCKED"}';
 }
 </script>
 </body>
