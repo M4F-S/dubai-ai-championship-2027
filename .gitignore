@@ -21,5 +21,6 @@ __pycache__/
 *.pyc
 
 # Local runtime & audit logs
-*.jsonl
+taryaq_audit.jsonl
+*.audit.jsonl
 
