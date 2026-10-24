@@ -206,7 +206,7 @@ class TestSubmissionTraceability(unittest.TestCase):
             self.assertIn("322M", text, f"Missing 322M in {path.name}")
             self.assertIn("0.0919", text, f"Missing 0.0919 ECE in {path.name}")
             self.assertIn("13.89%", text, f"Missing 13.89% in {path.name}")
-            self.assertIn("0.05 ms", text, f"Missing 0.05 ms in {path.name}")
+            self.assertIn("<40 ms", text, f"Missing <40 ms in {path.name}")
 
     def test_06_golden_eval_and_ablation_traceability(self):
         """6. Verify Golden 30 and Section 5.4 Ablation study metrics."""
@@ -291,7 +291,7 @@ class TestSubmissionTraceability(unittest.TestCase):
             self.assertNotIn(f, arch_report, f"Forbidden entity {f} in architecture report")
 
     def test_08_number_traceability_matrix_completeness(self):
-        """8. Verify NUMBER_TRACEABILITY_MATRIX.md exists and covers all key metrics."""
+        """8. Verify NUMBER_TRACEABILITY_MATRIX.md exists, has provenance schema, and every raw log exists."""
         self.assertTrue(self.traceability_matrix_path.exists())
         matrix_text = self.traceability_matrix_path.read_text(encoding="utf-8")
 
@@ -322,21 +322,26 @@ class TestSubmissionTraceability(unittest.TestCase):
         for row in rows_to_check:
             self.assertIn(row, matrix_text, f"Number Traceability Matrix missing row: {row}")
 
-        # Verify backing files mentioned in matrix actually exist on disk
-        backing_files = [
-            "bench/results.json",
-            "docs/models/LAYA_322M_MODEL_CARD.md",
-            "benchmarks/GOLDEN_EVAL_REPORT.md",
-            "docs/pilot/PILOT_LETTER_TEMPLATE_DRAFT.md",
-            "docs/pilot/PILOT_PROTOCOL_BRIEF.md",
-            "src/taryaq_agent.c",
-            "adapters/qala_mcp_policy_adapter.c",
-            "adapters/nibras_arabic_fademem_adapter.c",
-            "docs/architecture_summary_report.md",
-        ]
-        for bf in backing_files:
-            file_on_disk = self.repo_root / bf
-            self.assertTrue(file_on_disk.exists(), f"Backing file in matrix does not exist on disk: {bf}")
+        # Assert unverified claims (AST Symbol Indexer) are purged
+        self.assertNotIn("AST Symbol Index", matrix_text)
+        self.assertNotIn("AST Token Savings", matrix_text)
+
+        # Parse table rows and verify every Raw Log / Evidence Path exists on disk
+        lines = matrix_text.splitlines()
+        table_rows = [l for l in lines if l.startswith("| **") and not l.startswith("| #")]
+        self.assertGreaterEqual(len(table_rows), 60, "Expected at least 60 verified rows in matrix")
+
+        for r in table_rows:
+            cols = [c.strip() for c in r.split("|")]
+            # Format: ['', '#', 'Domain / Category', 'Exact Value / Claim', 'Context in Submission', 'Backing Repository File', 'Raw Log / Evidence Path', 'Machine / Environment', 'Provenance Timestamp', 'Verification Command', '']
+            self.assertGreaterEqual(len(cols), 8, f"Malformed row in matrix: {r}")
+            raw_path_col = cols[6].strip("`").strip()
+            # If path has multiple or notes, extract file path
+            m = re.search(r"([\w\-./]+\.\w+)", raw_path_col)
+            self.assertIsNotNone(m, f"Could not find valid file path in Raw Log column: '{raw_path_col}' (row: {r})")
+            rel_file = m.group(1)
+            file_on_disk = self.repo_root / rel_file
+            self.assertTrue(file_on_disk.exists(), f"Raw log / evidence path does not exist on disk: {rel_file} (from row: {r})")
 
 
 if __name__ == "__main__":
