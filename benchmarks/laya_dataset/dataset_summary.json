@@ -1,0 +1,117 @@
+{
+  "dataset_name": "Laya Sovereign Bilingual Triage Dataset 2026",
+  "generated_at": "2026-10-24T19:49:28.877150",
+  "total_examples": 2400,
+  "split_counts": {
+    "train": 1680,
+    "dev": 360,
+    "test": 360
+  },
+  "patient_cohort": {
+    "total_patients": 400,
+    "train_patients": 280,
+    "dev_patients": 60,
+    "test_patients": 60,
+    "patient_overlap": 0
+  },
+  "language_distribution": {
+    "ar": 1200,
+    "en": 1200
+  },
+  "questions_summary": {
+    "Q1_INTENT_ROUTING": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "CLINICAL_INTAKE": 48,
+        "CLAIM_SCRUB": 48,
+        "MED_LOOKUP": 48,
+        "POLICY_AUDIT": 48,
+        "GENERAL_QUERY": 48
+      }
+    },
+    "Q2_CLINICAL_URGENCY": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "STAT_EMERGENCY": 80,
+        "URGENT_CARE": 80,
+        "ROUTINE_DISPENSE": 80
+      }
+    },
+    "Q3_RENAL_RISK_SUSPECT": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "NORMAL_RENAL": 120,
+        "SUSPECTED_IMPAIRMENT_STAGE3_PLUS": 120
+      }
+    },
+    "Q4_CYP3A4_INTERACTION_RISK": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "SAFE_COMBINATION": 120,
+        "POTENT_CYP3A4_CONTRAINDICATION": 120
+      }
+    },
+    "Q5_CONTROLLED_SUBSTANCE_CHECK": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "STANDARD_PRESCRIPTION": 120,
+        "UAE_SCHEDULED_NARCOTIC_PSYCHOTROPIC": 120
+      }
+    },
+    "Q6_CLAIM_DELAY_PENALTY_RISK": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "ON_TIME_SUBMISSION": 120,
+        "DHA_SN_03_2019_DELAY_PENALTY": 120
+      }
+    },
+    "Q7_PII_LEAK_RISK": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "PII_CLEAN": 120,
+        "SENSITIVE_EMIRATES_ID_OR_NAME_DETECTED": 120
+      }
+    },
+    "Q8_CONTRADICTION_DETECTED": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "CLINICAL_MATCH": 120,
+        "INDICATION_DIAGNOSIS_MISMATCH": 120
+      }
+    },
+    "Q9_HUMAN_OVERRIDE_REQUIRED": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "AUTOMATED_CLEARANCE": 120,
+        "MANDATORY_PHYSICIAN_OVERRIDE": 120
+      }
+    },
+    "Q10_AIR_GAP_FALLBACK": {
+      "total": 240,
+      "ar": 120,
+      "en": 120,
+      "options": {
+        "SOVEREIGN_ON_DEVICE": 120,
+        "CLOUD_ESCALATION_PERMITTED": 120
+      }
+    }
+  }
+}
