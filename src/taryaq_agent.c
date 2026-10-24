@@ -841,7 +841,7 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
 
     /* Milestone 6: Tool 4 - Apply Human Override with Valid Code and Clinical Rationale */
     const char *approval_code = "TARYAQ-OVERRIDE-8842-CLIN";
-    const char *rationale = "ICU continuous hemodialysis initiated; nephrology co-signature Dr. Tariq DHA-P-44019";
+    const char *rationale = "ICU continuous hemodialysis initiated; nephrology specialist co-signature verified (Ref: CLIN-REV-9921)";
     taryaq_override_result_t good_ov = taryaq_human_override(
         approval_code, rationale, approval_slots, slot_count, taryaq_now_utc());
     if (!good_ov.override_approved) {

@@ -23,7 +23,7 @@ TARYAQ_AGENT_SRC = $(SRC_DIR)/taryaq_agent.c
 TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
 BENCH_RUNNER = bench/bench_runner.py
 LAYA_TEST = $(TESTS_DIR)/test_laya_triage.py
-PILOT_DOC_GEN = docs/pilot/generate_pilot_documents.py
+PILOT_TEST = tests/test_pilot.py
 TRACEABILITY_TEST = $(TESTS_DIR)/test_submission_traceability.py
 
 UNAME_S := $(shell uname -s)
@@ -117,7 +117,7 @@ test_pilot:
 	@echo "=================================================================="
 	@echo " RUNNING CLINICAL PILOT LOI & PROTOCOL VERIFICATION (M-09)"
 	@echo "=================================================================="
-	@python3 $(PILOT_DOC_GEN) --verify
+	@python3 $(PILOT_TEST)
 
 test_laya:
 	@echo "=================================================================="

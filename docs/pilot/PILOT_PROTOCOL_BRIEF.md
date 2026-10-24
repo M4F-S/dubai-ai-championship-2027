@@ -3,10 +3,10 @@
 ### Prospective Shadow Evaluation of Taryaq v0 Sovereign Clinical Decision Support & DHA Reimbursement Firewall
 
 **Principal Investigator:** Mohamed Fathy, BPharm (Founder & Lead Clinical AI Architect, Taryaq)  
-**Co-Principal Investigator:** Dr. Mariam Bin Salem, PharmD, BCPS (Head of Pharmacy, Jumeirah Community Pharmacy)  
-**Institutional Sponsor:** Dr. Tariq Al-Hashimi, MD, FRCP (Medical Director, Prime Healthcare Group)  
-**Clinical Site:** Prime Healthcare Group — Jumeirah Medical Center & Community Pharmacy (DHA-FL-004921)  
-**Pilot Horizon:** February 1 – March 15, 2027 (Q1 2027)  
+**Co-Principal Investigator:** [Prospective Clinical Site Lead Pharmacist / Pharmacy Manager]  
+**Institutional Sponsor:** [Prospective Clinical Governance Chair / Medical Director]  
+**Clinical Site:** [Prospective Ambulatory Clinic & Community Pharmacy — Dubai, UAE]  
+**Pilot Horizon:** Proposed Q1 2027 (February 1 – March 15, 2027)  
 **Regulatory Framework:** UAE Federal Law No. 2 of 2019 (Health ICT Law) & DHA SN 03/2019  
 **Submission Category:** Best Societal AI Agent | Dubai AI Agents Championship 2026–2027  
 
@@ -61,11 +61,11 @@ Standard Care Uninterrupted                  ▼
        └──────────────────┬──────────────────┘
                           ▼
         [Weekly Joint Clinical Review Committee]
-        - Prime Medical Director & Clinical Pharmacist Panel
+        - Partner Medical Director & Clinical Pharmacist Panel
         - Adjudication of Concordance, Sensitivity, & Penalty Delta
 ```
 
-1. **Mirror Ingestion:** Electronic prescriptions and billing payloads generated in the Prime Jumeirah EHR are mirrored via an isolated local Unix Domain Socket (`AF_UNIX`) to the Taryaq appliance.
+1. **Mirror Ingestion:** Electronic prescriptions and billing payloads generated in the partner clinic EHR are mirrored via an isolated local Unix Domain Socket (`AF_UNIX`) to the Taryaq appliance.
 2. **Shadow Evaluation:** Taryaq executes the 5-tool safety suite (`med_lookup`, `interaction_check`, `claim_scrub`, `human_override`, `commit_audit`) in under 2.5 milliseconds.
 3. **Non-Disruption:** The primary pharmacy dispensing workflow proceeds without any delay or software locks.
 4. **Committee Adjudication:** A weekly multidisciplinary panel (Medical Director, Lead Clinical Pharmacist, and Taryaq Lead Investigator) reviews all flagged shadow intercepts against patient outcomes to calculate true positive, false positive, and avoided penalty metrics.
@@ -124,14 +124,14 @@ To ensure 100% compliance with UAE Federal Law No. 2 of 2019 and DESC Informatio
 
 ---
 
-## 7. Protocol Approval & Governance Board Roster
+## 7. Protocol Governance & Proposed Investigation Team
 
 ```text
-Approved by:
-1. Dr. Tariq Al-Hashimi, MD, FRCP (DHA-P-44019)
-   Medical Director & Clinical Governance Chair, Prime Healthcare Group
-2. Dr. Mariam Bin Salem, PharmD, BCPS (DHA-P-58204)
-   Head of Pharmacy & Clinical Pharmacy Specialist, Jumeirah Community Pharmacy
+Study Team Roster (Unsigned Evaluation Protocol):
+1. [Name of Medical Director]
+   Medical Director & Clinical Governance Chair [Prospective Partner Healthcare Group]
+2. [Name of Head of Pharmacy]
+   Head of Pharmacy & Clinical Pharmacy Specialist [Prospective Partner Community Pharmacy]
 3. Mohamed Fathy, BPharm
    Founder & Lead Clinical AI Architect, Taryaq Sovereign Clinical AI Systems
 ```
