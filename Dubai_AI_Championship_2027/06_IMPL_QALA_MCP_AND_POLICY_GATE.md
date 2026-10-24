@@ -11,7 +11,7 @@ document\_type: c99\_reference\_implementation target\_fork: Qala (Fork of Belya
 
 This file contains the production-ready C99 implementation for the two adapter modules required to transform **`Belya`** into **`Qala` (القلعة)** for the *Best Business AI Agent* category:
 
-1. **`policy_gate.c`**: Solves the Sierra \$\\tau\$-bench / \$\\tau^3\$-Banking policy compliance cliff by intercepting every tool call *before* execution, enforcing Linux Landlock path boundaries, AED financial limits, and single-use scope-bound approval codes (`approval_code`), and writing an immutable DESC ISR v3 JSONL audit trail (`qala-audit.jsonl`).  
+1. **`policy_gate.c`**: Solves the Sierra \$\\tau\$-bench / \$\\tau^3\$-Banking policy compliance cliff by intercepting every tool call *before* execution, enforcing C99 path allowlist boundaries, AED financial limits, and single-use scope-bound approval codes (`approval_code`), and writing an immutable DESC ISR v3 JSONL audit trail (`qala-audit.jsonl`).  
 2. **`mcp_bridge.c`**: Implements the **Stateless Model Context Protocol (`2026-07-28` specification)** over HTTP JSON-RPC so `Qala` can bridge into any enterprise ERP (SAP, ERPNext, WooCommerce, Dubai Customs APIs) without stateful session handshakes.
 
 ---
@@ -46,7 +46,7 @@ typedef enum {
 
     VERDICT\_REVIEW    \= 2, /\* Gated mutation: requires single-use approval    \*/
 
-    VERDICT\_UNSAFE    \= 3, /\* Hard block: Landlock / DESC ISR v3 violation    \*/
+    VERDICT\_UNSAFE    \= 3, /\* Hard block: C99 Path / DESC ISR v3 violation    \*/
 
     VERDICT\_AUTH\_BLK  \= 4, /\* Upstream credential missing or expired (honest) \*/
 

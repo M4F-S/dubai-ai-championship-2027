@@ -40,13 +40,13 @@ While single-turn code generation and static QA have saturated in late 2026, mul
 | **Orchestration Topology** | Flat ReAct loop appending every failed tool call into one shared context window (quadratic KV-cache bloat). | **4-Tier Hierarchical Pipeline** (`Architect -> Builder -> Reviewer -> Verifier`) communicating via zero-copy C structs and strict JSON verdict envelopes (`SAFE | CAUTION | UNSAFE | REVIEW | ERROR`). |
 | **Code & Document Indexing** | Arbitrary token-count chunking that severs syntax boundaries. | Embedded pure-C **AST symbol indexer** \+ local SQLite FTS5 index (`.ast-cache/index.db`) \+ symbol call/dependency graph (`nav action=impact`), cutting token usage by **up to 90%** compared to blind chunking. |
 | **Memory & Consolidation** | Unbounded vector store dumping stale logs into prompts. | **CORAL Dual-Stream Memory** (Episodic JSONL/SQLite vs. Semantic entity graph) with **Reciprocal Rank Fusion (RRF)** combining FTS5 BM25 lexical search \+ dense vectors, plus **FadeMem / VIGIL** exponential decay (\$I(t') \= I\_0 \\cdot 2^{-(t'-t)/\\tau\_{1/2}}\$). |
-| **Process & Data Isolation** | Unsandboxed Python subprocesses or root-heavy Docker containers leaking data to foreign APIs. | **In-process Linux Landlock LSM kernel sandboxing** (`landlock_create_ruleset()` enforcing `LANDLOCK_ACCESS_FS_READ/WRITE/EXECUTE` deny-by-default) \+ ephemeral git worktrees & rootless OverlayFS. |
+| **Process & Data Isolation** | Unsandboxed Python subprocesses or root-heavy Docker containers leaking data to foreign APIs. | **In-process C99 deterministic path allowlisting & boundary enforcement** (deny-by-default on unauthorized paths) \+ ephemeral git worktrees & rootless container sandboxing. |
 
 ---
 
 ## 2.3 Local Model Sovereignty: The UAE Open-Source AI Fleet (October 2026\)
 
-To satisfy the Championship's strict data protection rule and DESC ISR v3 compliance, both agents execute 100% locally via `llama.cpp` or `vLLM` over Landlock-restricted Unix domain sockets (`AF_UNIX`) using UAE-developed open-weight foundation models:
+To satisfy the Championship's strict data protection rule and DESC ISR v3 compliance, both agents execute 100% locally via `llama.cpp` over isolated Unix domain sockets (`AF_UNIX`) using UAE-developed open-weight foundation models:
 
 | Model Family & Developer | Scale & Architecture | Context Window & VRAM | Verified Benchmark Performance | Optimal Role in `Qala` & `Nibras` |
 | :---- | :---- | :---- | :---- | :---- |

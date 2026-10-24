@@ -42,7 +42,7 @@ We do **not** rewrite the C99 cores of `Belya` or `Almaz`. Both engines already 
 
   \[ WebSocket / Local UI Telemetry HUD \]        \[ Stateless MCP 2026-07-28 C-Bridge \]
 
-  (Visualizes AST Graph, Landlock Blocks,       (Connects C99 Core to any Enterprise 
+  (Visualizes AST Graph, Security Blocks,       (Connects C99 Core to any Enterprise 
 
    & Memory Decay in real-time on stage)         ERP / Dubai Gov API via JSON-RPC)
 
@@ -66,7 +66,7 @@ We do **not** rewrite the C99 cores of `Belya` or `Almaz`. Both engines already 
 
   • 41 Native C99 Tools & POSIX PTY             • CORAL Dual-Stream Memory (SQLite+FTS5)
 
-  • Linux Landlock LSM Kernel Sandbox           • VIGIL Appraisal (Reframed as Friction)
+  • C99 Path Allowlist Sandbox Security         • VIGIL Appraisal (Reframed as Friction)
 
   • C99 AST Symbol Index                        • FadeMem Decay (Reframed as Token ROI)
 

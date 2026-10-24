@@ -47,7 +47,7 @@
     <span style="color:var(--muted); font-size:13px; margin-left:10px;">Bare-Metal C99 Sovereign Autonomous Systems | Dubai Championship 2027</span>
   </div>
   <div class="controls">
-    <button onclick="simLandlockAttack()">1. Prompt Injection (Landlock)</button>
+    <button onclick="simLandlockAttack()">1. Prompt Injection (C99 Sandbox Block)</button>
     <button onclick="simTimeFastForward()">2. Fast-Forward 7d (10080x)</button>
     <button onclick="simTelegramApproval()">3. Single-Use Code Approve</button>
     <button onclick="simTaryaqClinical()">4. Taryaq Pharmacovigilance</button>
@@ -96,7 +96,7 @@ Normalized: "اداره الازمات في دبي 2027 و 098" (Zero-Alloc C99)
       <span class="metric-val">0.00 KB (AED 0.00 Cost)</span>
     </div>
     <div class="metric-row">
-      <span>Linux Landlock LSM Ruleset</span>
+      <span>C99 Path Allowlist Ruleset</span>
       <span class="metric-val">ENFORCED (Deny-By-Default)</span>
     </div>
     <div id="security-status" class="alert-box alert-safe">
@@ -286,7 +286,7 @@ function handleTelemetryEvent(data) {
       if (sec) {
         sec.className = 'alert-box alert-danger';
         const target = escapeHtml(data.target || data.target_path || '/confidential/uae_citizens.db');
-        sec.innerHTML = `<strong>🚨 LANDLOCK LSM KERNEL BLOCK (EACCES):</strong> Prompt-injection attempted <code>fs_read("${target}")</code>. Blocked in C99 before syscall execution. Zero bytes leaked.`;
+        sec.innerHTML = `<strong>🚨 C99 SECURITY SANDBOX BLOCK:</strong> Prompt-injection attempted <code>fs_read("${target}")</code>. Blocked in C99 before filesystem access. Zero bytes leaked.`;
       }
       break;
     }

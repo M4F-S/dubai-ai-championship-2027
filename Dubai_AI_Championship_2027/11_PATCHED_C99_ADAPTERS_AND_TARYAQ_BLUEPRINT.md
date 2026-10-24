@@ -558,7 +558,7 @@ void nibras\_fademem\_step\_patched(fademem\_node\_t \*node,
 
 ### Why `Taryaq` Beats Tandem Health, Heidi Health, and MedicalAssistants.ai
 
-1. **UAE Health Data Residency By Design (`UAE Federal Law No. 2 of 2019`):** Foreign cloud AI scribes transmit patient consultations to external servers. `Taryaq` runs 100% air-gapped on clinic hardware using `Jais 3 (7B)` and `Falcon-H1 Arabic` with Linux Landlock LSM locking down `NABIDH` / `Malaffi` patient databases.  
+1. **UAE Health Data Residency By Design (`UAE Federal Law No. 2 of 2019`):** Foreign cloud AI scribes transmit patient consultations to external servers. `Taryaq` runs 100% air-gapped on clinic hardware using `Jais 3 (7B)` with deterministic C99 security shields locking down `NABIDH` / `Malaffi` patient databases.  
 2. **Deterministic C99 Pharmacovigilance & Controlled-Medication Gate (`<1ms`):** Instead of acting as a passive voice stenographer, `Taryaq` intercepts every drafted prescription in C99 before signature—checking renal eGFR dosing, fatal CYP3A4/P-gp drug-drug interactions, and UAE controlled/narcotic prescription compliance rules.  
 3. **Pre-Submission DHA `eClaimLink` & `Ejadah` Claim Scrubber:** Prevents the clinic's \#1 financial loss (rejected insurance claims under DHA's strict 2-resubmission limit and 0.03% daily delay penalties) by verifying mandatory ICD-10 / CPT clinical justifications *before* the patient leaves the room.
 

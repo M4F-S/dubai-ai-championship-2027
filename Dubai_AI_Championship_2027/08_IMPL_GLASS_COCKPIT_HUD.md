@@ -9,7 +9,7 @@ Never show raw terminal logs to VIP dignitaries and VCs on the Grand Final stage
 * **Live Mode:** Connects automatically to `ws://127.0.0.1:8787/telemetry` streamed from the `Qala` or `Nibras` C99 binary.  
 * **Stage Failsafe / Simulation Buttons:** Includes interactive hardware-fault-tolerant triggers for:  
   1. **Air-Gap Verification (`0 Bytes Cloud Exfiltration`)**  
-  2. **Live Prompt Injection Attack \$\\rightarrow\$ Linux Landlock LSM Kernel Block**  
+  2. **Live Prompt Injection Attack \$\\rightarrow\$ C99 Sandbox Security Block**  
   3. **`--sim-time-scale 10080x` 7-Day `FadeMem` Context Pruning & Procedural Rule Distillation**  
   4. **Telegram/Slack Single-Use `approval_code` Human Checkpoint**
 
@@ -109,7 +109,7 @@ Never show raw terminal logs to VIP dignitaries and VCs on the Grand Final stage
 
   \<div class="controls"\>
 
-    \<button onclick="simLandlockAttack()"\>1. Trigger Prompt Injection (Landlock Block)\</button\>
+    \<button onclick="simLandlockAttack()"\>1. Trigger Prompt Injection (Path Allowlist Block)\</button\>
 
     \<button onclick="simTimeFastForward()"\>2. Fast-Forward 7 Days (--sim-time-scale 10080x)\</button\>
 
@@ -197,7 +197,7 @@ Normalized: "اداره الازمات في دبي 2027" (Zero-Alloc C99)\</pre\
 
     \<div class="metric-row"\>
 
-      \<span\>Linux Landlock LSM Ruleset\</span\>
+      \<span\>C99 Path Allowlist Ruleset\</span\>
 
       \<span class="metric-val"\>ENFORCED (Deny-By-Default)\</span\>
 
