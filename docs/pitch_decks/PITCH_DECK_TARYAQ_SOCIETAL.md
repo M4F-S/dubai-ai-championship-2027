@@ -10,7 +10,7 @@
 * **Headline:** TARYAQ (ترياق): The Sovereign Clinical Firewall
 * **Sub-headline:** Protecting Patient Lives and Eliminating Healthcare Revenue Loss with Deterministic C99 Pharmacovigilance and DHA Claim Cycle Scrubbing.
 * **Core Value Proposition:** An air-gapped, on-premise clinical decision-support agent that intercepts fatal drug-drug interactions in sub-milliseconds (<0.05 ms) and scrubs electronic insurance claims before submission under Dubai Health Authority (DHA) rules—guaranteeing 100% compliance with UAE Health Data Law.
-* **Target Audience:** Dubai Health Authority (DHA), Dubai Academic Health Corporation (Dubai Health), private hospital networks (Prime Healthcare Group — committed pilot partner, Aster, Mediclinic, NMC, Fakeeh), community pharmacies, and day-surgery clinics.
+* **Target Audience:** Dubai Health Authority (DHA), Dubai Academic Health Corporation (Dubai Health), private hospital networks (Aster, Mediclinic, NMC, Fakeeh, and community provider networks), community pharmacies, and day-surgery clinics.
 
 ---
 
@@ -98,15 +98,15 @@
 
 ---
 
-### Slide 9: Clinical Pilot Commitment & Institutional LOI
-* **Committed Clinical Partner:** **Prime Healthcare Group LLC (Jumeirah Medical Center & Community Pharmacy, DHA Facility License: DHA-FL-004921)**.
-* **Formal Commitment Letter Executed 24 October 2026 (`docs/pilot/PILOT_LETTER_LOI.md`):**
-  > *"We hereby confirm our formal commitment to pilot the Taryaq v0 sovereign clinical AI decision support system in Q1 2027 (February 1 – March 15, 2027) in shadow advisory mode, and to share anonymised evaluation results for the Dubai AI Agents Championship 2026–2027."*
-* **Three Institutional Signatories:**
-  1. **Dr. Tariq Al-Hashimi, MD, FRCP** — Medical Director & Head of Clinical Governance (DHA License #DHA-P-44019).
-  2. **Dr. Mariam Bin Salem, PharmD, BCPS** — Head of Pharmacy & Lead Clinical Pharmacist (DHA License #DHA-P-58204).
+### Slide 9: Clinical Pilot Evaluation Framework & Institutional Protocol
+* **Pilot Strategy:** Prospective shadow evaluation protocol structured for Dubai ambulatory clinic and community pharmacy operators (`docs/pilot/PILOT_PROTOCOL_BRIEF.md`).
+* **Unsigned Protocol & Draft Framework (`docs/pilot/PILOT_LETTER_TEMPLATE_DRAFT.md`):**
+  > *"Active prospective pilot outreach in progress with Dubai community healthcare and pharmacy providers for Q1 2027 (February 1 – March 15, 2027) non-interventional shadow advisory evaluation."*
+* **Governance & Investigation Team Structure:**
+  1. **Clinical Governance Lead / Medical Director** — Prospective partner healthcare facility lead.
+  2. **Pharmacy Operations Lead** — Prospective partner lead clinical pharmacist.
   3. **Mohamed Fathy, BPharm** — Founder & Lead Clinical AI Architect, Licensed Clinical Pharmacist.
-* **Clinical Scope:** 500 outpatient polypharmacy prescriptions and 500 pre-submission eClaimLink electronic billing claims.
+* **Evaluation Target:** 500 outpatient polypharmacy prescriptions and 500 pre-submission eClaimLink electronic billing claims.
 
 ---
 
@@ -115,6 +115,6 @@
   * Seed funding allocation: 40% clinical EHR/NABIDH connector engineering, 30% hardware appliance deployment, 20% regulatory attestation, 10% operations.
 * **Execution Roadmap:**
   * *Dec 2026:* 500-scenario synthetic pre-pilot validation on air-gapped UM790 hardware.
-  * *Feb 1 – Mar 15, 2027 (Q1 2027):* On-premises prospective shadow pilot at Prime Healthcare Group (Jumeirah); zero cloud leakage under UAE Law No. 2 of 2019.
+  * *Feb 1 – Mar 15, 2027 (Q1 2027):* On-premises prospective shadow pilot across Dubai ambulatory clinic / community pharmacy partner; zero cloud leakage under UAE Law No. 2 of 2019.
   * *May 2027:* Grand Final live air-gapped stage demonstration presenting real-world clinical safety and penalty recovery metrics.
   * *Q3 2027:* Full commercial scaling via DIFC Dubai AI Campus across Dubai Health’s NABIDH ecosystem and 14,000 Dubai Chambers healthcare partners.

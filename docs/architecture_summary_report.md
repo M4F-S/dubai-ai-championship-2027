@@ -196,16 +196,13 @@ $$\text{Throughput (tok/s)} = \frac{\text{Memory Bandwidth (GB/s)}}{\text{Active
 
 ---
 
-## 8. Clinical Pilot Partner & Real-World Validation
+## 8. Clinical Pilot Framework & Prospective Evaluation Protocol
 
-On **24 October 2026**, Taryaq executed a formal Letter of Intent (LOI) for prospective clinical evaluation:
-- **Healthcare Partner:** **Prime Healthcare Group LLC — Jumeirah Medical Center & Community Pharmacy** (DHA Facility License: **DHA-FL-004921**, MOHAP Code: **MOHAP-DXB-94812**).
-- **Execution Document:** Countersigned agreement committed in repository (`docs/pilot/PILOT_LETTER_LOI.md`, `docs/pilot/PILOT_LETTER_EXECUTED_SAMPLE.pdf`).
-- **Three Institutional Signatories:**
-  1. **Dr. Tariq Al-Hashimi, MD, FRCP** — Medical Director & Head of Clinical Governance (DHA License #DHA-P-44019).
-  2. **Dr. Mariam Bin Salem, PharmD, BCPS** — Head of Pharmacy & Lead Clinical Pharmacist (DHA License #DHA-P-58204).
-  3. **Mohamed Fathy, BPharm** — Founder & Lead Clinical AI Architect, Licensed Clinical Pharmacist.
-- **Pilot Scope:** Prospective non-interventional evaluation in Q1 2027 (Feb 1 – Mar 15, 2027) across **500 outpatient polypharmacy prescriptions** and **500 eClaimLink billing claims** in **100% Shadow Advisory Mode (`SHADOW_ADVISORY_MODE`)**.
+Taryaq has established a comprehensive prospective clinical evaluation protocol (`docs/pilot/PILOT_PROTOCOL_BRIEF.md`) and draft agreement framework (`docs/pilot/PILOT_LETTER_TEMPLATE_DRAFT.md`):
+- **Target Partner Profile:** Dubai ambulatory clinical center & community pharmacy networks.
+- **Framework Status:** Unsigned draft agreement framework under active prospective pilot outreach; no binding countersigned agreement asserted.
+- **Governance Structure:** Dual clinical investigator model pairing attending Medical Director with lead Clinical Pharmacist and PI Mohamed Fathy, BPharm.
+- **Pilot Scope:** Prospective non-interventional evaluation planned for Q1 2027 (Feb 1 – Mar 15, 2027) across **500 outpatient polypharmacy prescriptions** and **500 eClaimLink billing claims** in **100% Shadow Advisory Mode (`SHADOW_ADVISORY_MODE`)**.
 
 ---
 
