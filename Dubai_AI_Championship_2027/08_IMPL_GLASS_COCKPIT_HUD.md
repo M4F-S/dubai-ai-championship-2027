@@ -121,7 +121,7 @@ Never show raw terminal logs to VIP dignitaries and VCs on the Grand Final stage
 
     \<span class="badge badge-airgap"\>AIR-GAPPED: 0 B EXFILTRATED\</span\>
 
-    \<span class="badge badge-model"\>UAE LOCAL: FALCON3-10B \+ JAIS 3 (AF\_UNIX)\</span\>
+    \<span class="badge badge-model"\>JAIS 3 (7B) + LAYA (322M) (AF_UNIX)\</span\>
 
   \</div\>
 
@@ -137,7 +137,7 @@ Never show raw terminal logs to VIP dignitaries and VCs on the Grand Final stage
 
     \<div class="metric-row"\>
 
-      \<span\>Tree-sitter CST/AST Impact Trace\</span\>
+      \<span\>C99 AST Symbol Index Trace\</span\>
 
       \<span class="metric-val" id="ast-time"\>3.8 ms (41 Tools Ready)\</span\>
 

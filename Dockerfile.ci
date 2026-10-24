@@ -1,0 +1,24 @@
+# Dockerfile.ci - Clean Linux GCC:13 Continuous Integration Container
+# Target: Dubai Create AI Agents Championship 2026-2027
+# Ensures 100% deterministic C99 compilation with -Wall -Wextra -Werror
+
+FROM gcc:13
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    make \
+    libcurl4-openssl-dev \
+    libsqlite3-dev \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+# Safe directory configuration for Git
+RUN git config --global --add safe.directory '*'
+
+COPY . /workspace
+
+# Run complete adapter verification battery
+CMD ["make", "clean", "test"]

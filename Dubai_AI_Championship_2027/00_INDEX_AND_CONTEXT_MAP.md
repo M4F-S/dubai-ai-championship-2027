@@ -68,7 +68,7 @@ We do **not** rewrite the C99 cores of `Belya` or `Almaz`. Both engines already 
 
   • Linux Landlock LSM Kernel Sandbox           • VIGIL Appraisal (Reframed as Friction)
 
-  • Tree-sitter CST/AST Symbol Index            • FadeMem Decay (Reframed as Token ROI)
+  • C99 AST Symbol Index                        • FadeMem Decay (Reframed as Token ROI)
 
   • Telegram / Slack / Discord Gateways         • Subconscious Mamba Background Daemon
 
@@ -78,4 +78,4 @@ We do **not** rewrite the C99 cores of `Belya` or `Almaz`. Both engines already 
 
 \========================================================================================
 
-  • llama.cpp / vLLM over Unix Domain Socket (Falcon3-10B, Falcon3-Mamba-7B, Jais 3 7B)
+  • llama.cpp / vLLM over Unix Domain Socket (Jais 3 7B + Laya Multilingual 322M)

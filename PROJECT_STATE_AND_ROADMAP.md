@@ -22,6 +22,8 @@
 | **WS-08** | 10-Slide Pitch Decks (Qala, Nibras Executive, Taryaq) | `Principal_Architect` | ✅ COMPLETED | `docs/pitch_decks/PITCH_DECK_*.md` |
 | **WS-09** | 2.5-Minute Video Screenplay & Demo Script | `Principal_Architect` | ✅ COMPLETED | `docs/video_script.md` |
 | **WS-10** | DCDE Mandatory Architecture Summary Report | `Principal_Architect` | ✅ COMPLETED | `docs/architecture_summary_report.md` |
+| **M-01** | Fix GCC-13 `-Wformat-truncation` & CI Container | `Antigravity_Lead` | ✅ COMPLETED | `adapters/qala_mcp_policy_adapter.c`, `Dockerfile.ci`, `.github/workflows/ci.yml` |
+| **M-02** | Apply Claim Ledger Corrections Across All Files | `Antigravity_Lead` | ✅ COMPLETED | `Dubai_AI_Championship_2027/00-11`, `docs/`, `hud/`, `README.md` |
 
 ---
 
@@ -34,7 +36,7 @@
 | **Streamable MCP Client Driver (`mcp_curl_client.c`)** | ✅ VERIFIED | Full `libcurl` + `cJSON` transport, dynamic response buffering, honest error handling & timeouts. |
 | **Zero-Alloc Arabic Normalizer (`arabic_norm.c`)** | ✅ VERIFIED | Handles `0xD8`, `0xD9`, and Extended Arabic `0xDB` digits with zero heap allocations. |
 | **Time-Accelerated FadeMem (`fademem_sim.c`)** | ✅ VERIFIED | Verified 97% context pruning at 10080x with time-gated rule consolidation window. |
-| **Clinical Gatekeeper & Scrubber (`taryaq_clinical.c`)** | ✅ VERIFIED | Blocks Colchicine + Clarithromycin renal interaction; scrubs missing Ejadah HbA1c attachments. |
+| **Clinical Gatekeeper & Scrubber (`taryaq_clinical.c`)** | ✅ VERIFIED | Blocks Colchicine + Clarithromycin renal interaction; flags DHA SN 03/2019 0.03%/day delay penalties. |
 | **Grounding Shield & PII Scrubber (`grounding_shield.c`)** | ✅ VERIFIED | Verified PII redaction and deterministic factual/numerical hallucination blocking in C99. |
 | **3-Panel Glass Cockpit HUD (`hud/`)** | ✅ VERIFIED | Interactive simulation triggers verified for Landlock block, memory pruning, and approval token. |
 | **Physical Air-Gap Hardware Latency Test** | ⏳ PENDING | Physical TTFT benchmark on presentation laptop scheduled for Build Phase (Nov 2026). |
@@ -59,8 +61,8 @@
 - [ ] Benchmark multi-turn $\text{pass}^8$ repeatability over `dubai_synthetic_suite.json` (M-08)
 
 ### Phase 2.5: Hermes Review & Sprint Implementation (October – November 2026)
-- [ ] **M-01:** Fix GCC-13 `-Wformat-truncation` in `qala_mcp_policy_adapter.c` and add `Dockerfile.ci`
-- [ ] **M-02:** Apply Claim Ledger corrections across docs, decks, video scripts, and READMEs
+- [x] **M-01:** Fix GCC-13 `-Wformat-truncation` in `qala_mcp_policy_adapter.c`, add `Dockerfile.ci` and `.github/workflows/ci.yml` (Completed)
+- [x] **M-02:** Apply Claim Ledger corrections across docs, decks, video scripts, and READMEs (Completed)
 - [ ] **M-03:** Stateless MCP Conformance Hardening (`Mcp-Name`, `params._meta`, client capabilities, SSE parser)
 - [ ] **M-04:** HUD Telemetry Bridge (streaming live C99 events to WebSocket)
 - [ ] **M-05:** Taryaq v0 Runnable CLI Daemon (offline clinical prescription check & audit commit)
@@ -86,6 +88,7 @@
 
 ## 4. Append-Only Change Log
 
+* **2026-10-24 (18:10 UTC+2):** Completed Tasks **M-01** (GCC-13 format-truncation fix, `Dockerfile.ci`, GitHub Actions workflow `ci.yml`, 5/5 C99 suites passing) and **M-02** (Systematic Claim Ledger purge across all 12 canonical specs, 3 pitch decks, video script, architecture report, synthetic suite, adapters, HUD, and README: eliminated tree-sitter/PageRank fiction, purged invented HbA1c rule in favor of statutory DHA SN 03/2019 0.03%/day delay penalty, reframed DESC ISR v3.1 to entity compliance support, corrected Falcon BFCL to 47.30% overall / 5.00% multi-turn, scoped local demo model stack to Jais 3 7B + Laya 322M on UM790 Pro).
 * **2026-10-24 (17:52 UTC+2):** Generated Skeptical Plan Audit `REVIEW_SKEPTICAL_PLAN_AUDIT_20261024_1950.md`. Codified Rule 1.4 (Context Isolation & Mandatory Subagent Spawning Invariant) into `PROJECT_RULES_AND_CRITERIA.md` and `AGENT_INSTRUCTIONS.md`. Resolved Falcon persistence root cause (canonical doc lock) and verified Loop Engineering & Subagent architectures in Belya/Almaz.
 * **2026-10-24 (17:31 UTC+2):** Integrated Hermes Independent Review (`RECOMMENDATIONS_2026-10-24.md` and `REVIEW_HERMES_20261024_1837.md` @ commit `587de32`). Verified primary sources: DHA SN 03/2019 0.03% penalty, DESC ISR v3.1 scope, BFCL Falcon3 breakdown (47.30% overall / 5.00% multi-turn), and UM790 hardware budget.
 * **2026-10-24 (16:03 UTC+2):** Initialized master control plane repo. Hardened C99 adapters (`qala`, `nibras`, `taryaq`), compiled clean with `make test`, tagged `v0.1.0-dubai-init`. Commit `3742659`.

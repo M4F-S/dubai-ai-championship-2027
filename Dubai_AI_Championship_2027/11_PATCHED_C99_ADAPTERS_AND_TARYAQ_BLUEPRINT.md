@@ -666,19 +666,19 @@ taryaq\_result\_t taryaq\_verify\_prescription\_and\_claim(const taryaq\_rx\_con
 
     }
 
-    /\* 3\. DHA eClaimLink & Ejadah Pre-Submission Claim Scrubber \*/
+    /* 3. DHA eClaimLink Claim Cycle Standardisation Gatekeeper (SN 03/2019) */
 
-    if (rx-\>icd10\_code && strncmp(rx-\>icd10\_code, "E11", 3\) \== 0 &&
+    if (rx->submission_delay_days > 0) {
 
-        \!rx-\>has\_ejadah\_lab\_justification) {
+        res.verdict = CLINICAL_CLAIM_CYCLE_WARN;
 
-        res.verdict \= CLINICAL\_EJADAH\_SCRUB\_WARN;
+        strncpy(res.alert_code, "DHA_SN03_2019_DELAY_PENALTY_EXPOSURE", sizeof(res.alert_code) - 1);
 
-        res.alert\_code \= "DHA\_EJADAH\_MISSING\_HBA1C\_PAYLOAD";
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale),
 
-        res.clinical\_rationale \=
+                 "Claim Cycle Warning: Submission is %u day(s) overdue under DHA SN 03/2019; subject to 0.03%%/day delay penalty on Net Claimed amount.",
 
-            "Claim Scrub Alert: DHA Ejadah requires baseline HbA1c lab value attached to eClaimLink XML to prevent payer rejection.";
+                 rx->submission_delay_days);
 
         return res;
 

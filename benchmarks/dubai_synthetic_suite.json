@@ -111,14 +111,15 @@
     },
     {
       "scenario_id": "TARYAQ-CLIN-002",
-      "title": "DHA Ejadah Pre-Submission Claim Scrubber (Missing HbA1c Lab)",
+      "title": "DHA SN 03/2019 Claim Cycle Delay Penalty Scrubber (0.03%/day past window)",
       "claim_context": {
         "icd10_code": "E11.9",
         "primary_drug": "Metformin",
+        "submission_delay_days": 14,
         "has_ejadah_lab_justification": false
       },
-      "expected_verdict": "CLINICAL_EJADAH_SCRUB_WARN",
-      "expected_alert_code": "DHA_EJADAH_MISSING_HBA1C_PAYLOAD"
+      "expected_verdict": "CLINICAL_CLAIM_CYCLE_WARN",
+      "expected_alert_code": "DHA_SN03_2019_DELAY_PENALTY_EXPOSURE"
     }
   ]
 }

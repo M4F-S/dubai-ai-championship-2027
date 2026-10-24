@@ -22,8 +22,8 @@
   • Target Market: Dubai Corporates,      • Target Market: Dubai C-Suite,         • Target Market: Dubai Hospitals,
     Logistics, Ports & FinOps               Family Offices & Board Members          Clinics & Medical Groups
   • Primary Value: DESC ISR v3.1 Data     • Primary Value: Sovereign Deal Memory, • Primary Value: Pharmacovigilance &
-    Residency, Stateless MCP ERP Bridge,    FadeMem Token Pruning (97% ROI) &       DHA eClaimLink/Ejadah Claim
-    Zero-Drift Policy Gatekeeper            VIGIL Friction-Free Coordination        Scrubber (Law No. 2 of 2019)
+    Residency Support, Stateless MCP ERP    FadeMem Token Pruning (97% ROI) &       DHA eClaimLink SN 03/2019 Claim
+    Bridge, Zero-Drift Policy Gatekeeper    VIGIL Friction-Free Coordination        Cycle Scrubber (Law No. 2 of 2019)
 ========================================================================================================
 ```
 
@@ -33,9 +33,9 @@
 
 1. **Sub-Millisecond Cold Start (<15MB RAM):** Pure ISO C99 binaries eliminate Python interpreter latency, virtual environment bloat, and fragile package dependencies.
 2. **Deterministic Policy Gatekeeper (`policy_gate.c`):** Solves the Sierra Research $\tau^3$-Banking policy compliance cliff by verifying financial thresholds (>AED 50,000) and requiring single-use cryptographic approval codes before executing mutations.
-3. **100% Sovereign Air-Gapped Inference:** Operates locally over `AF_UNIX` sockets using the UAE's own open-weight foundation models:
-   * **`Jais 3 (7B/13B)`** (Inception42 / MBZUAI): 512,000-token context window for long-context bilingual policy compliance.
-   * **`Falcon3-Mamba-7B`** (TII Abu Dhabi): $O(1)$ constant memory background processing.
+3. **100% Sovereign Air-Gapped Inference:** Operates locally over `AF_UNIX` sockets using sovereign open-weight foundation models:
+   * **`Jais 3 7B`** (Inception42 / MBZUAI): Arabic-native bilingual policy reasoning (scoped to 8K context on edge hardware).
+   * **`Laya Multilingual 322M`** (Convai Innovations): Fast System-1 triage layer (~33ms) with calibrated intent and risk scoring.
 4. **Linux Landlock LSM Kernel Isolation:** In-process unprivileged kernel sandboxing blocking unauthorized file access (`/confidential/uae_citizens.db`, `.env`) before syscalls touch disk.
 5. **Universal Enterprise Connectivity:** Connects to SAP, Salesforce, ERPNext, or Dubai Customs via the **Stateless Model Context Protocol (`2026-07-28` specification)**.
 

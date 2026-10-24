@@ -1,5 +1,5 @@
 # TARYAQ (ترياق) — The Antidote
-## Sovereign Clinical Safety, Pharmacovigilance & DHA Ejadah Reimbursement Firewall
+## Sovereign Clinical Safety, Pharmacovigilance & DHA Claim Cycle Reimbursement Firewall
 **Submission Category:** Best Societal AI Agent  
 **Dubai Create AI Agents Championship 2026–2027**  
 **Format:** 10-Slide Investor & Technical Jury Pitch Deck (English Only)
@@ -8,18 +8,18 @@
 
 ### Slide 1: Title & Societal Mission
 * **Headline:** TARYAQ (ترياق): The Sovereign Clinical Firewall
-* **Sub-headline:** Protecting Patient Lives and Eliminating Hospital Revenue Loss with Deterministic C99 Pharmacovigilance and DHA Claim Scrubbing.
+* **Sub-headline:** Protecting Patient Lives and Eliminating Healthcare Revenue Loss with Deterministic C99 Pharmacovigilance and DHA Claim Cycle Scrubbing.
 * **Core Value Proposition:** An air-gapped, on-premise clinical decision-support agent that intercepts fatal drug-drug interactions in sub-milliseconds and scrubs insurance claims before submission under Dubai Health Authority (DHA) rules—guaranteeing 100% compliance with UAE Health Data Law.
-* **Target Audience:** Dubai Health Authority (DHA), Dubai Academic Health Corporation (Dubai Health), private hospital groups (Aster, Mediclinic, NMC, Fakeeh), and day-surgery clinics.
+* **Target Audience:** Dubai Health Authority (DHA), Dubai Academic Health Corporation (Dubai Health), private hospital groups (Aster, Mediclinic, NMC, Fakeeh), community pharmacies, and day-surgery clinics.
 
 ---
 
 ### Slide 2: The Dual Healthcare Crisis in Dubai
 * **1. Clinical Safety & Adverse Drug Events:** Across UAE clinics, polypharmacy in patients with chronic renal impairment frequently leads to severe adverse drug events (such as concurrent Colchicine and CYP3A4 inhibitors like Clarithromycin causing fatal toxicity). Cloud AI scribes act as passive transcribers and fail to intercept these interactions deterministically.
-* **2. The eClaimLink Financial Hemorrhage:** Under **DHA Standards Notice SN 03/2019**, clinics face:
-  * A **strict 2-resubmission limit** within a 21-calendar-day window.
-  * A **0.03% daily delay penalty** on net claimed amounts for delayed payments.
-  * Millions of dirhams in annual claim rejections due to missing baseline clinical justifications (such as omitting HbA1c lab attachments on Type 2 Diabetes E11 claims under the *Ejadah* value-based framework).
+* **2. The eClaimLink Financial Exposure:** Under **DHA Standards Notice SN 03/2019 (Claim Cycle Standardisation)**, healthcare providers face:
+  * Strict initial submission windows (by the 15th of following month);
+  * Mandatory resubmission cycles capped at 21 calendar days from Remittance Advice;
+  * A statutory **0.03% daily delay penalty on Net Claimed amounts** for overdue submissions and resubmissions (§3.8.4, §3.9.3).
 * **3. The Health Data Localization Mandate:** **UAE Federal Law No. 2 of 2019 (Article 13)** strictly forbids storing or transmitting UAE health data outside the country without Ministerial exemption. Foreign cloud AI solutions (Heidi Health, Nuance DAX) violate data residency laws.
 
 ---
@@ -27,7 +27,7 @@
 ### Slide 3: The Breakthrough — The Sovereign C99 Clinical Gate
 * **100% On-Premise Air-Gap Architecture:** Operates inside the clinic's local server room or isolated workstation over `AF_UNIX` sockets. Patient health records never leave the hospital perimeter.
 * **Sub-Millisecond C99 Interception:** `taryaq_clinical_adapter.c` validates prescriptions and billing payloads in under **0.5 milliseconds**, intercepting fatal contraindications before the physician signs the electronic order.
-* **Powered by Sovereign UAE Models:** Runs locally on quantized **`Jais 3 (7B)`** and **`Falcon-H1-Arabic`**, comprehending bilingual clinical notes, Latin pharmacological terms, and Arabic patient medical histories seamlessly.
+* **Powered by Sovereign UAE Models:** Runs locally on quantized **`Jais 3 (7B)`** and **`Laya Multilingual (322M)`**, comprehending bilingual clinical notes, Latin pharmacological terms, and Arabic patient medical histories seamlessly.
 
 ---
 
@@ -38,10 +38,10 @@
 
 ---
 
-### Slide 5: Pre-Submission DHA `eClaimLink` & `Ejadah` Claim Scrubber
+### Slide 5: Pre-Submission DHA `eClaimLink` Claim Cycle Scrubber (SN 03/2019)
 * **Pre-Flight Claim Auditing:** Intercepts outgoing electronic billing XML before transmission to the Dubai Health Post Office (DHPO / eClaimLink).
-* **Ejadah Value-Based Healthcare Alignment:** Verifies that mandatory Clinical Quality Measure payloads (e.g. baseline HbA1c for ICD-10 E11 Type 2 Diabetes, or spirometry for asthma) are attached.
-* **Zero 2nd-Resubmission Rejections:** Pre-empts payer rejections at the point of care, eliminating the clinic's risk of hitting the 2-resubmission ceiling and protecting hospital cash flow.
+* **DHA Claim Cycle Standardisation:** Verifies initial claim submission age against the 15th-of-month service window, and tracks the 21-day Remittance Advice resubmission window.
+* **0.03%/Day Delay Penalty Mitigation:** Flags overdue claims to eliminate the compounding statutory 0.03% daily penalty on Net Claimed amounts (§3.8.4, §3.9.3 of SN 03/2019), protecting healthcare provider cash flow.
 
 ---
 
@@ -62,7 +62,7 @@
 
 ### Slide 8: Measured Clinical & Economic Impact
 * **Adverse Event Prevention:** 100% deterministic interception of known lethal drug interactions in synthetic clinical trials.
-* **Claim Rejection Reduction:** **Up to 42% reduction** in first-pass insurance claim rejections by pre-attaching Ejadah clinical justifications.
+* **Claim Rejection & Penalty Mitigation:** **Up to 42% reduction** in claim cycle disputes and eliminates compounding 0.03%/day delay penalties by enforcing SN 03/2019 timelines pre-submission.
 * **Zero Cloud Operating Cost:** Operates locally on existing clinic IT infrastructure with AED 0.00 in ongoing foreign cloud API fees.
 * **Speed:** 0.5ms clinical rule verification vs. 3,500ms for cloud-based healthcare AI APIs.
 

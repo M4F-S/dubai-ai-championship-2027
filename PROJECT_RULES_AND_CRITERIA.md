@@ -18,7 +18,7 @@ All team members (human engineers and autonomous AI agents) must strictly adhere
 The official DCDE rules permit a single team to submit multiple applications without registering twice. Our competition portfolio consists of three distinct entries:
 1. **`Qala` (القلعة)** — *Best Business AI Agent* (Sovereign Enterprise Compliance, FinOps, DESC ISR v3.1 Gate, Stateless MCP ERP Bridge).
 2. **`Nibras Executive` (نبراس)** — *Best Personal AI Agent* (C-Suite Sovereign Shadow Chief-of-Staff, 97% Context Pruning via FadeMem, Long-Horizon Deal Memory).
-3. **`Taryaq` (ترياق)** — *Best Societal AI Agent* (Sovereign Clinical Safety & DHA `eClaimLink` / `Ejadah` Reimbursement Firewall).
+3. **`Taryaq` (ترياق)** — *Best Societal AI Agent* (Sovereign Clinical Safety & DHA `eClaimLink` Reimbursement Firewall / SN 03/2019 Claim Cycle Gatekeeper).
 
 ### 1.3 Key Competition Dates
 * **Initial Registration & Profile Enrolment:** Closes in **December 2026**.
@@ -43,8 +43,8 @@ The official DCDE rules permit a single team to submit multiple applications wit
 ### 2.2 Sovereign Air-Gapped Local Inference
 * All foundation model inference must run 100% locally over **Unix Domain Sockets (`AF_UNIX`)** using `llama.cpp` or `vLLM`.
 * Zero bytes of prompt or enterprise context may traverse foreign cloud APIs.
-* **Primary Foundation Model:** **`Jais 3 (7B/13B)`** (Inception42/MBZUAI) for bilingual Arabic/English 512K-token reasoning.
-* **Background Daemon:** **`Falcon3-Mamba-7B`** (TII Abu Dhabi) for $O(1)$ constant memory background goal execution.
+* **Primary Foundation Model:** **`Jais 3 7B`** (Inception42/MBZUAI) for bilingual Arabic/English reasoning (scoped to 8K context on edge demo workstation).
+* **Fast Triage & Decision Layer:** **`Laya Multilingual 322M`** (Convai Innovations) for ~33ms CPU intent routing and calibrated risk scoring; autonomic cognition cycle for background goal execution.
 * **Constrained Function Calling:** Enforce strict **GBNF grammars** on all local model tool outputs to eliminate syntax and argument drift.
 
 ### 2.3 Universal Enterprise Connectivity via Stateless MCP

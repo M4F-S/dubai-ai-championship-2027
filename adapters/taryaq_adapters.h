@@ -14,10 +14,13 @@ extern "C" {
 
 typedef enum {
     CLINICAL_SAFE                   = 0, /* Prescription and billing claim pass checks */
-    CLINICAL_EJADAH_SCRUB_WARN      = 1, /* Missing mandatory clinical attachment/lab */
+    CLINICAL_CLAIM_CYCLE_WARN       = 1, /* DHA SN 03/2019 submission deadline exceeded (0.03%/day) */
     CLINICAL_CONTROLLED_DRUG_GATE   = 2, /* Controlled substance requires pharmacist sign-off */
     CLINICAL_CONTRAINDICATION_BLOCK = 3  /* Fatal drug-drug or renal contraindication blocked */
 } taryaq_verdict_t;
+
+/* Backward compatibility alias */
+#define CLINICAL_EJADAH_SCRUB_WARN CLINICAL_CLAIM_CYCLE_WARN
 
 typedef struct {
     const char *primary_drug;
@@ -26,7 +29,8 @@ typedef struct {
     bool        is_controlled_substance;
     bool        has_controlled_id_verified;
     const char *icd10_code;
-    bool        has_ejadah_lab_justification;
+    uint32_t    submission_delay_days;       /* Days elapsed past DHA SN 03/2019 window */
+    bool        has_ejadah_lab_justification; /* Retained for ABI compatibility */
 } taryaq_rx_context_t;
 
 typedef struct {

@@ -24,7 +24,7 @@
 ### Slide 3: The Breakthrough — Autopoietic C99 Cognitive Architecture
 * **Fork of `Almaz`:** Built on a battle-tested, biologically-inspired C99 cognitive engine that operates continuously on local hardware.
 * **Zero Cloud Exfiltration:** Runs 100% locally on personal executive laptops over Landlock-jailed `AF_UNIX` sockets. Zero external cloud API calls; zero corporate espionage risk.
-* **Bilingual Native Mastery:** Powered locally by **`Jais 3 (7B)`** (with an expansive 512,000-token context window for full board dossier review) and **`Falcon-Emirati-7B`** (84.83% on *Alyah* Emirati dialect and cultural benchmark).
+* **Bilingual Native Mastery:** Powered locally by **`Jais 3 (7B)`** (Arabic/English sovereign foundation model) and **`Laya Multilingual (322M)`** (calibrated non-autoregressive decision & triage layer).
 
 ---
 
@@ -54,7 +54,7 @@
 
 ### Slide 7: SARSI Self-Model & The Subconscious Mamba Daemon
 * **SARSI (Self-Adaptive Reflective State Identity):** A persistent local profile that tracks executive habits, preferred communication styles, and stakeholder dynamics without cloud profiling.
-* **Subconscious Background Worker (`Falcon3-Mamba-7B`):** Operates silently in the background with **$O(1)$ constant memory** (zero expanding KV cache). While the executive sleeps, the Mamba daemon consolidates the day's episodic interactions into clean morning briefing cards.
+* **Subconscious Background Worker:** Operates silently in the background with autopoietic idle goal processing (`almaz_autonomic_cognition_cycle()`). While the executive sleeps, the autonomous daemon consolidates the day's episodic interactions into clean morning briefing cards.
 
 ---
 

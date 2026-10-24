@@ -193,7 +193,7 @@ The competition rules require attaching a **Summary Report explaining the core a
 | **`Qala` (القلعة)** | *The Citadel* — Bare-Metal C99 Enterprise Runtime | Fork of `Belya`; executes 41 native tools in C99 with zero Python interpreter overhead and sub-millisecond cold starts. |
 | **`Nibras` (نبراس)** | *The Guiding Lamp* — Lifelong Cognitive Exocortex | Fork of `Almaz`; manages bilingual long-horizon user state, procedural learning, and autonomous token-budget optimization. |
 | **4-Tier Pipeline** | Architect \$\\rightarrow\$ Builder \$\\rightarrow\$ Reviewer \$\\rightarrow\$ Verifier | Hierarchical C-struct orchestration that prevents context-window pollution and verifies every action before committing. |
-| **Tree-sitter CST/AST** | Incremental Concrete/Abstract Syntax Tree Indexer | Parses code and structured configs in pure C, resolving caller/callee blast radius (`nav action=impact`) with 90% fewer tokens. |
+| **C99 AST Symbol Index** | Pure-C Syntax & Symbol Indexer | Parses code and structured configs in pure C, resolving caller/callee blast radius (`nav action=impact`) with 90% fewer tokens. |
 | **Landlock LSM** | Linux Security Module Kernel Sandboxing | Enforces unprivileged, deny-by-default filesystem isolation (`landlock_create_ruleset()`) directly inside the C99 process. |
 | **DESC ISR v3 Gate** | Deterministic C99 Policy Gatekeeper (`policy_gate.c`) | Intercepts every tool call prior to execution, enforcing AED financial limits and single-use human approval codes. |
 | **Stateless MCP** | Model Context Protocol (`2026-07-28` Specification) | Zero-handshake HTTP JSON-RPC C99 bridge (`mcp_bridge.c`) connecting `Qala` to enterprise ERPs and Dubai government APIs. |
@@ -206,13 +206,13 @@ The competition rules require attaching a **Summary Report explaining the core a
 
 ## 10.4 Slide-by-Slide Pitch Deck Structure (10 Slides — English Only)
 
-1. **Slide 1 — Title & Sovereign Positioning:** *Qala & Nibras: Bare-Metal C99 Autonomous Systems Powered 100% Locally by UAE Sovereign Models (Falcon 3 & Jais 3).*  
+1. **Slide 1 — Title & Sovereign Positioning:** *Qala & Nibras: Bare-Metal C99 Autonomous Systems Powered 100% Locally by Sovereign Models (Jais 3 & Laya Multilingual).*  
 2. **Slide 2 — The Enterprise Reliability & Sovereignty Crisis:** Why 90% of Python/no-code prompt wrappers fail in production: 60% multi-trial policy collapse on Sierra's \$\\tau\$-bench, \<56% accuracy on \$\\tau^3\$-Banking, and unacceptable foreign cloud data leakage under DESC ISR v3.  
-3. **Slide 3 — Our Breakthrough: Bare-Metal C99 \+ UAE Sovereign Weights:** Zero Python bloat, sub-millisecond startup, running 100% air-gapped over `AF_UNIX` sockets on TII's `Falcon3-10B-Instruct`, `Falcon3-Mamba-7B`, and Inception42's 512K-context `Jais 3`.  
-4. **Slide 4 — Inside `Qala` (Best Business AI Agent):** 4-Tier Hierarchical Pipeline \+ 41 native C99 tools \+ Stateless MCP (`2026-07-28`) Enterprise Bridge \+ Tree-sitter AST impact analysis.  
+3. **Slide 3 — Our Breakthrough: Bare-Metal C99 \+ UAE Sovereign Weights:** Zero Python bloat, sub-millisecond startup, running 100% air-gapped over `AF_UNIX` sockets on Inception42's `Jais 3` (7B) and Convai's `Laya` (322M) triage layer.  
+4. **Slide 4 — Inside `Qala` (Best Business AI Agent):** 4-Tier Hierarchical Pipeline \+ 41 native C99 tools \+ Stateless MCP (`2026-07-28`) Enterprise Bridge \+ C99 AST symbol index impact analysis.  
 5. **Slide 5 — Inside `Nibras` (Best Personal & Societal AI Agent):** CORAL Dual-Stream Memory \+ VIGIL Workflow Friction Detection \+ FadeMem Autonomous Token Pruning \+ C99 UTF-8 Arabic/Dialect Normalizer.  
 6. **Slide 6 — Unbreakable Governance (Solving \$\\tau^3\$-Banking & DESC ISR v3):** How `policy_gate.c` \+ Linux Landlock LSM \+ Telegram/Slack Single-Use Approval Codes guarantee 100% policy compliance and zero data exfiltration.  
 7. **Slide 7 — Live Demo Snapshot (The 3-Panel "Glass Cockpit" HUD):** Visual walkthrough of the air-gapped cable pull, live Landlock kernel block of a prompt injection, 10080x time-accelerated memory pruning, and mobile approval checkpoint.  
-8. **Slide 8 — Verified Unit Economics & Benchmark Superiority:** 90% token reduction via Tree-sitter & FadeMem, AED 0.00 external cloud API cost, and deterministic multi-trial execution.  
+8. **Slide 8 — Verified Unit Economics & Benchmark Superiority:** 90% token reduction via C99 AST symbol index & FadeMem, AED 0.00 external cloud API cost, and deterministic multi-trial execution.  
 9. **Slide 9 — Dubai D33 & DUB.AI Commercial Rollout:** Immediate incorporation in Dubai to serve the 11 DCDE Agentic AI corporate partners and 14,000 SMEs across logistics, FinOps, and bilingual civic education.  
 10. **Slide 10 — Team & Execution Roadmap (Jan 2027 – May 2027):** Engineering milestones from prototype submission to the May 2027 Museum of the Future Grand Final.

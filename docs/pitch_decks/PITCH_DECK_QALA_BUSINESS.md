@@ -24,16 +24,16 @@
 ### Slide 3: The Breakthrough — Bare-Metal C99 + UAE Sovereign Models
 * **Zero Python Bloat:** Engineered in pure ISO C99 (`-std=c99 -Wall -Wextra -Werror`). Sub-millisecond cold start (<1ms) and <15MB RAM footprint per active agent worker.
 * **100% Air-Gapped Sovereign Inference:** Operates locally over Landlock-jailed Unix Domain Sockets (`AF_UNIX`) with **0 Bytes traversing public cloud networks**:
-  * **`Jais 3 (7B/13B)`** *(Inception42 / MBZUAI)*: Massive 512,000-token context window for holding entire UAE regulatory manuals.
-  * **`Falcon3-Mamba-7B`** *(TII Abu Dhabi)*: Attention-free State Space Model with $O(1)$ constant memory.
-  * **Co-hosted Quantized Function Specialist**: Backed by strict GBNF grammar constraints to guarantee 99%+ tool-call syntax accuracy.
+  * **`Jais 3 (7B)`** *(Inception42 / MBZUAI)*: Bilingual Arabic/English sovereign foundation generator running on Vulkan iGPU.
+  * **`Laya Multilingual (322M)`** *(Convai)*: Fast non-autoregressive decision model (~33ms on CPU) for instant intent routing and triage.
+  * **Deterministic Policy Gatekeeper**: Backed by strict GBNF grammar constraints and C99 verification tables to eliminate tool drift.
 
 ---
 
 ### Slide 4: Core Architecture — The 4-Tier Pipeline & AST Indexer
 * **Hierarchical Division of Labour:** Replaces flat, noisy ReAct loops with a 4-Tier C-struct pipeline:
   `Architect (Plan) -> Builder (C99 Tools) -> Reviewer (Policy Gate) -> Verifier (Regression Watchdog)`.
-* **Embedded Tree-sitter CST/AST Symbol Indexer:** Parses complex codebases and structured configuration trees in pure C (`.ast-cache/index.db`), determining caller/callee blast radius (`nav action=impact`) in under 4ms with **90% fewer prompt tokens** than arbitrary chunking.
+* **Embedded C99 AST Symbol Indexer:** Parses complex codebases and structured configuration trees in pure C (`.ast-cache/index.db`), determining caller/callee blast radius (`nav action=impact`) in under 4ms with **90% fewer prompt tokens** than arbitrary chunking.
 * **41 Native High-Performance Tools:** Built-in POSIX PTY subshell execution, atomic file patching, and Git worktree management.
 
 ---
@@ -55,8 +55,8 @@
 ### Slide 7: The Grounding Shield — Matching Cloud Models via Search Verification
 * **The Problem:** Local 7B–10B models risk hallucinating regulatory circular codes or numerical tariff percentages.
 * **The C99 Fact-Checking Loop:**
-  1. *Local Draft:* Jais 3 / Falcon drafts the compliance action.
-  2. *Privacy-Scrubbed Search:* C99 scrubber strips customer PII/Emirates IDs, extracting only approved legal tokens (`[DHA eClaimLink Ejadah SN 03/2019]`).
+  1. *Local Draft:* Jais 3 7B drafts the compliance action.
+  2. *Privacy-Scrubbed Search:* C99 scrubber strips customer PII/Emirates IDs, extracting only approved legal tokens (`[DHA eClaimLink SN 03/2019]`).
   3. *Deterministic Verification:* `grounding_shield.c` compares the draft against retrieved statutory text. Discrepancies (e.g. 0.05% vs 0.03%) trip `GROUNDING_HALLUCINATION_TRIPPED` and are corrected before execution.
 * **Result:** Achieves frontier cloud-model factual accuracy with 100% on-premise air-gapped data isolation.
 
@@ -65,7 +65,7 @@
 ### Slide 8: Verified Unit Economics & Empirical Benchmarks
 * **Deterministic Policy Repeatability:** **99.2% $\text{pass}^8$ multi-turn consistency** across 200 synthetic enterprise trials (vs. <25% for standard Python ReAct agents on $\tau$-bench).
 * **Cost Structure:** **AED 0.00 External Cloud API Cost**. Runs on an unprivileged on-premise workstation or local sovereign data center.
-* **Token Efficiency:** 90% reduction in context window tokens via Tree-sitter AST impact analysis and local SQLite indexing.
+* **Token Efficiency:** 90% reduction in context window tokens via C99 AST symbol impact analysis and local SQLite indexing.
 * **Cold-Start Latency:** Sub-millisecond tool execution (<1ms) compared to 2,000–5,000ms for heavy Python frameworks.
 
 ---

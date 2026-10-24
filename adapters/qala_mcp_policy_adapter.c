@@ -163,7 +163,7 @@ qala_policy_result_t policy_verify_call(
         res.verdict = VERDICT_UNSAFE;
         strncpy(res.code, "landlock_fs_denied", sizeof(res.code) - 1);
         snprintf(res.reason, sizeof(res.reason),
-                 "DESC ISR v3.1 & Landlock Block: Access to restricted path '%s' denied.",
+                 "DESC ISR v3.1 Path Allowlist: Access to restricted path '%.180s' denied.",
                  ctx->target_path ? ctx->target_path : "in_args");
         write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
         return res;
@@ -180,7 +180,7 @@ qala_policy_result_t policy_verify_call(
             res.verdict = VERDICT_HALLUCINATION;
             strncpy(res.code, "grounding_hallucination_blocked", sizeof(res.code) - 1);
             snprintf(res.reason, sizeof(res.reason),
-                     "Grounding Shield Intercept: %s", g_res.discrepancy_note);
+                     "Grounding Shield Intercept: %.220s", g_res.discrepancy_note);
             write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
             return res;
         }
@@ -193,7 +193,7 @@ qala_policy_result_t policy_verify_call(
             res.verdict = VERDICT_REVIEW;
             strncpy(res.code, "approval_required", sizeof(res.code) - 1);
             snprintf(res.reason, sizeof(res.reason),
-                     "Gated operation '%s' (AED %.2f) requires a single-use approval_code (scope: %s).",
+                     "Gated operation '%.64s' (AED %.2f) requires a single-use approval_code (scope: %.32s).",
                      ctx->tool_name, ctx->amount_aed,
                      ctx->required_scope ? ctx->required_scope : "default");
             write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
@@ -227,7 +227,7 @@ qala_policy_result_t policy_verify_call(
     res.verdict = VERDICT_SAFE;
     strncpy(res.code, "policy_verified", sizeof(res.code) - 1);
     snprintf(res.reason, sizeof(res.reason),
-             "Tool '%s' verified under DESC ISR v3.1 deterministic policy.", ctx->tool_name);
+             "Tool '%.64s' verified under DESC ISR v3.1 deterministic policy.", ctx->tool_name);
     write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
     return res;
 }

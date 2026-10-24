@@ -1,6 +1,6 @@
 /* grounding_shield.c
  * Hardened C99 Implementation of:
- *   1. Privacy-Scrubbed Search Query Extractor (DESC ISR v3.1 Compliant)
+ *   1. Privacy-Scrubbed Search Query Extractor (Designed to Support DESC ISR v3.1 Entity Compliance)
  *   2. Deterministic Factual Cross-Verification & Hallucination Blocker
  */
 

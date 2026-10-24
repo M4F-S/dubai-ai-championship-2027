@@ -43,13 +43,13 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
         return res;
     }
 
-    /* 3. DHA eClaimLink & Ejadah Pre-Submission Claim Scrubber (SN 03/2019) */
-    if (rx->icd10_code && strncmp(rx->icd10_code, "E11", 3) == 0 && !rx->has_ejadah_lab_justification) {
-        res.verdict = CLINICAL_EJADAH_SCRUB_WARN;
-        strncpy(res.alert_code, "DHA_EJADAH_MISSING_HBA1C_PAYLOAD", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Claim Scrub Alert: DHA Ejadah requires baseline HbA1c lab attachment to eClaimLink XML to prevent payer rejection.",
-                sizeof(res.clinical_rationale) - 1);
+    /* 3. DHA eClaimLink Claim Cycle Standardisation Gatekeeper (SN 03/2019) */
+    if (rx->submission_delay_days > 0) {
+        res.verdict = CLINICAL_CLAIM_CYCLE_WARN;
+        strncpy(res.alert_code, "DHA_SN03_2019_DELAY_PENALTY_EXPOSURE", sizeof(res.alert_code) - 1);
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale),
+                 "Claim Cycle Warning: Submission is %u day(s) overdue under DHA SN 03/2019; subject to 0.03%%/day delay penalty on Net Claimed amount.",
+                 rx->submission_delay_days);
         return res;
     }
 
@@ -68,6 +68,7 @@ int main(void) {
         .is_controlled_substance = false,
         .has_controlled_id_verified = false,
         .icd10_code = "M10.0",
+        .submission_delay_days = 0,
         .has_ejadah_lab_justification = true
     };
     taryaq_result_t r1 = taryaq_verify_prescription_and_claim(&fatal_case);
@@ -82,33 +83,35 @@ int main(void) {
         .is_controlled_substance = true,
         .has_controlled_id_verified = false,
         .icd10_code = "R52",
+        .submission_delay_days = 0,
         .has_ejadah_lab_justification = true
     };
     taryaq_result_t r2 = taryaq_verify_prescription_and_claim(&narcotic_case);
     assert(r2.verdict == CLINICAL_CONTROLLED_DRUG_GATE);
     assert(strcmp(r2.alert_code, "UAE_CONTROLLED_RX_VERIFICATION_REQUIRED") == 0);
 
-    /* Test 3: Type 2 Diabetes (E11) claim without baseline HbA1c -> EJADAH_SCRUB_WARN */
-    taryaq_rx_context_t claim_case = {
+    /* Test 3: DHA SN 03/2019 Claim Submission delayed past deadline -> CLAIM_CYCLE_WARN */
+    taryaq_rx_context_t delayed_claim = {
         .primary_drug = "Metformin",
         .concurrent_drug = NULL,
         .patient_egfr_ml_min = 75.0,
         .is_controlled_substance = false,
         .has_controlled_id_verified = false,
         .icd10_code = "E11.9",
-        .has_ejadah_lab_justification = false
+        .submission_delay_days = 12,
+        .has_ejadah_lab_justification = true
     };
-    taryaq_result_t r3 = taryaq_verify_prescription_and_claim(&claim_case);
-    assert(r3.verdict == CLINICAL_EJADAH_SCRUB_WARN);
-    assert(strcmp(r3.alert_code, "DHA_EJADAH_MISSING_HBA1C_PAYLOAD") == 0);
+    taryaq_result_t r3 = taryaq_verify_prescription_and_claim(&delayed_claim);
+    assert(r3.verdict == CLINICAL_CLAIM_CYCLE_WARN);
+    assert(strcmp(r3.alert_code, "DHA_SN03_2019_DELAY_PENALTY_EXPOSURE") == 0);
 
     /* Test 4: Fully compliant claim -> SAFE */
-    claim_case.has_ejadah_lab_justification = true;
-    taryaq_result_t r4 = taryaq_verify_prescription_and_claim(&claim_case);
+    delayed_claim.submission_delay_days = 0;
+    taryaq_result_t r4 = taryaq_verify_prescription_and_claim(&delayed_claim);
     assert(r4.verdict == CLINICAL_SAFE);
     assert(strcmp(r4.alert_code, "DHA_NABIDH_SAFE") == 0);
 
-    printf("[PASS] All Taryaq C99 Pharmacovigilance & Ejadah Claim Scrubber tests passed successfully!\n");
+    printf("[PASS] All Taryaq C99 Pharmacovigilance & DHA SN 03/2019 Claim Scrubber tests passed successfully!\n");
     return 0;
 }
 #endif
