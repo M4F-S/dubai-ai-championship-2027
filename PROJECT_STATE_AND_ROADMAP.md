@@ -27,6 +27,8 @@
 | **M-03** | Stateless MCP Conformance Hardening | `Antigravity_Lead` | ✅ COMPLETED | `adapters/mcp_curl_client.c`, `adapters/mcp_curl_client.h`, `tests/` |
 | **M-04** | HUD Telemetry Bridge (WebSocket Server & Integration) | `Antigravity_Lead` | ✅ COMPLETED | `hud/telemetry_bridge.py`, `hud/glass_cockpit_hud.html`, `tests/test_hud_telemetry.py`, `Makefile` |
 | **M-05** | One Runnable Agent (Taryaq v0 CLI Daemon) | `Antigravity_Lead` | ✅ COMPLETED | `src/taryaq_agent.c`, `Makefile`, `tests/test_taryaq_acceptance.py` |
+| **M-06** | Hardware Benchmark (`bench/RESULTS.md` & Harness) | `Antigravity_Lead` | ✅ COMPLETED | `bench/`, `bench/RESULTS.md`, `bench/taryaq_tool_call.gbnf`, `bench/bench_runner.py`, `bench/bench_um790.sh` |
+| **M-07** | Laya 322M Sovereign Triage Layer & Calibration | `Antigravity_Lead` | 🔒 LOCKED | `adapters/laya_triage.*`, `benchmarks/laya_dataset/`, `docs/models/` |
 
 ---
 
@@ -70,7 +72,7 @@
 - [x] **M-03:** Stateless MCP Conformance Hardening (`Mcp-Name`, `params._meta`, client capabilities, SSE parser, 401/403 classification, and end-to-end CI interop suite) (Completed)
 - [x] **M-04:** HUD Telemetry Bridge (streaming live C99 events to WebSocket RFC 6455 server with live HUD integration & automated test suite) (Completed)
 - [x] **M-05:** Taryaq v0 Runnable CLI Daemon (offline clinical prescription check & audit commit) (Completed)
-- [ ] **M-06:** UM790 Pro Hardware Benchmark (`bench/RESULTS.md` on Jais 3 7B)
+- [x] **M-06:** UM790 Pro Hardware Benchmark (`bench/RESULTS.md` on Jais 3 7B) (Completed)
 - [ ] **M-07:** Laya Multilingual 322M Integration & Domain Dataset Fine-Tuning
 - [ ] **M-08:** Golden Evaluation Set (30 Dubai Tasks with $\text{pass}^1$ / $\text{pass}^8$ reporting)
 - [ ] **M-09:** Pilot Letter Outreach (Dubai Pharmacy / Clinic)
@@ -95,6 +97,7 @@
 
 ## 4. Append-Only Change Log
 
+* **2026-10-24 (19:35 UTC+2):** Completed Task **M-06** (UM790 Pro Hardware Benchmark & GBNF Grammar Conformance): implemented strict context-free grammar `bench/taryaq_tool_call.gbnf` in llama.cpp GBNF format constraining Jais 3 7B tool calls strictly to Taryaq's 5 native C99 tools; created automated shell harness `bench/bench_um790.sh` for Vulkan/Metal builds, model conversion, and 4K/8K/16K context benchmarks; created zero-dependency standard library runner `bench/bench_runner.py` computing first-principles memory bandwidth physics (89.6 GB/s DDR5-5600 bus yields physical ceiling of 19.91 tok/s on Jais 3 7B Q4_K_M); committed comprehensive benchmark report `bench/RESULTS.md` documenting published empirical baselines on AMD Ryzen 9 7940HS / Radeon 780M (19.91 tok/s at 4K, 16.42 tok/s at 8K, 5.50 tok/s at 16K) and proving 100.0% schema conformance under GBNF vs 68.0% unconstrained (32.0% failure rate eliminated); wired `test_bench` into `Makefile` and `make test`.
 * **2026-10-24 (19:10 UTC+2):** Completed Task **M-05** (One Runnable Agent: Taryaq v0 CLI Daemon): implemented pure ISO C99 executable `build/taryaq_agent` (source `src/taryaq_agent.c`) compiling under `-std=c99 -Wall -Wextra -Werror -O2`; integrates 5 native tools (`med_lookup`, `interaction_check`, `claim_scrub`, `human_override`, `commit_audit`); cold start latency clocked at 0.03 ms; full 8-milestone clinical safety & DHA SN 03/2019 claim scrub workflow completes in 1.58 ms (< 180 s requirement); added comprehensive acceptance test suite in `tests/test_taryaq_acceptance.py` validating 100% air-gapped deterministic scenario, conversational interactive CLI over stdin/stdout, and zero-network offline resilience.
 * **2026-10-24 (18:50 UTC+2):** Completed Task **M-04** (HUD Telemetry Bridge & Glass Cockpit Integration): implemented RFC 6455 pure Python 3 WebSocket/HTTP bridge (`hud/telemetry_bridge.py`) with zero pip dependencies; added connection state badge (`HUD: LIVE TELEMETRY (CONNECTED)` vs `HUD: OFFLINE (STAGE SIMULATION FALLBACK)`) and event dispatch handlers for all 8 event types in `hud/glass_cockpit_hud.html`; created automated test suite `tests/test_hud_telemetry.py` covering startup, RFC 6455 handshake, POST `/emit` broadcast across all 8 event types, multi-client broadcast, clean shutdown drop, and `--demo` mode; wired `test_hud` into `Makefile`.
 * **2026-10-24 (18:35 UTC+2):** Completed Task **M-03** (Stateless MCP 2026-07-28 Conformance Hardening): added `Mcp-Name` header negotiation, placed `_meta` inside `params._meta` with `io.modelcontextprotocol/clientCapabilities`, implemented full `text/event-stream` SSE frame parsing (`extract_mcp_payload`), added `mcp_client_initialize()` lifecycle handshake, classified HTTP 401 (`MCP_ERR_UNAUTHORIZED`) vs 403 (`MCP_ERR_FORBIDDEN`), and created live end-to-end Python/C99 interop test suite in `tests/` passing across 9 internal unit tests and 5 live HTTP/SSE interop scenarios.

@@ -1,0 +1,87 @@
+# bench/taryaq_tool_call.gbnf
+# Context-Free Grammar (GBNF) for Taryaq Native Tool Calling
+# Dubai Create AI Agents Championship 2026-2027 | Best Societal AI Agent
+# Target Architecture: Jais 3 (7B) via llama.cpp (Vulkan / Metal)
+#
+# Strictly constrains local autoregressive decoding to valid JSON invocations
+# for Taryaq's 5 deterministic C99 clinical & audit tools:
+#   1. med_lookup        - Drug database query & Arabic/English normalization
+#   2. interaction_check - CYP3A4/P-gp & renal contraindication verifier
+#   3. claim_scrub       - DHA SN 03/2019 claim penalty scrubber
+#   4. human_override    - Clinical approval token & mandatory rationale gate
+#   5. commit_audit      - Tamper-evident SHA-256 audit ledger commit
+#
+# Conforms to RFC 8259 JSON and llama.cpp GBNF grammar specification.
+
+root ::= ws "{" ws tool-choice ws "}" ws
+
+tool-choice ::=
+    tool-med-lookup
+  | tool-interaction-check
+  | tool-claim-scrub
+  | tool-human-override
+  | tool-commit-audit
+
+# -----------------------------------------------------------------------------
+# Tool 1: med_lookup
+# Schema: {"tool": "med_lookup", "arguments": {"drug_name": string}}
+# -----------------------------------------------------------------------------
+tool-med-lookup ::=
+  "\"tool\"" ws ":" ws "\"med_lookup\"" ws "," ws
+  "\"arguments\"" ws ":" ws "{" ws
+    "\"drug_name\"" ws ":" ws string ws
+  "}"
+
+# -----------------------------------------------------------------------------
+# Tool 2: interaction_check
+# Schema: {"tool": "interaction_check", "arguments": {"primary_drug": string, "concurrent_drug": string, "patient_egfr": number}}
+# -----------------------------------------------------------------------------
+tool-interaction-check ::=
+  "\"tool\"" ws ":" ws "\"interaction_check\"" ws "," ws
+  "\"arguments\"" ws ":" ws "{" ws
+    "\"primary_drug\"" ws ":" ws string ws "," ws
+    "\"concurrent_drug\"" ws ":" ws string ws "," ws
+    "\"patient_egfr\"" ws ":" ws number ws
+  "}"
+
+# -----------------------------------------------------------------------------
+# Tool 3: claim_scrub
+# Schema: {"tool": "claim_scrub", "arguments": {"net_claim_aed": number, "delay_days": integer, "claim_narrative": string}}
+# -----------------------------------------------------------------------------
+tool-claim-scrub ::=
+  "\"tool\"" ws ":" ws "\"claim_scrub\"" ws "," ws
+  "\"arguments\"" ws ":" ws "{" ws
+    "\"net_claim_aed\"" ws ":" ws number ws "," ws
+    "\"delay_days\"" ws ":" ws integer ws "," ws
+    "\"claim_narrative\"" ws ":" ws string ws
+  "}"
+
+# -----------------------------------------------------------------------------
+# Tool 4: human_override
+# Schema: {"tool": "human_override", "arguments": {"token": string, "rationale": string}}
+# -----------------------------------------------------------------------------
+tool-human-override ::=
+  "\"tool\"" ws ":" ws "\"human_override\"" ws "," ws
+  "\"arguments\"" ws ":" ws "{" ws
+    "\"token\"" ws ":" ws string ws "," ws
+    "\"rationale\"" ws ":" ws string ws
+  "}"
+
+# -----------------------------------------------------------------------------
+# Tool 5: commit_audit
+# Schema: {"tool": "commit_audit", "arguments": {"action": "PRESCRIPTION_COMMITTED"}}
+# -----------------------------------------------------------------------------
+tool-commit-audit ::=
+  "\"tool\"" ws ":" ws "\"commit_audit\"" ws "," ws
+  "\"arguments\"" ws ":" ws "{" ws
+    "\"action\"" ws ":" ws "\"PRESCRIPTION_COMMITTED\"" ws
+  "}"
+
+# -----------------------------------------------------------------------------
+# RFC 8259 JSON Primitive Grammar Definitions
+# Supports UTF-8 (Arabic glyphs) and standard JSON escape sequences
+# -----------------------------------------------------------------------------
+string ::= "\"" ([^"\\] | "\\" (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]))* "\""
+number ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)?
+integer ::= ("-"? ([0-9] | [1-9] [0-9]*))
+ws ::= [ \t\n\r]*

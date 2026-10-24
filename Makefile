@@ -21,6 +21,7 @@ MOCK_SERVER = $(TESTS_DIR)/mcp_mock_server.py
 HUD_TEST = $(TESTS_DIR)/test_hud_telemetry.py
 TARYAQ_AGENT_SRC = $(SRC_DIR)/taryaq_agent.c
 TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
+BENCH_RUNNER = bench/bench_runner.py
 
 QALA_BIN = $(BUILD_DIR)/test_qala_adapter
 NIBRAS_BIN = $(BUILD_DIR)/test_nibras_adapter
@@ -30,7 +31,7 @@ MCP_CURL_BIN = $(BUILD_DIR)/test_mcp_curl_client
 INTEROP_BIN = $(BUILD_DIR)/test_mcp_interop
 TARYAQ_AGENT_BIN = $(BUILD_DIR)/taryaq_agent
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud taryaq_agent clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench taryaq_agent clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN)
 
@@ -62,7 +63,7 @@ $(TARYAQ_AGENT_BIN): $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING
 
 taryaq_agent: $(TARYAQ_AGENT_BIN)
 
-test: all test_interop test_hud
+test: all test_interop test_hud test_bench
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -77,8 +78,14 @@ test: all test_interop test_hud
 	@./$(TARYAQ_AGENT_BIN) --test
 	@python3 $(TARYAQ_ACCEPTANCE_TEST)
 	@echo "=================================================================="
-	@echo " [SUCCESS] All Championship Adapters, Interop, HUD & Taryaq Agent Tests Passed!"
+	@echo " [SUCCESS] All Championship Adapters, Interop, HUD, Taryaq & Bench Tests Passed!"
 	@echo "=================================================================="
+
+test_bench:
+	@echo "=================================================================="
+	@echo " RUNNING UM790 HARDWARE BENCHMARK & GBNF GRAMMAR VERIFIER (M-06)"
+	@echo "=================================================================="
+	@python3 $(BENCH_RUNNER) --verify
 
 test_interop: $(INTEROP_BIN)
 	@echo "=================================================================="
