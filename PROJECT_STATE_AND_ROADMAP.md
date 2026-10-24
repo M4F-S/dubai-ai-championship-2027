@@ -17,7 +17,7 @@
 | **WS-03** | Glass Cockpit Stage Telemetry HUD | `Principal_Architect` | ✅ COMPLETED | `hud/glass_cockpit_hud.html` |
 | **WS-04** | 100% Synthetic Benchmark Dataset | `Principal_Architect` | ✅ COMPLETED | `benchmarks/dubai_synthetic_suite.json` |
 | **WS-05** | Master Tracking & Governance Docs | `Principal_Architect` | ✅ COMPLETED | `PROJECT_RULES_AND_CRITERIA.md`, `PROJECT_STATE_AND_ROADMAP.md`, `AGENT_INSTRUCTIONS.md` |
-| **WS-06** | C99 Grounding Shield (Search-Verification Loop) | *AVAILABLE* | 🟢 OPEN | `adapters/grounding_shield.c`, `adapters/grounding_shield.h` |
+| **WS-06** | C99 Grounding Shield (Search-Verification Loop) | `Principal_Architect` | ✅ COMPLETED | `adapters/grounding_shield.c`, `adapters/grounding_shield.h` |
 | **WS-07** | `libcurl` + `cJSON` Streamable MCP Client | *AVAILABLE* | 🟢 OPEN | `adapters/mcp_curl_client.c`, `Makefile` |
 | **WS-08** | 10-Slide Pitch Decks (Qala, Nibras, Taryaq) | *AVAILABLE* | 🟢 OPEN | `docs/pitch_decks/` |
 | **WS-09** | 2.5-Minute Video Screenplay & Demo Script | *AVAILABLE* | 🟢 OPEN | `docs/video_script.md` |
@@ -34,6 +34,7 @@
 | **Zero-Alloc Arabic Normalizer (`arabic_norm.c`)** | ✅ VERIFIED | Handles `0xD8`, `0xD9`, and Extended Arabic `0xDB` digits with zero heap allocations. |
 | **Time-Accelerated FadeMem (`fademem_sim.c`)** | ✅ VERIFIED | Verified 97% context pruning at 10080x with time-gated rule consolidation window. |
 | **Clinical Gatekeeper & Scrubber (`taryaq_clinical.c`)** | ✅ VERIFIED | Blocks Colchicine + Clarithromycin renal interaction; scrubs missing Ejadah HbA1c attachments. |
+| **Grounding Shield & PII Scrubber (`grounding_shield.c`)** | ✅ VERIFIED | Verified PII redaction and deterministic factual/numerical hallucination blocking in C99. |
 | **3-Panel Glass Cockpit HUD (`hud/`)** | ✅ VERIFIED | Interactive simulation triggers verified for Landlock block, memory pruning, and approval token. |
 | **Physical Air-Gap Hardware Latency Test** | ⏳ PENDING | Physical TTFT benchmark on presentation laptop scheduled for Build Phase (Nov 2026). |
 | **Local Model Binding (`Jais 3 7B` / `AF_UNIX`)** | ⏳ PENDING | Awaiting GGUF socket configuration on presentation machine. |
