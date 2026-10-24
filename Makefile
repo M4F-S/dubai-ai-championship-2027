@@ -17,6 +17,7 @@ CJSON_SRC = $(ADAPTERS_DIR)/cJSON.c
 MCP_CURL_SRC = $(ADAPTERS_DIR)/mcp_curl_client.c
 INTEROP_SRC = $(TESTS_DIR)/test_mcp_interop.c
 MOCK_SERVER = $(TESTS_DIR)/mcp_mock_server.py
+HUD_TEST = $(TESTS_DIR)/test_hud_telemetry.py
 
 QALA_BIN = $(BUILD_DIR)/test_qala_adapter
 NIBRAS_BIN = $(BUILD_DIR)/test_nibras_adapter
@@ -25,7 +26,7 @@ GROUNDING_BIN = $(BUILD_DIR)/test_grounding_shield
 MCP_CURL_BIN = $(BUILD_DIR)/test_mcp_curl_client
 INTEROP_BIN = $(BUILD_DIR)/test_mcp_interop
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN)
 
@@ -50,7 +51,7 @@ $(MCP_CURL_BIN): $(MCP_CURL_SRC) $(CJSON_SRC) $(ADAPTERS_DIR)/mcp_curl_client.h 
 $(INTEROP_BIN): $(INTEROP_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) $(ADAPTERS_DIR)/mcp_curl_client.h $(ADAPTERS_DIR)/cJSON.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INTEROP_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) $(LDFLAGS) -lcurl -o $@
 
-test: all test_interop
+test: all test_interop test_hud
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -60,7 +61,7 @@ test: all test_interop
 	@./$(GROUNDING_BIN)
 	@./$(MCP_CURL_BIN)
 	@echo "=================================================================="
-	@echo " [SUCCESS] All C99 Championship Adapters & Interop Tests Passed!"
+	@echo " [SUCCESS] All C99 Championship Adapters, Interop & HUD Tests Passed!"
 	@echo "=================================================================="
 
 test_interop: $(INTEROP_BIN)
@@ -88,6 +89,12 @@ test_interop: $(INTEROP_BIN)
 	curl -s -X POST http://127.0.0.1:8765/shutdown > /dev/null 2>&1 || true; \
 	wait $$SERVER_PID 2>/dev/null || true; \
 	exit $$TEST_STATUS
+
+test_hud:
+	@echo "=================================================================="
+	@echo " RUNNING HUD TELEMETRY BRIDGE VERIFICATION SUITE"
+	@echo "=================================================================="
+	@python3 $(HUD_TEST)
 
 test_qala: $(QALA_BIN)
 	@./$(QALA_BIN)

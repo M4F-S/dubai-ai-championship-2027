@@ -19,7 +19,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, monospace; }
   body { background: var(--bg); color: var(--text); padding: 16px; height: 100vh; display: flex; flex-direction: column; gap: 14px; }
   header { display: flex; justify-content: space-between; align-items: center; background: var(--panel); border: 1px solid var(--border); padding: 12px 20px; border-radius: 10px; }
-  .badge { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+  .badge { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; transition: all 0.3s ease; }
   .badge-airgap { background: rgba(16,185,129,0.15); color: var(--emerald); border: 1px solid var(--emerald); }
   .badge-model { background: rgba(6,182,212,0.15); color: var(--cyan); border: 1px solid var(--cyan); }
   .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; flex: 1; min-height: 0; }
@@ -27,7 +27,7 @@
   h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
   .metric-row { display: flex; justify-content: space-between; background: #090e1a; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; }
   .metric-val { font-weight: 700; color: var(--emerald); }
-  .alert-box { padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.4; border: 1px solid var(--border); background: #090e1a; }
+  .alert-box { padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.4; border: 1px solid var(--border); background: #090e1a; transition: background 0.3s ease, border-color 0.3s ease; }
   .alert-danger { background: rgba(239,68,68,0.15); border-color: var(--crimson); color: #fca5a5; }
   .alert-safe { background: rgba(16,185,129,0.12); border-color: var(--emerald); color: #6ee7b7; }
   .alert-warn { background: rgba(245,158,11,0.15); border-color: var(--gold); color: #fde68a; }
@@ -53,7 +53,8 @@
     <button onclick="simTaryaqClinical()">4. Taryaq Pharmacovigilance</button>
     <button onclick="simGroundingFactCheck()">5. Grounding Shield Fact-Check</button>
   </div>
-  <div style="display:flex; gap:8px;">
+  <div style="display:flex; gap:8px; align-items:center;">
+    <span class="badge" id="hud-conn-badge" style="background:rgba(239,68,68,0.15); color:var(--crimson); border:1px solid var(--crimson);">HUD: OFFLINE (STAGE SIMULATION FALLBACK)</span>
     <span class="badge badge-airgap">AIR-GAPPED: 0 B EXFILTRATED</span>
     <span class="badge badge-model">JAIS 3 (7B) + LAYA (322M) (AF_UNIX)</span>
   </div>
@@ -131,71 +132,317 @@ Mcp-Method: tools/call
 </div>
 
 <script>
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function appendAuditLog(entry) {
+  const audit = document.getElementById('audit-log');
+  if (!audit) return;
+  const line = typeof entry === 'string' ? entry : JSON.stringify(entry);
+  audit.textContent += '\n' + line;
+  audit.scrollTop = audit.scrollHeight;
+}
+
+function setBadgeOnline() {
+  const badge = document.getElementById('hud-conn-badge');
+  if (badge) {
+    badge.className = 'badge badge-airgap';
+    badge.style.background = 'rgba(16,185,129,0.15)';
+    badge.style.color = 'var(--emerald)';
+    badge.style.border = '1px solid var(--emerald)';
+    badge.textContent = 'HUD: LIVE TELEMETRY (CONNECTED)';
+  }
+}
+
+function setBadgeOffline() {
+  const badge = document.getElementById('hud-conn-badge');
+  if (badge) {
+    badge.className = 'badge';
+    badge.style.background = 'rgba(239,68,68,0.15)';
+    badge.style.color = 'var(--crimson)';
+    badge.style.border = '1px solid var(--crimson)';
+    badge.textContent = 'HUD: OFFLINE (STAGE SIMULATION FALLBACK)';
+  }
+}
+
+function handleTelemetryEvent(data) {
+  if (!data || typeof data !== 'object') return;
+  const eventType = data.event_type || data.type;
+
+  switch (eventType) {
+    case 'task_started': {
+      if (data.ast_time) document.getElementById('ast-time').textContent = data.ast_time;
+      if (data.token_saved) document.getElementById('token-saved').textContent = data.token_saved;
+      const sec = document.getElementById('security-status');
+      if (sec) {
+        sec.className = 'alert-box alert-safe';
+        sec.innerHTML = '<strong>KERNEL MONITOR NOMINAL:</strong> Process jailed to <code>/workspace/service</code>. Access to <code>/confidential/*</code> and <code>.env</code> blocked at kernel level.';
+      }
+      const gate = document.getElementById('gate-status');
+      if (gate) {
+        gate.textContent = data.gate_status || 'INITIALIZED (READY)';
+        gate.style.color = 'var(--cyan)';
+      }
+      const box = document.getElementById('approval-box');
+      if (box) {
+        box.className = 'alert-box';
+        box.innerHTML = '<strong>Deterministic Policy Gate Active:</strong> Monitoring tool execution and transaction boundaries.';
+      }
+      const n1Pct = document.getElementById('node1-pct'); if (n1Pct) n1Pct.textContent = '(I = 0.42)';
+      const n1Bar = document.getElementById('node1-bar'); if (n1Bar) n1Bar.style.width = '42%';
+      const n2Pct = document.getElementById('node2-pct'); if (n2Pct) n2Pct.textContent = '(I = 0.55)';
+      const n2Bar = document.getElementById('node2-bar'); if (n2Bar) n2Bar.style.width = '55%';
+      break;
+    }
+
+    case 'tool_call': {
+      const toolName = escapeHtml(data.tool || data.tool_name || 'stateless_tool');
+      const duration = data.duration_ms !== undefined ? `${data.duration_ms} ms` : '2.1 ms';
+      const readyTools = data.ready_tools || 41;
+      document.getElementById('ast-time').textContent = `${duration} (${toolName} / ${readyTools} Tools)`;
+      if (data.mcp_frame) {
+        const frameBox = document.getElementById('mcp-frame');
+        if (frameBox) frameBox.textContent = data.mcp_frame;
+      }
+      break;
+    }
+
+    case 'gate_verdict': {
+      const verdict = data.verdict || 'REVIEW REQUIRED';
+      const gate = document.getElementById('gate-status');
+      if (gate) {
+        gate.textContent = verdict;
+        if (verdict.includes('SAFE') || verdict.includes('APPROVED')) {
+          gate.style.color = 'var(--emerald)';
+        } else if (verdict.includes('BLOCKED') || verdict.includes('UNSAFE') || verdict.includes('FATAL')) {
+          gate.style.color = 'var(--crimson)';
+        } else {
+          gate.style.color = 'var(--gold)';
+        }
+      }
+      const box = document.getElementById('approval-box');
+      if (box) {
+        if (verdict.includes('SAFE') || verdict.includes('APPROVED')) {
+          box.className = 'alert-box alert-safe';
+          const tok = data.token ? `Token <code>${escapeHtml(data.token)}</code> consumed in constant time.` : 'Stateless MCP transaction executed and verified.';
+          box.innerHTML = `<strong>✅ SINGLE-USE APPROVAL VERIFIED:</strong> ${tok}`;
+        } else if (verdict.includes('BLOCKED') || verdict.includes('UNSAFE')) {
+          box.className = 'alert-box alert-danger';
+          box.innerHTML = `<strong>🚨 GATE POLICY INTERCEPT:</strong> Mutation blocked by deterministic policy: ${escapeHtml(data.reason || verdict)}`;
+        } else {
+          box.className = 'alert-box alert-warn';
+          box.innerHTML = `<strong>⚠️ GATE VERDICT: REVIEW REQUIRED:</strong> Operation paused pending manual governance check.`;
+        }
+      }
+      break;
+    }
+
+    case 'approval_required': {
+      const gate = document.getElementById('gate-status');
+      const amtStr = data.amount_aed ? ` (AED ${Number(data.amount_aed).toLocaleString('en-US', {minimumFractionDigits: 2})})` : '';
+      if (gate) {
+        gate.textContent = `REVIEW REQUIRED${amtStr}`;
+        gate.style.color = 'var(--gold)';
+      }
+      const box = document.getElementById('approval-box');
+      if (box) {
+        box.className = 'alert-box alert-warn';
+        const toolCode = escapeHtml(data.tool || 'erp_customs_settlement');
+        const scopeCode = escapeHtml(data.scope || 'finops_remediate');
+        const thresh = data.amount_aed ? `exceeds AED ${Number(data.threshold_aed || 50000).toLocaleString()} threshold` : 'requires manual authorization';
+        box.innerHTML = `<strong>Gated Operation Paused:</strong> Tool <code>${toolCode}</code> ${thresh}.<br><br>` +
+          `Awaiting single-use cryptographic approval code on <strong>Telegram Concierge Gateway</strong> (Scope: <code>${scopeCode}</code>).`;
+      }
+      break;
+    }
+
+    case 'state_committed': {
+      if (data.token_saved) {
+        document.getElementById('token-saved').textContent = data.token_saved;
+      }
+      if (data.node1_pct) document.getElementById('node1-pct').textContent = data.node1_pct;
+      if (data.node1_bar) {
+        document.getElementById('node1-bar').style.width = data.node1_bar;
+      } else if (data.node1_pct && data.node1_pct.includes('PRUNED')) {
+        document.getElementById('node1-bar').style.width = '0%';
+      }
+      if (data.node2_pct) document.getElementById('node2-pct').textContent = data.node2_pct;
+      if (data.node2_bar) {
+        document.getElementById('node2-bar').style.width = data.node2_bar;
+      } else if (data.node2_pct && data.node2_pct.includes('PRUNED')) {
+        document.getElementById('node2-bar').style.width = '0%';
+      }
+      break;
+    }
+
+    case 'security_block': {
+      const sec = document.getElementById('security-status');
+      if (sec) {
+        sec.className = 'alert-box alert-danger';
+        const target = escapeHtml(data.target || data.target_path || '/confidential/uae_citizens.db');
+        sec.innerHTML = `<strong>🚨 LANDLOCK LSM KERNEL BLOCK (EACCES):</strong> Prompt-injection attempted <code>fs_read("${target}")</code>. Blocked in C99 before syscall execution. Zero bytes leaked.`;
+      }
+      break;
+    }
+
+    case 'taryaq_clinical': {
+      const gate = document.getElementById('gate-status');
+      if (gate) {
+        gate.textContent = data.verdict || 'FATAL CONTRAINDICATION BLOCKED';
+        gate.style.color = 'var(--crimson)';
+      }
+      const box = document.getElementById('approval-box');
+      if (box) {
+        box.className = 'alert-box alert-danger';
+        const drugs = escapeHtml(data.drugs || 'Colchicine + Clarithromycin');
+        const egfr = escapeHtml(data.egfr || 22.0);
+        box.innerHTML = `<strong>🚨 TARYAQ CLINICAL GATE INTERCEPT:</strong> Blocked concurrent <code>${drugs}</code> in patient with eGFR = ${egfr} ml/min (&lt;30). Fatal CYP3A4 toxicity prevented in C99 before prescription sign-off.`;
+      }
+      break;
+    }
+
+    case 'grounding_verify': {
+      const gate = document.getElementById('gate-status');
+      if (gate) {
+        gate.textContent = data.verdict || 'HALLUCINATION BLOCKED (CORRECTED)';
+        gate.style.color = 'var(--gold)';
+      }
+      const box = document.getElementById('approval-box');
+      if (box) {
+        box.className = 'alert-box alert-warn';
+        const pii = escapeHtml(data.pii_redacted || 'patient name & Emirates ID (784-1988-...)');
+        const claimed = escapeHtml(data.claimed_val || '0.05% daily penalty');
+        const citation = escapeHtml(data.citation || 'DHA SN 03/2019');
+        const grounded = escapeHtml(data.grounded_val || '0.03% daily penalty');
+        box.innerHTML = '<strong>🛡️ GROUNDING SHIELD INTERCEPT:</strong><br>' +
+          `1. <em>PII Scrubber:</em> Redacted ${pii}. Clean Query: <code>[DHA eClaimLink Ejadah SN 03/2019]</code>.<br>` +
+          `2. <em>Factual Check:</em> Local model drafted <code>${claimed}</code>.<br>` +
+          `3. <em>Authoritative Grounding:</em> ${citation} mandates <code>${grounded}</code>.<br>` +
+          `<strong>Status:</strong> Discrepancy caught in C99. Corrected to ${grounded} with zero cloud telemetry.`;
+      }
+      break;
+    }
+
+    default: {
+      if (data.verdict) {
+        const gate = document.getElementById('gate-status');
+        if (gate) gate.textContent = data.verdict;
+      }
+      break;
+    }
+  }
+
+  if (data.log) {
+    appendAuditLog(data.log);
+  } else if (data.audit_log) {
+    appendAuditLog(data.audit_log);
+  }
+}
+
 // WebSocket auto-reconnect telemetry listener
 (function initTelemetry() {
   const WS_URL = "ws://127.0.0.1:8787/telemetry";
-  let ws;
+  let ws = null;
+  let reconnectTimer = null;
+
   function connect() {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
     try {
       ws = new WebSocket(WS_URL);
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.verdict) document.getElementById('gate-status').textContent = data.verdict;
-        if (data.log) document.getElementById('audit-log').textContent += '\n' + data.log;
+
+      ws.onopen = () => {
+        setBadgeOnline();
       };
-      ws.onclose = () => setTimeout(connect, 2000);
-    } catch (e) { /* Standalone demo mode */ }
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          handleTelemetryEvent(data);
+        } catch (e) {
+          console.error("Failed to parse telemetry event:", e, event.data);
+        }
+      };
+
+      ws.onclose = () => {
+        setBadgeOffline();
+        reconnectTimer = setTimeout(connect, 2000);
+      };
+
+      ws.onerror = () => {
+        setBadgeOffline();
+        try { ws.close(); } catch (err) {}
+      };
+    } catch (e) {
+      setBadgeOffline();
+      reconnectTimer = setTimeout(connect, 2000);
+    }
   }
-  window.addEventListener("DOMContentLoaded", connect);
+
+  if (document.readyState === 'loading') {
+    window.addEventListener("DOMContentLoaded", connect);
+  } else {
+    connect();
+  }
 })();
 
+// Documented stage offline simulation triggers (hardware-fault failsafe)
 function simLandlockAttack() {
-  const sec = document.getElementById('security-status');
-  sec.className = 'alert-box alert-danger';
-  sec.innerHTML = '<strong>🚨 LANDLOCK LSM KERNEL BLOCK (EACCES):</strong> Prompt-injection attempted <code>fs_read("/confidential/uae_citizens.db")</code>. Blocked in C99 before syscall execution. Zero bytes leaked.';
-  document.getElementById('audit-log').textContent += '\n{"timestamp_utc":1792600045,"tool":"fs_read","target_path":"/confidential/uae_citizens.db","verdict":"UNSAFE","code":"landlock_fs_denied"}';
+  handleTelemetryEvent({
+    event_type: 'security_block',
+    target: '/confidential/uae_citizens.db',
+    log: '{"timestamp_utc":1792600045,"tool":"fs_read","target_path":"/confidential/uae_citizens.db","verdict":"UNSAFE","code":"landlock_fs_denied"}'
+  });
 }
 
 function simTimeFastForward() {
-  document.getElementById('token-saved').textContent = '97% Saved (+7 Days @ 10080x)';
-  document.getElementById('node1-pct').textContent = '(I = 0.003 -> PRUNED)';
-  document.getElementById('node1-bar').style.width = '0%';
-  document.getElementById('node2-pct').textContent = '(I = 0.004 -> PRUNED)';
-  document.getElementById('node2-bar').style.width = '0%';
+  handleTelemetryEvent({
+    event_type: 'state_committed',
+    token_saved: '97% Saved (+7 Days @ 10080x)',
+    node1_pct: '(I = 0.003 -> PRUNED)',
+    node1_bar: '0%',
+    node2_pct: '(I = 0.004 -> PRUNED)',
+    node2_bar: '0%'
+  });
 }
 
 function simTelegramApproval() {
-  const gate = document.getElementById('gate-status');
-  gate.textContent = 'APPROVED & VERIFIED (SAFE)';
-  gate.style.color = '#10b981';
-  const box = document.getElementById('approval-box');
-  box.className = 'alert-box alert-safe';
-  box.innerHTML = '<strong>✅ SINGLE-USE APPROVAL VERIFIED:</strong> Token <code>DUBAI-APPROVE-9941-X</code> consumed in constant time. Stateless MCP transaction executed and verified.';
-  document.getElementById('audit-log').textContent += '\n{"timestamp_utc":1792600088,"tool":"erp_customs_settlement","amount_aed":125000.00,"approval_supplied":true,"verdict":"SAFE","code":"policy_verified"}';
+  handleTelemetryEvent({
+    event_type: 'gate_verdict',
+    verdict: 'APPROVED & VERIFIED (SAFE)',
+    token: 'DUBAI-APPROVE-9941-X',
+    log: '{"timestamp_utc":1792600088,"tool":"erp_customs_settlement","amount_aed":125000.00,"approval_supplied":true,"verdict":"SAFE","code":"policy_verified"}'
+  });
 }
 
 function simTaryaqClinical() {
-  const gate = document.getElementById('gate-status');
-  gate.textContent = 'FATAL CONTRAINDICATION BLOCKED';
-  gate.style.color = '#ef4444';
-  const box = document.getElementById('approval-box');
-  box.className = 'alert-box alert-danger';
-  box.innerHTML = '<strong>🚨 TARYAQ CLINICAL GATE INTERCEPT:</strong> Blocked concurrent <code>Colchicine + Clarithromycin</code> in patient with eGFR = 22 ml/min (<30). Fatal CYP3A4 toxicity prevented in C99 before prescription sign-off.';
-  document.getElementById('audit-log').textContent += '\n{"timestamp_utc":1792600120,"agent":"Taryaq","tool":"rx_prescribe","primary_drug":"Colchicine","egfr":22.0,"verdict":"CLINICAL_CONTRAINDICATION_BLOCK","code":"FATAL_CYP3A4_RENAL_CONTRAINDICATION"}';
+  handleTelemetryEvent({
+    event_type: 'taryaq_clinical',
+    drugs: 'Colchicine + Clarithromycin',
+    egfr: 22.0,
+    verdict: 'FATAL CONTRAINDICATION BLOCKED',
+    log: '{"timestamp_utc":1792600120,"agent":"Taryaq","tool":"rx_prescribe","primary_drug":"Colchicine","egfr":22.0,"verdict":"CLINICAL_CONTRAINDICATION_BLOCK","code":"FATAL_CYP3A4_RENAL_CONTRAINDICATION"}'
+  });
 }
 
 function simGroundingFactCheck() {
-  const gate = document.getElementById('gate-status');
-  gate.textContent = 'HALLUCINATION BLOCKED (CORRECTED)';
-  gate.style.color = '#f59e0b';
-  const box = document.getElementById('approval-box');
-  box.className = 'alert-box alert-warn';
-  box.innerHTML = '<strong>🛡️ GROUNDING SHIELD INTERCEPT:</strong><br>' +
-    '1. <em>PII Scrubber:</em> Redacted patient name & Emirates ID (784-1988-...). Clean Query: <code>[DHA eClaimLink Ejadah SN 03/2019]</code>.<br>' +
-    '2. <em>Factual Check:</em> Local model drafted <code>0.05% daily penalty</code>.<br>' +
-    '3. <em>Authoritative Grounding:</em> DHA SN 03/2019 mandates <code>0.03% daily penalty</code>.<br>' +
-    '<strong>Status:</strong> Discrepancy caught in C99. Corrected to 0.03% with zero cloud telemetry.';
-  document.getElementById('audit-log').textContent += '\n{"timestamp_utc":1792600155,"agent":"Qala/Taryaq","tool":"grounding_verify","claimed_val":0.05,"grounded_val":0.03,"citation":"DHA_SN_03_2019","verdict":"HALLUCINATION_BLOCKED"}';
+  handleTelemetryEvent({
+    event_type: 'grounding_verify',
+    pii_redacted: 'patient name & Emirates ID (784-1988-...)',
+    claimed_val: '0.05% daily penalty',
+    grounded_val: '0.03% daily penalty',
+    citation: 'DHA SN 03/2019',
+    verdict: 'HALLUCINATION BLOCKED (CORRECTED)',
+    log: '{"timestamp_utc":1792600155,"agent":"Qala/Taryaq","tool":"grounding_verify","claimed_val":0.05,"grounded_val":0.03,"citation":"DHA_SN_03_2019","verdict":"HALLUCINATION_BLOCKED"}'
+  });
 }
 </script>
 </body>
