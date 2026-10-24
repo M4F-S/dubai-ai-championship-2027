@@ -18,7 +18,7 @@
 | **WS-04** | 100% Synthetic Benchmark Dataset | `Principal_Architect` | ✅ COMPLETED | `benchmarks/dubai_synthetic_suite.json` |
 | **WS-05** | Master Tracking & Governance Docs | `Principal_Architect` | ✅ COMPLETED | `PROJECT_RULES_AND_CRITERIA.md`, `PROJECT_STATE_AND_ROADMAP.md`, `AGENT_INSTRUCTIONS.md` |
 | **WS-06** | C99 Grounding Shield (Search-Verification Loop) | `Principal_Architect` | ✅ COMPLETED | `adapters/grounding_shield.c`, `adapters/grounding_shield.h` |
-| **WS-07** | `libcurl` + `cJSON` Streamable MCP Client | *AVAILABLE* | 🟢 OPEN | `adapters/mcp_curl_client.c`, `Makefile` |
+| **WS-07** | `libcurl` + `cJSON` Streamable MCP Client | `Principal_Architect` | ✅ COMPLETED | `adapters/mcp_curl_client.c`, `adapters/mcp_curl_client.h`, `adapters/cJSON.*`, `Makefile` |
 | **WS-08** | 10-Slide Pitch Decks (Qala, Nibras, Taryaq) | *AVAILABLE* | 🟢 OPEN | `docs/pitch_decks/` |
 | **WS-09** | 2.5-Minute Video Screenplay & Demo Script | *AVAILABLE* | 🟢 OPEN | `docs/video_script.md` |
 | **WS-10** | DCDE Mandatory Architecture Summary Report | *AVAILABLE* | 🟢 OPEN | `docs/architecture_summary_report.pdf` |
@@ -31,6 +31,7 @@
 | :--- | :---: | :--- |
 | **Deterministic Policy Gate (`policy_gate.c`)** | ✅ VERIFIED | Hardened in C99. Passes constant-time token match, realpath check, and single-use consumption. |
 | **Stateless MCP Header Generator (`mcp_bridge.c`)** | ✅ VERIFIED | Formats `MCP-Protocol-Version: 2026-07-28` and `Mcp-Method: tools/call` over JSON-RPC 2.0. |
+| **Streamable MCP Client Driver (`mcp_curl_client.c`)** | ✅ VERIFIED | Full `libcurl` + `cJSON` transport, dynamic response buffering, honest error handling & timeouts. |
 | **Zero-Alloc Arabic Normalizer (`arabic_norm.c`)** | ✅ VERIFIED | Handles `0xD8`, `0xD9`, and Extended Arabic `0xDB` digits with zero heap allocations. |
 | **Time-Accelerated FadeMem (`fademem_sim.c`)** | ✅ VERIFIED | Verified 97% context pruning at 10080x with time-gated rule consolidation window. |
 | **Clinical Gatekeeper & Scrubber (`taryaq_clinical.c`)** | ✅ VERIFIED | Blocks Colchicine + Clarithromycin renal interaction; scrubs missing Ejadah HbA1c attachments. |
