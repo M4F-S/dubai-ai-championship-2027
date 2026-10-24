@@ -1,5 +1,5 @@
 {
-  "timestamp_utc": "2026-10-24 19:37:19 UTC",
+  "timestamp_utc": "2026-10-24 20:06:09 UTC",
   "task_id": "M-06",
   "system_specification": {
     "system_model": "Minisforum Venus Series UM790 Pro",
@@ -40,12 +40,14 @@
     }
   },
   "bandwidth_physics": {
+    "execution_status": "MODELLED_PENDING_PHYSICAL_EXECUTION",
     "theoretical_max_tok_s": 19.91,
-    "measured_tok_s": 19.91,
+    "published_reference_tok_s": 19.91,
     "ms_per_token": 50.23,
     "memory_bus_utilization_pct": 100.0,
     "formula": "Throughput (tok/s) = Memory Bandwidth (GB/s) / Model Size (GB)",
-    "derivation": "89.6 GB/s / 4.50 GB = 19.91 tok/s"
+    "derivation": "89.6 GB/s / 4.50 GB = 19.91 tok/s",
+    "provenance_note": "19.91 tok/s is a published reference value for AMD Radeon 780M silicon with DDR5-5600, pending local run on UM790 hardware."
   },
   "empirical_benchmark_table": [
     {

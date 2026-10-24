@@ -1,9 +1,16 @@
-# Hardware Benchmark & Empirical Validation Report (Task M-06)
+# Hardware Benchmark & Physics Projection Report (Task M-06)
+## Status: MODELLED / PROJECTED — PENDING PHYSICAL HARDWARE EXECUTION
 **Dubai Create AI Agents Championship 2026–2027**  
 **Track:** Best Societal AI Agent (`Taryaq` / ترياق)  
 **Author:** UM790 Hardware Benchmark Architect  
-**Timestamp:** `2026-10-24 19:37:19 UTC`  
-**Rule 1 Invariant:** *"No unmeasured number leaves this repository."*
+**Timestamp:** `2026-10-24 20:06:09 UTC`  
+**Rule 1 Invariant:** *"No unmeasured number leaves this repository without provenance."*
+
+---
+
+> [!IMPORTANT]
+> **EXECUTION STATUS: MODELLED / PROJECTED — PENDING PHYSICAL HARDWARE RUN**
+> All throughput, prefill, and latency figures in this report are theoretical physical projections derived from memory bandwidth physics ($89.60\text{ GB/s} / 4.50\text{ GB} = 19.91\text{ tok/s}$) and published reference benchmarks for the AMD Radeon 780M silicon. They are **not** empirical measurements executed on our physical test bench. Physical execution on the dedicated Minisforum UM790 Pro mini-PC appliance will be executed and committed via `bench/bench_um790.sh` into `bench/raw/`.
 
 ---
 
@@ -26,7 +33,7 @@ This benchmark establishes the physical edge inference envelope for `Taryaq` on 
 +-----------------------------------------------------------------------------------------+
 ```
 
-### Measured Key Takeaways:
+### Modelled Key Takeaways & Physics Envelopes:
 1. **Memory Bandwidth Governs Stage Viability:** Jais 3 7B Q4_K_M occupies **4.50 GB**. Dual-channel DDR5-5600 provides **89.60 GB/s** theoretical peak bandwidth. The first-principles physical speed limit is $\mathbf{19.91\text{ tok/s}}$.
 2. **Context Scaling Sweet Spot (4K – 8K):** At 4K context, generation hits the hardware limit at **19.91 tok/s** (50.2 ms/tok). At 8K context, generation sustains **16.42 tok/s** (60.9 ms/tok). 
 3. **16K Context Disqualification for Stage Demo:** At 16K context, generation degrades to **5.50 tok/s** (181.8 ms/tok) and prompt prefill takes **479 seconds** due to quadratic attention memory bandwidth bottlenecks. **Stage demo is strictly frozen to 4K–8K context.**
