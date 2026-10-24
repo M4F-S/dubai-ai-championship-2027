@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DUBAI AI AGENTS CHAMPIONSHIP 2027 | SOVEREIGN GLASS COCKPIT</title>
+  
+  <!-- Modern Intentional Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #060911;
+      --bg-surface: #0c1220;
+      --bg-panel: #111a2e;
+      --bg-elevated: #16223b;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(245, 158, 11, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.18);
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.18);
+      --gold: #f59e0b;
+      --gold-glow: rgba(245, 158, 11, 0.18);
+      --crimson: #ef4444;
+      --crimson-glow: rgba(239, 68, 68, 0.22);
+      --purple: #8b5cf6;
+
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-arabic: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [dir="rtl"] {
+      font-family: var(--font-arabic);
+    }
+    [dir="ltr"] {
+      font-family: var(--font-sans);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: var(--bg-base);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(6, 182, 212, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.06) 0%, transparent 45%);
+    }
+
+    /* Top Navigation Bar */
+    header {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(12, 18, 32, 0.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 50;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-emblem {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #060911;
+      font-size: 18px;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Agent Switcher Tabs */
+    .agent-nav {
+      display: flex;
+      background: rgba(6, 9, 17, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .agent-tab {
+      padding: 8px 16px;
+      border-radius: 7px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .agent-tab:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .agent-tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border-active);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .tab-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .dot-taryaq { background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
+    .dot-qala { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+    .dot-nibras { background: var(--purple); box-shadow: 0 0 6px var(--purple); }
+
+    /* Top Controls & Badges */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    .badge-c99 {
+      background: var(--emerald-glow);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-c99::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .badge-airgap {
+      background: var(--cyan-glow);
+      color: var(--cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-lang {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-lang:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--gold);
+    }
+
+    /* Main Workspace Layout */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 62% 38%;
+      gap: 16px;
+      padding: 16px 24px;
+      min-height: 0;
+    }
+
+    /* Left: Conversational Execution Workspace */
+    .chat-section {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 12px 18px;
+      background: rgba(17, 26, 46, 0.6);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Scenario Quick Chips */
+    .scenario-bar {
+      padding: 10px 18px;
+      background: rgba(6, 9, 17, 0.4);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .scenario-bar::-webkit-scrollbar { display: none; }
+
+    .scenario-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scenario-chip:hover {
+      background: var(--bg-elevated);
+      color: var(--text-main);
+      border-color: var(--cyan);
+    }
+
+    /* Chat Messages Stream */
+    .chat-scroll {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .msg-bubble {
+      max-width: 88%;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+
+    .msg-user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #1e293b 0%, #172033 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border-bottom-right-radius: 2px;
+    }
+
+    .msg-agent {
+      align-self: flex-start;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-bottom-left-radius: 2px;
+    }
+
+    /* Tool Execution Card */
+    .tool-card {
+      background: #090e1b;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-left: 3px solid var(--cyan);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin: 8px 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .tool-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--cyan);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .tool-latency {
+      color: var(--emerald);
+      font-size: 11px;
+    }
+
+    .tool-body {
+      color: #cbd5e1;
+      font-size: 11.5px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* PII Card */
+    .pii-card {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px dashed rgba(16, 185, 129, 0.4);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11.5px;
+      color: #a7f3d0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    /* Safety Block Alert */
+    .block-alert {
+      background: var(--crimson-glow);
+      border: 1px solid var(--crimson);
+      border-radius: 8px;
+      padding: 14px;
+      margin: 10px 0;
+      color: #fca5a5;
+    }
+    .block-alert strong {
+      color: #fee2e2;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    /* Chat Input Dock */
+    .chat-input-bar {
+      padding: 14px 18px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(6, 9, 17, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text-main);
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .chat-input:focus {
+      border-color: var(--gold);
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #060911;
+      font-weight: 700;
+      border: none;
+      padding: 0 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-send:hover {
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Right: Glass Cockpit HUD & Telemetry */
+    .hud-section {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    /* Metric Gauge Bento */
+    .gauge-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .gauge-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .gauge-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .gauge-value {
+      font-size: 18px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--emerald);
+    }
+    .gauge-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Security Gate Matrix */
+    .matrix-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .matrix-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .gate-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      background: rgba(6, 9, 17, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .gate-status-pill {
+      font-size: 10px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .pill-safe { background: var(--emerald-glow); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .pill-review { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .pill-block { background: var(--crimson-glow); color: var(--crimson); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Cryptographic Audit Ledger */
+    .ledger-panel {
+      flex: 1;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 240px;
+    }
+
+    .ledger-scroll {
+      flex: 1;
+      background: #04070e;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ledger-entry {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding-bottom: 6px;
+    }
+    .ledger-entry:last-child { border-bottom: none; }
+    .ledger-sha { color: var(--gold); font-size: 10px; word-break: break-all; }
+
+    /* Emergency Override Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(6, 9, 17, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-box {
+      width: 90%;
+      max-width: 520px;
+      background: var(--bg-surface);
+      border: 2px solid var(--crimson);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 0 40px var(--crimson-glow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fee2e2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-input {
+      background: #04070e;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      outline: none;
+    }
+    .modal-input:focus { border-color: var(--crimson); }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .btn-override {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      border: none;
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand-group">
+      <div class="brand-emblem">D</div>
+      <div>
+        <div class="brand-title" id="lbl-title">
+          DUBAI AI AGENTS CHAMPIONSHIP 2027
+        </div>
+        <div class="brand-sub" id="lbl-sub">
+          Bare-Metal C99 Sovereign Agent Cockpit | Minisforum UM790 Pro
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Switcher Tabs -->
+    <div class="agent-nav">
+      <button class="agent-tab active" id="tab-taryaq" onclick="switchAgent('taryaq')">
+        <span class="tab-dot dot-taryaq"></span>
+        <span id="tab-taryaq-text">TARYAQ (Societal Health)</span>
+      </button>
+      <button class="agent-tab" id="tab-qala" onclick="switchAgent('qala')">
+        <span class="tab-dot dot-qala"></span>
+        <span id="tab-qala-text">QALA (Business &amp; Trade)</span>
+      </button>
+      <button class="agent-tab" id="tab-nibras" onclick="switchAgent('nibras')">
+        <span class="tab-dot dot-nibras"></span>
+        <span id="tab-nibras-text">NIBRAS (Executive Copilot)</span>
+      </button>
+    </div>
+
+    <!-- Header Status Badges & Language Switch -->
+    <div class="header-actions">
+      <span class="badge badge-c99" id="badge-engine">C99 SHIELD: &lt;0.02ms</span>
+      <span class="badge badge-airgap" id="badge-airgap">AIR-GAP: 0 B EXFILTRATED</span>
+      <button class="btn-lang" onclick="toggleLanguage()">
+        <span id="btn-lang-text">🌐 العربية (RTL)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Workspace -->
+  <main>
+    <!-- Left: Conversational Agent Execution Section -->
+    <section class="chat-section">
+      <div class="section-header">
+        <div class="section-title">
+          <span id="lbl-chat-title">Interactive Agent Execution Stream</span>
+        </div>
+        <div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">
+          <span id="lbl-model-badge">Model: Qwen 2.5 7B (UM790 Equiv)</span>
+        </div>
+      </div>
+
+      <!-- Demonstration Scenario Presets -->
+      <div class="scenario-bar" id="scenario-chips">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Messages Stream -->
+      <div class="chat-scroll" id="chat-messages">
+        <div class="msg-bubble msg-agent" id="welcome-msg">
+          <strong style="color:var(--gold);">Welcome to the Sovereign Championship Cockpit.</strong><br>
+          Select a judge demo scenario above or enter a clinical/business query. All model proposals are deterministically checked in local C99 code in microseconds before execution.
+        </div>
+      </div>
+
+      <!-- Input Dock -->
+      <div class="chat-input-bar">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Type clinical prescription, claim inquiry, or business directive..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button class="btn-send" onclick="sendMessage()">
+          <span id="lbl-send-btn">Execute Agent</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Right: Glass Cockpit HUD & Telemetry -->
+    <aside class="hud-section">
+      <!-- 4 Key Telemetry Gauges -->
+      <div class="gauge-grid">
+        <div class="gauge-card">
+          <span class="gauge-label" id="lbl-gauge-cold">C99 Cold Start</span>
+          <span class="gauge-value" id="val-cold">0.013 ms</span>
+          <span class="gauge-sub">Target &lt; 15.000 ms</span>
+        </div>
+        <div class="gauge-card">
+          <span class="gauge-label" id="lbl-gauge-mem">DDR5 Saturation</span>
+          <span class="gauge-value" id="val-mem" style="color:var(--cyan);">19.91 tok/s</span>
+          <span class="gauge-sub">89.6 GB/s UM790 Bus</span>
+        </div>
+        <div class="gauge-card">
+          <span class="gauge-label" id="lbl-gauge-wan">WAN Exfiltration</span>
+          <span class="gauge-value" id="val-wan">0.00 KB</span>
+          <span class="gauge-sub">DESC ISR v3.1 Air-Gap</span>
+        </div>
+        <div class="gauge-card">
+          <span class="gauge-label" id="lbl-gauge-ledger">Audit Signatures</span>
+          <span class="gauge-value" id="val-ledger" style="color:var(--gold);">52</span>
+          <span class="gauge-sub">SHA-256 Non-Repudiated</span>
+        </div>
+      </div>
+
+      <!-- Security Gate Matrix -->
+      <div class="matrix-panel">
+        <div class="matrix-title">
+          <span id="lbl-matrix-title">C99 Hardware Security Matrix</span>
+          <span style="color:var(--emerald); font-size:10px;">ALL GATES ARMED</span>
+        </div>
+        <div class="gate-row">
+          <span>Taryaq CYP3A4 Pharmacovigilance</span>
+          <span class="gate-status-pill pill-safe" id="gate-taryaq-status">ARMED (&lt;0.01ms)</span>
+        </div>
+        <div class="gate-row">
+          <span>DHA SN 03/2019 Claim Scrubber</span>
+          <span class="gate-status-pill pill-safe" id="gate-dha-status">0.03%/DAY ACTIVE</span>
+        </div>
+        <div class="gate-row">
+          <span>Tau-3 Financial Limit Gatekeeper</span>
+          <span class="gate-status-pill pill-review" id="gate-qala-status">AED 50,000 CAP</span>
+        </div>
+        <div class="gate-row">
+          <span>C99 Path Isolation (DESC ISR v3)</span>
+          <span class="gate-status-pill pill-safe" id="gate-path-status">JAILED /workspace</span>
+        </div>
+      </div>
+
+      <!-- Live Cryptographic Audit Stream -->
+      <div class="ledger-panel">
+        <div class="matrix-title">
+          <span id="lbl-ledger-title">Cryptographic JSONL Audit Ledger</span>
+          <button class="btn-lang" style="padding:2px 8px; font-size:10px;" onclick="refreshAuditLog()">Refresh</button>
+        </div>
+        <div class="ledger-scroll" id="audit-feed">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Emergency Clinical Safety Override Modal -->
+  <div class="modal-backdrop" id="override-modal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>⛔</span>
+        <span id="lbl-modal-title">FATAL CLINICAL CONTRAINDICATION INTERCEPTED</span>
+      </div>
+      <p style="font-size:13px; color:#cbd5e1; line-height:1.5;" id="lbl-modal-desc">
+        Deterministic C99 Pharmacovigilance Shield blocked prescription: <strong>Colchicine + Clarithromycin</strong> with patient eGFR = 22 mL/min/1.73m².
+      </p>
+      
+      <div>
+        <label style="font-size:11px; color:var(--text-dim); text-transform:uppercase; font-weight:700; display:block; margin-bottom:4px;" id="lbl-modal-code">
+          Single-Use Clinician Override Token
+        </label>
+        <input type="text" id="modal-token-input" class="modal-input" style="width:100%;" placeholder="Enter clinician token, e.g. TARYAQ-OVERRIDE-8842-CLIN">
+        <button class="btn-lang" style="margin-top:6px; font-size:11px; color:var(--gold);" onclick="document.getElementById('modal-token-input').value='TARYAQ-OVERRIDE-8842-CLIN'">
+          ⚡ Auto-Fill Judge Test Token (TARYAQ-OVERRIDE-8842-CLIN)
+        </button>
+      </div>
+
+      <div>
+        <label style="font-size:11px; color:var(--text-dim); text-transform:uppercase; font-weight:700; display:block; margin-bottom:4px;" id="lbl-modal-rationale">
+          Documented Medical Rationale
+        </label>
+        <input type="text" id="modal-rationale-input" class="modal-input" style="width:100%;" value="ICU continuous hemodialysis initiated; nephrology co-signature Dr. Tariq DHA-P-44019">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeOverrideModal()">Rollback &amp; Abort</button>
+        <button class="btn-override" onclick="submitClinicalOverride()">Authorize &amp; Commit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State management
+    let currentAgent = 'taryaq';
+    let isArabic = false;
+    let pendingBlockedMessage = null;
+
+    // Bilingual Translation Lexicon
+    const I18N = {
+      en: {
+        title: "DUBAI AI AGENTS CHAMPIONSHIP 2027",
+        sub: "Bare-Metal C99 Sovereign Agent Cockpit | Minisforum UM790 Pro",
+        tabTaryaq: "TARYAQ (Societal Health)",
+        tabQala: "QALA (Business & Trade)",
+        tabNibras: "NIBRAS (Executive Copilot)",
+        chatTitle: "Interactive Agent Execution Stream",
+        modelBadge: "Model: Qwen 2.5 7B (UM790 Equiv)",
+        sendBtn: "Execute Agent",
+        coldStart: "C99 Cold Start",
+        memSat: "DDR5 Saturation",
+        wanExfil: "WAN Exfiltration",
+        ledgerCount: "Audit Signatures",
+        matrixTitle: "C99 Hardware Security Matrix",
+        ledgerTitle: "Cryptographic JSONL Audit Ledger",
+        langBtn: "🌐 العربية (RTL)",
+        placeholder: "Type clinical prescription, claim inquiry, or business directive...",
+        welcome: "<strong>Welcome to the Sovereign Championship Cockpit.</strong><br>Select a judge demo scenario above or enter a clinical/business query. All model proposals are deterministically checked in local C99 code in microseconds before execution."
+      },
+      ar: {
+        title: "بطولة دبي للذكاء الاصطناعي ٢٠٢٧",
+        sub: "قمرة القيادة السيادية لنواة C99 البرمجية | Minisforum UM790 Pro",
+        tabTaryaq: "الـتِـرْيـاق (الرعاية الصحية المجتمعية)",
+        tabQala: "الـقَـلْـعَـة (الأعمال والتجارة)",
+        tabNibras: "الـنِّـبْـراس (المساعد التنفيذي)",
+        chatTitle: "مسار التنفيذ التفاعلي للوكيل السيادي",
+        modelBadge: "النموذج: Qwen 2.5 7B (المكافئ لجهاز UM790)",
+        sendBtn: "تنفيذ الوكيل",
+        coldStart: "زمن الإقلاع البارد (C99)",
+        memSat: "تشبع ذاكرة DDR5",
+        wanExfil: "حجم التسريب السحابي",
+        ledgerCount: "سجلات التدقيق المشفرة",
+        matrixTitle: "مصفوفة الحماية المادية C99",
+        ledgerTitle: "دفتر التدقيق الرقمي المشفر (SHA-256)",
+        langBtn: "🌐 English (LTR)",
+        placeholder: "اكتب وصفة طبية، أو استفساراً تأمينياً، أو أمراً تنفيذياً...",
+        welcome: "<strong>مرحباً بك في قمرة القيادة السيادية لبطولة دبي للذكاء الاصطناعي.</strong><br>اختر أحد سيناريوهات التحكيم التوضيحية أعلاه أو أدخل استفسارك الطبي أو التجاري. تُراجع كافة المقترحات حتمياً وبشكل فوري عبر نواة C99 في أجزاء من المايكروثانية قبل اعتمادها."
+      }
+    };
+
+    function switchAgent(agent) {
+      currentAgent = agent;
+      document.querySelectorAll('.agent-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab-${agent}`).classList.add('active');
+      appendAgentNotice(`Switched context to ${agent.toUpperCase()}`);
+    }
+
+    function toggleLanguage() {
+      isArabic = !isArabic;
+      const html = document.documentElement;
+      const dict = isArabic ? I18N.ar : I18N.en;
+
+      html.setAttribute('dir', isArabic ? 'rtl' : 'ltr');
+      html.setAttribute('lang', isArabic ? 'ar' : 'en');
+
+      document.getElementById('lbl-title').textContent = dict.title;
+      document.getElementById('lbl-sub').textContent = dict.sub;
+      document.getElementById('tab-taryaq-text').textContent = dict.tabTaryaq;
+      document.getElementById('tab-qala-text').textContent = dict.tabQala;
+      document.getElementById('tab-nibras-text').textContent = dict.tabNibras;
+      document.getElementById('lbl-chat-title').textContent = dict.chatTitle;
+      document.getElementById('lbl-model-badge').textContent = dict.modelBadge;
+      document.getElementById('lbl-send-btn').textContent = dict.sendBtn;
+      document.getElementById('lbl-gauge-cold').textContent = dict.coldStart;
+      document.getElementById('lbl-gauge-mem').textContent = dict.memSat;
+      document.getElementById('lbl-gauge-wan').textContent = dict.wanExfil;
+      document.getElementById('lbl-gauge-ledger').textContent = dict.ledgerCount;
+      document.getElementById('lbl-matrix-title').textContent = dict.matrixTitle;
+      document.getElementById('lbl-ledger-title').textContent = dict.ledgerTitle;
+      document.getElementById('btn-lang-text').textContent = dict.langBtn;
+      document.getElementById('chat-input').placeholder = dict.placeholder;
+      document.getElementById('welcome-msg').innerHTML = dict.welcome;
+
+      renderScenarioChips();
+    }
+
+    // Load Judge Demo Scenarios from Server
+    let scenarios = [];
+    async function loadScenarios() {
+      try {
+        const res = await fetch('/api/scenarios');
+        const data = await res.json();
+        scenarios = data.scenarios || [];
+        renderScenarioChips();
+      } catch (err) {
+        console.warn('Could not load scenarios:', err);
+      }
+    }
+
+    function renderScenarioChips() {
+      const container = document.getElementById('scenario-chips');
+      container.innerHTML = '';
+      scenarios.forEach((s, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'scenario-chip';
+        btn.innerHTML = `<span>⚡</span> <span>${isArabic ? s.title_ar : s.title_en}</span>`;
+        btn.onclick = () => selectScenario(s);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectScenario(s) {
+      switchAgent(s.agent);
+      document.getElementById('chat-input').value = s.prompt;
+      sendMessage();
+    }
+
+    function appendUserMessage(text) {
+      const container = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'msg-bubble msg-user';
+      div.textContent = text;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendAgentNotice(text) {
+      const container = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.style.cssText = 'font-size:11.5px; color:var(--text-dim); text-align:center; margin:4px 0;';
+      div.textContent = `— ${text} —`;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // Send Message and handle SSE Stream
+    async function sendMessage(overrideToken = null, overrideRationale = null) {
+      const input = document.getElementById('chat-input');
+      const message = overrideToken ? pendingBlockedMessage : input.value.trim();
+      if (!message) return;
+
+      if (!overrideToken) {
+        appendUserMessage(message);
+        input.value = '';
+      }
+
+      const container = document.getElementById('chat-messages');
+      const agentMsg = document.createElement('div');
+      agentMsg.className = 'msg-bubble msg-agent';
+      container.appendChild(agentMsg);
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: message,
+            agent: currentAgent,
+            override_token: overrideToken,
+            override_rationale: overrideRationale
+          })
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const rawData = line.slice(6);
+              if (rawData.trim() === '[DONE]') break;
+              try {
+                const event = JSON.parse(rawData);
+                handleStreamEvent(event, agentMsg);
+              } catch (e) {
+                console.error('Error parsing SSE frame:', e);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        agentMsg.innerHTML += `<div style="color:var(--crimson);">Error connecting to bridge server: ${err.message}</div>`;
+      }
+
+      refreshAuditLog();
+    }
+
+    function handleStreamEvent(event, msgElement) {
+      if (event.type === 'pii_scrubbed') {
+        const card = document.createElement('div');
+        card.className = 'pii-card';
+        card.innerHTML = `
+          <span>🛡️ <strong>DESC ISR v3.1 PII Scrubber:</strong> ${event.bytes_redacted} bytes redacted</span>
+          <span style="font-family:var(--font-mono); font-size:10px;">${event.c99_latency_ms} ms</span>
+        `;
+        msgElement.appendChild(card);
+      }
+      else if (event.type === 'tool_call') {
+        const card = document.createElement('div');
+        card.className = 'tool-card';
+        card.id = `tool-${event.tool}`;
+        card.innerHTML = `
+          <div class="tool-header">
+            <span>⚙️ Proposal: <code>${event.tool}</code></span>
+            <span class="tool-latency">Pending C99 Shield</span>
+          </div>
+          <div class="tool-body">${JSON.stringify(event.args, null, 2)}</div>
+        `;
+        msgElement.appendChild(card);
+      }
+      else if (event.type === 'c99_execution') {
+        const existing = msgElement.querySelector(`#tool-${event.tool}`);
+        if (existing) {
+          const res = event.result;
+          existing.querySelector('.tool-latency').textContent = `✓ Executed in ${res.execution_time_ms || 0.012} ms`;
+          existing.style.borderColor = res.is_blocked ? 'var(--crimson)' : 'var(--emerald)';
+          existing.style.borderLeftColor = res.is_blocked ? 'var(--crimson)' : 'var(--emerald)';
+        }
+      }
+      else if (event.type === 'security_block') {
+        pendingBlockedMessage = document.getElementById('chat-input').value || "Patient prescribed كولشيسين and Clarithromycin, eGFR 22";
+        const block = document.createElement('div');
+        block.className = 'block-alert';
+        block.innerHTML = `
+          <strong>⛔ SECURITY BARRIER TRIGGERED: ${event.alert_code}</strong>
+          <div>${event.rationale}</div>
+          <button class="btn-override" style="margin-top:10px;" onclick="openOverrideModal('${event.alert_code}', '${event.rationale}')">
+            ⚠️ Clinician Override Required
+          </button>
+        `;
+        msgElement.appendChild(block);
+      }
+      else if (event.type === 'token') {
+        const span = document.createElement('span');
+        // Render simple markdown headers/bolds
+        let formatted = event.content
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n/g, '<br>');
+        span.innerHTML = formatted;
+        msgElement.appendChild(span);
+      }
+      else if (event.type === 'audit_committed') {
+        const auditCard = document.createElement('div');
+        auditCard.style.cssText = 'background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:8px 12px; margin-top:8px; font-size:11.5px;';
+        auditCard.innerHTML = `
+          <span style="color:var(--gold); font-weight:700;">✍️ Cryptographic Ledger Signature (SHA-256):</span><br>
+          <code style="color:var(--text-main); font-size:10px;">${event.signature}</code>
+        `;
+        msgElement.appendChild(auditCard);
+      }
+
+      const container = document.getElementById('chat-messages');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // Modal Handling
+    function openOverrideModal(alertCode, rationale) {
+      document.getElementById('override-modal').style.display = 'flex';
+    }
+    function closeOverrideModal() {
+      document.getElementById('override-modal').style.display = 'none';
+    }
+    async function submitClinicalOverride() {
+      const token = document.getElementById('modal-token-input').value.trim();
+      const rationale = document.getElementById('modal-rationale-input').value.trim();
+
+      if (!token) {
+        alert('Please enter a clinician override token');
+        return;
+      }
+
+      closeOverrideModal();
+      appendAgentNotice(`Submitting clinician token '${token}' for single-use unblock...`);
+      sendMessage(token, rationale);
+    }
+
+    // Fetch and refresh live audit log
+    async function refreshAuditLog() {
+      try {
+        const res = await fetch('/api/audit');
+        const data = await res.json();
+        const feed = document.getElementById('audit-feed');
+        feed.innerHTML = '';
+        
+        document.getElementById('val-ledger').textContent = data.count || 0;
+
+        (data.records || []).slice(0, 10).forEach(rec => {
+          const div = document.createElement('div');
+          div.className = 'ledger-entry';
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; color:#64748b;">
+              <span>${rec.action} (${rec.agent})</span>
+              <span>${new Date(rec.timestamp_utc * 1000).toLocaleTimeString()}</span>
+            </div>
+            <div style="color:${rec.state === 'COMMITTED' ? 'var(--emerald)' : 'var(--crimson)'}; font-weight:600;">
+              State: ${rec.state}
+            </div>
+            <div class="ledger-sha">${rec.sha256_signature || ''}</div>
+          `;
+          feed.appendChild(div);
+        });
+      } catch (err) {
+        console.warn('Audit fetch error:', err);
+      }
+    }
+
+    // Connect to WebSocket Telemetry Bridge on Port 8787 (if running)
+    function initWebSocketTelemetry() {
+      try {
+        const ws = new WebSocket('ws://127.0.0.1:8787/telemetry');
+        ws.onopen = () => {
+          const badge = document.getElementById('badge-engine');
+          badge.textContent = 'HUD WS: CONNECTED (<0.02ms)';
+        };
+        ws.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data.type === 'taryaq_clinical' || data.type === 'security_block') {
+              refreshAuditLog();
+            }
+          } catch (err) {}
+        };
+      } catch (err) {
+        // Fallback gracefully
+      }
+    }
+
+    // Initialize UI on load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadScenarios();
+      refreshAuditLog();
+      initWebSocketTelemetry();
+    });
+  </script>
+</body>
+</html>

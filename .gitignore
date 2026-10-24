@@ -24,3 +24,9 @@ __pycache__/
 taryaq_audit.jsonl
 *.audit.jsonl
 
+# Node.js & Next.js
+node_modules/
+.next/
+dist/
+
+
