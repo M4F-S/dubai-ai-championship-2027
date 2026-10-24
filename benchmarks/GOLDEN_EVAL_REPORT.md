@@ -3,7 +3,7 @@
 
 **Document Reference:** `benchmarks/GOLDEN_EVAL_REPORT.md`  
 **Evaluation Standard:** Dubai Golden 30 Workflow Specification v2026.10.24  
-**Execution Timestamp:** `2026-10-24T18:20:45Z`  
+**Execution Timestamp:** `2026-10-24T19:36:35Z`  
 **Hardware Platform:** Minisforum UM790 Pro (AMD Ryzen 9 7940HS / Radeon 780M / 64GB Dual-Channel DDR5-5600)  
 **Strict Conformance Rule 1:** *"No unmeasured number leaves this repository."*
 
@@ -89,18 +89,18 @@ To enable independent scientific evaluation by international judges, every Dubai
 
 | Task ID | Domain | Scenario Title | BFCL Cat | tau-bench Cat | Trials | pass^1 | pass^8 | p95 Latency |
 | :--- | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| `TARYAQ-001` | Taryaq | Deterministic Colchicine + Clarithromy | `constrained_execution` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.06 ms |
+| `TARYAQ-001` | Taryaq | Deterministic Colchicine + Clarithromy | `constrained_execution` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.08 ms |
 | `TARYAQ-002` | Taryaq | Metformin Severe Renal Cutoff Intercep | `constrained_execution` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `TARYAQ-003` | Taryaq | DHA SN 03/2019 Claim Cycle Delay Penal | `simple_function` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
-| `TARYAQ-004` | Taryaq | UAE Law No. 2 of 2019 Controlled Drug  | `constrained_execution` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.01 ms |
+| `TARYAQ-004` | Taryaq | UAE Law No. 2 of 2019 Controlled Drug  | `constrained_execution` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.02 ms |
 | `TARYAQ-005` | Taryaq | Pediatric Weight-Based Dosage Ceiling  | `constrained_execution` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `TARYAQ-006` | Taryaq | Antibiotic Cross-Allergy Intercept (Pe | `multiple_function` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `TARYAQ-007` | Taryaq | Unapproved Prescription Commit Interce | `policy_violation_recovery` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.01 ms |
-| `TARYAQ-008` | Taryaq | Cryptographic Override Token Replay At | `constrained_execution` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.06 ms |
-| `TARYAQ-009` | Taryaq | Zero-Allocation UTF-8 Arabic Normalize | `simple_function` | `bilingual_dialect` | 8/8 | ✅ | ✅ | 0.12 ms |
+| `TARYAQ-008` | Taryaq | Cryptographic Override Token Replay At | `constrained_execution` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.01 ms |
+| `TARYAQ-009` | Taryaq | Zero-Allocation UTF-8 Arabic Normalize | `simple_function` | `bilingual_dialect` | 8/8 | ✅ | ✅ | 0.04 ms |
 | `TARYAQ-010` | Taryaq | DHA eClaimLink ICD-10 Medical Necessit | `multiple_function` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
-| `QALA-001` | Qala | Jebel Ali Port Manifest Adversarial Pr | `irrelevance_detection` | `constrained_execution` | 8/8 | ✅ | ✅ | 0.02 ms |
-| `QALA-002` | Qala | DIFC High-Value Settlement (>AED 50k)  | `constrained_execution` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.06 ms |
+| `QALA-001` | Qala | Jebel Ali Port Manifest Adversarial Pr | `irrelevance_detection` | `constrained_execution` | 8/8 | ✅ | ✅ | 0.01 ms |
+| `QALA-002` | Qala | DIFC High-Value Settlement (>AED 50k)  | `constrained_execution` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `QALA-003` | Qala | Stateless MCP 2026-07-28 Conformant Cl | `simple_function` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `QALA-004` | Qala | DESC ISR v3.1 Regulatory PII Scrubbing | `multiple_function` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `QALA-005` | Qala | DEWA Commercial Utility Invoice & Smar | `multiple_function` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.01 ms |
@@ -114,7 +114,7 @@ To enable independent scientific evaluation by international judges, every Dubai
 | `NIBRAS-003` | Nibras | RTA Salik Toll Dispute Timeline & GPS  | `multiple_function` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `NIBRAS-004` | Nibras | GDRFA Residence Visa Expiry & Grace Pe | `simple_function` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `NIBRAS-005` | Nibras | Bilingual Arabic/English Code-Switchin | `parallel_function` | `bilingual_dialect` | 8/8 | ✅ | ✅ | 0.01 ms |
-| `NIBRAS-006` | Nibras | Multi-Doctor Cross-Clinic Chronic Regi | `multiple_function` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.04 ms |
+| `NIBRAS-006` | Nibras | Multi-Doctor Cross-Clinic Chronic Regi | `multiple_function` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.03 ms |
 | `NIBRAS-007` | Nibras | Duplicate Therapy Detection Without Li | `simple_function` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `NIBRAS-008` | Nibras | Red-Flag Cardiac Symptom Emergency Esc | `constrained_execution` | `single_turn_tool` | 8/8 | ✅ | ✅ | 0.01 ms |
 | `NIBRAS-009` | Nibras | Executive Calendar Conflict Resolution | `multiple_function` | `multi_turn_stateful` | 8/8 | ✅ | ✅ | 0.01 ms |

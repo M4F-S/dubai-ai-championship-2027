@@ -8,75 +8,111 @@
 
 ### Slide 1: Title & Executive Vision
 * **Headline:** NIBRAS EXECUTIVE (نبراس): The Sovereign Cognitive Exocortex
-* **Sub-headline:** Zero-Drift Deal Memory, Autonomous Token Pruning, and Workflow Friction Elimination for Dubai's Leadership.
-* **Core Value Proposition:** An air-gapped, autopoietic personal AI operating system engineered in C99. It remembers every strategic meeting, M&A deal nuance, and stakeholder commitment across years without ever transmitting confidential executive data to the cloud.
-* **Target Audience:** C-Suite Executives, Managing Directors, Family Office Principals, and Board Members in Dubai, DIFC, and ADGM.
+* **Sub-headline:** Zero-Drift Memory, Autonomous Token Pruning, and Workflow Friction Elimination for Dubai Leadership.
+* **Core Value Proposition:** An air-gapped, autopoietic personal AI operating system engineered in C99. It remembers every strategic meeting, M&A deal nuance, stakeholder commitment, and complex medication regimen across years without ever transmitting confidential executive records to the cloud.
+* **Target Audience:** C-Suite Executives, Managing Directors, Family Office Principals, and Chronic Polypharmacy Patients in Dubai, DIFC, and ADGM.
 
 ---
 
-### Slide 2: The Executive Context Crisis & Cloud Privacy Hazard
-* **The Cognitive Fragmentation Dilemma:** Modern executives navigate hundreds of confidential conversations, term sheets, board directives, and WhatsApp/Email commitments weekly. Context is lost, leading to missed commitments and decision fatigue.
-* **The Cloud Privacy Hazard:** Commercial consumer assistants (ChatGPT, Copilot, Apple Intelligence) stream highly sensitive executive thoughts, unannounced acquisition notes, and personal family office asset allocations to third-party cloud infrastructure—violating corporate NDAs and data governance policies.
-* **The Context Window Bloat Trap:** Dumping months of notes into LLM prompts triggers the "lost-in-the-middle" phenomenon, exponentially inflates token costs, and leads to catastrophic context drift.
+### Slide 2: The Personal Context Crisis & Cloud Privacy Hazard
+* **1. The Cognitive Fragmentation Dilemma:** Modern leaders and polypharmacy patients navigate dozens of fragmented commitments, term sheets, WhatsApp/Email threads, and medical regimens across multiple specialists weekly. Critical context is lost, causing decision fatigue and costly oversights.
+* **2. The Cloud Privacy Hazard:** Commercial consumer assistants (ChatGPT, Copilot, Apple Intelligence) stream highly sensitive executive thoughts, unannounced acquisition notes, and personal health metrics to third-party cloud infrastructure—violating corporate NDAs and UAE data privacy laws.
+* **3. The Context Window Bloat Trap:** Dumping months of uncurated notes into large context windows triggers the "lost-in-the-middle" phenomenon, exponentially inflates token consumption, and leads to catastrophic context drift.
 
 ---
 
-### Slide 3: The Breakthrough — Autopoietic C99 Cognitive Architecture
-* **Fork of `Almaz`:** Built on a battle-tested, biologically-inspired C99 cognitive engine that operates continuously on local hardware.
-* **Zero Cloud Exfiltration:** Runs 100% locally on personal executive laptops over Landlock-jailed `AF_UNIX` sockets. Zero external cloud API calls; zero corporate espionage risk.
-* **Bilingual Native Mastery:** Powered locally by **`Jais 3 (7B)`** (Arabic/English sovereign foundation model) and **`Laya Multilingual (322M)`** (calibrated non-autoregressive decision & triage layer).
+### Slide 3: Who Pays & Unit Economics
+* **The Economic Buyers:**
+  * **C-Suite Executives & Board Members:** Require an unhackable, zero-exfiltration cognitive shadow chief-of-staff that organizes strategic priorities and board deliverables.
+  * **Family Office Principals & HNWIs:** Managing multi-generational assets across DIFC and ADGM, demanding absolute confidentiality for strategic deal negotiations.
+  * **Private Patients & Family Caregivers:** Managing complex multi-specialist chronic regimens where duplicate therapy and missed drug interactions pose serious health hazards.
+* **High Willingness-to-Pay & ROI:**
+  * **Annual Subscription / Unit Value:** High-Net-Worth Individuals readily pay **AED 5,000–15,000 annually** for an air-gapped, zero-leak cognitive exocortex.
+  * **Cloud Cost Elimination:** **AED 0.00 external cloud API cost**, running on local personal workstation hardware ($650 appliance).
+  * **Leadership Productivity:** Recovers **15+ hours weekly** of fragmented administrative searching, delivering immediate personal ROI.
 
 ---
 
-### Slide 4: CORAL Dual-Stream Memory — Episodic vs. Semantic Graph
-* **Separation of Cognitive Streams:**
-  * *Episodic Stream (Working Memory):* Fast, append-only SQLite/JSONL logging of daily interactions, voice notes, and meeting minutes.
-  * *Semantic Graph (Long-Term Rules):* Distilled network of permanent relationships, strategic principles, and executive commitments.
-* **Reciprocal Rank Fusion (RRF):** Combines SQLite FTS5 BM25 lexical keyword matching with dense local vector embeddings, retrieving precise deal context across multi-year archives in under 5ms.
-* **Zero-Allocation C99 Arabic Normalizer:** Unifies Modern Standard Arabic (MSA), Emirati colloquial phrases, and English code-switching (`arabic_norm.c`).
+### Slide 4: The Live Demo Walkthrough
+* **100% Air-Gapped Demonstration:** Demonstrated on stage with the physical Ethernet cable pulled. Zero external internet connectivity.
+* **Step 1: Sub-Millisecond Cold Start (<0.025 ms):** Bare-metal C99 engine starts up in **0.013 ms**, communicating over local POSIX domain sockets (`AF_UNIX`).
+* **Step 2: Bilingual Colloquial Input:** Executive inputs Arabic/English voice note with Emirati dialect: `"تابع مع د. طارق بخصوص صفقة الاستحواذ"` and review chronic medication schedule.
+* **Step 3: Zero-Allocation Arabic Normalizer:** In-process C99 normalizer unifies alef/ya and strips diacritics in **0.12 ms** with zero heap allocations.
+* **Step 4: FadeMem Exponential Memory Pruning:** Operator clicks HUD Button: `Fast-Forward 7d (10080x)`. The C99 decay engine simulates 7 days of memory decay in 10 seconds: transient calendar noise drops to 0%, saving **97% of context tokens**.
+* **Step 5: VIGIL Rule Distillation:** High-friction operational errors are distilled into permanent procedural rules, locking critical deal constraints into memory.
+* **Step 6: Real-Time HUD Telemetry:** State updates broadcast live over WebSocket (`ws://127.0.0.1:8787`) to the Glass Cockpit HUD.
 
 ---
 
-### Slide 5: FadeMem — Exponential Memory Pruning (97% Token Savings)
-* **Mathematically Modeled Forgetting Curve:** Emulates human cognitive memory decay:
-  $$I(t') = I_0 \cdot 2^{-(t' - t) \cdot \text{scale} / \tau_{1/2}}$$
-* **Autonomous Context Pruning:** Automatically prunes transient noise (routine calendar pings, verbose build logs) below $I < 0.25$, cutting active context-window consumption by **up to 97%**.
-* **Stage-Proven Acceleration (`--sim-time-scale 10080x`):** Fast-forwards 7 virtual days of cognitive consolidation in 60 seconds on the Glass Cockpit HUD, proving memory consolidation live on stage.
+### Slide 5: Measured Results & Empirical Benchmarks
+* **M-06 UM790 Pro Hardware Benchmark (`bench/RESULTS.md`):**
+  * AMD Ryzen 9 7940HS / Radeon 780M / 64GB DDR5-5600 dual channel (**89.6 GB/s** bandwidth).
+  * Jais 3 7B Q4_K_M (4.50 GB): **19.91 tok/s at 4K context (50.23 ms/tok)**, **16.42 tok/s at 8K context (60.90 ms/tok)**.
+  * GBNF Tool Grammar (`bench/taryaq_tool_call.gbnf`): **100.0% schema compliance** vs 68.0% unconstrained (**+32.0% reliability delta**, eliminating 32/100 syntax failures).
+* **M-07 Laya Multilingual 322M Calibrated Triage (`docs/models/LAYA_322M_MODEL_CARD.md`):**
+  * 10 canonical decision heads across 2,400 labeled examples (1,200 AR / 1,200 EN, 400 patients, zero data leakage).
+  * Dev temperature scaling reduces Expected Calibration Error (ECE) from **0.3954 down to 0.0919** (76.8% error reduction).
+  * Uncertainty-gated abstention at $\tau=0.85$: **13.89% abstention**, achieving **100.00% accuracy on retained cases** in **0.05 ms CPU latency**.
+* **M-08 Golden 30 Benchmark Suite (`benchmarks/GOLDEN_EVAL_REPORT.md`):**
+  * 30 tasks $\times$ 8 trials = **240 test executions**: **100.0% first-trial pass rate ($\text{pass}^1$)**, **100.0% empirical 8-trial pass rate ($\text{pass}^8$)**, and **0.0% unsafe actions**.
 
 ---
 
-### Slide 6: VIGIL Appraisal — Workflow Friction & Cognitive Load Detection
-* **Objective Friction Tracking:** Replaces subjective mood tracking with deterministic **Cognitive Load & Workflow Friction Indexing**.
-* **Procedural Trajectory Distillation:** Detects when an operational step encounters severe friction (a *Thorn*). When an executive workflow fails, `VIGIL` automatically extracts the root cause and promotes it into a permanent procedural guardrail rule after the consolidation window.
-* **GBA-Bench Validation:** Empirically proven by enterprise benchmark research to lift multi-turn execution accuracy by **+20 to +47 percentage points**.
+### Slide 6: Why Us & Unified Platform Lineage
+* **The Unified Platform Lineage:** Nibras is the personal cognitive face of our unified sovereign agent platform, sharing its underlying ISO C99 runtime, Arabic normalizer, and Grounding Shield with Taryaq and Qala.
+* **Proven Championship Heritage:** Direct successor to past Dubai Chambers winner *Brainy* (Most Innovative App, 2nd Edition), elevating personal cognitive assistance to sovereign C-suite leadership.
+* **The Clinical Pharmacist Foundation:** Founded by licensed clinical pharmacist **Mohamed Fathy, BPharm**, ensuring that personal health tracking, medication management, and regimen reconciliation adhere to rigorous medical safety standards.
+* **Zero-Drift Architecture:** Replaces brittle Python vector-store wrappers with an autopoietic C99 cognitive engine that operates continuously on local hardware.
 
 ---
 
-### Slide 7: SARSI Self-Model & The Subconscious Mamba Daemon
-* **SARSI (Self-Adaptive Reflective State Identity):** A persistent local profile that tracks executive habits, preferred communication styles, and stakeholder dynamics without cloud profiling.
-* **Subconscious Background Worker:** Operates silently in the background with autopoietic idle goal processing (`almaz_autonomic_cognition_cycle()`). While the executive sleeps, the autonomous daemon consolidates the day's episodic interactions into clean morning briefing cards.
+### Slide 7: 3-Tier Sovereign Architecture & Dual-Stream Memory
+* **Tier 1: Fast Calibrated Triage (Laya Multilingual 322M on CPU):**
+  * Evaluates 10 canonical heads in **0.05 ms** (<1 GB RAM).
+  * Routes queries, identifies urgent commitments, and flags sensitive confidential topics.
+* **Tier 2: Sovereign Multilingual Generator (Jais 3 7B on Radeon 780M iGPU):**
+  * Bilingual Arabic/English generation running locally at **19.91 tok/s** via Vulkan.
+  * Formulates briefings and action drafts constrained by strict GBNF schemas.
+* **Tier 3: Bare-Metal C99 Cognitive Engine (CORAL, FadeMem & VIGIL):**
+  * CORAL Dual-Stream Memory: Separates chronological JSONL episodic logs from permanent SQLite FTS5 BM25 semantic graphs.
+  * FadeMem Decay Engine: Mathematically models forgetting ($I(t') = I_0 \cdot 2^{-\Delta t / \tau_{1/2}}$), pruning noise below $I < 0.25$ and saving **97% of context tokens**.
+  * VIGIL Appraisal: Distills high-friction operational experiences into permanent procedural guardrails (+20 to +47 percentage points accuracy boost on GBA-Bench).
 
 ---
 
-### Slide 8: The C99 Grounding Shield — Zero-Hallucination Briefings
-* **Fact-Checked Executive Summaries:** When Nibras synthesizes market trends or regulatory requirements, it triggers the C99 **Grounding Shield** (`grounding_shield.c`):
-  1. Scrubs all executive names and confidential deal amounts.
-  2. Queries local regulatory caches and verified search endpoints.
-  3. Cross-checks numerical claims (DIFC filing fees, statutory deadlines) against authoritative corpora, catching and correcting hallucinations before the briefing is rendered.
+### Slide 8: Section 5.4 Ablation Study (The Technical Proof)
+* **Empirical Ablation Across 200 Tasks on Physical UM790 Hardware:**
+
+| Configuration | Task Accuracy | p95 Latency | Unsafe-Action Rate | Abstention Rate |
+| :--- | :---: | :---: | :---: | :---: |
+| **Jais 3 7B alone** | 36.0% | 754.0 ms | 41.0% | 0.0% |
+| **7B + Laya triage** | 74.5% | 748.4 ms | 5.5% | 14.5% |
+| **7B + Laya + deterministic verifier** | **88.0%** | **202.1 ms** | **0.0%** | **12.0%** |
+
+* **Key Technical Insights:**
+  * *Unconstrained LLMs are Dangerous:* Jais 3 7B alone suffers an unacceptable **41.0% unsafe-action rate** and **0.0% abstention**, attempting unauthorized external network calls and hallucinating false commitments.
+  * *Laya Triage Filters Ambiguity:* Calibrated Laya triage introduces **14.5% abstention**, lifting accuracy to 74.5% and reducing unsafe actions to 5.5%.
+  * *Deterministic Verifier Guarantees Zero Harm:* Adding the C99 verifier drives unsafe actions to **strictly 0.0%**, while cutting p95 latency to **202.1 ms**.
 
 ---
 
-### Slide 9: Commercial Fit & Alignment with Dubai Leadership (D33)
-* **Precedents in Championship History:** Direct successor to past Dubai Chambers winner *Brainy* (2nd Edition Most Innovative App), elevating personal cognitive assistance to sovereign C-suite leadership.
-* **D33 Productivity Objective:** Targets the D33 mandate to increase leadership productivity by **50%**, liberating executives from 15+ hours weekly of administrative fragmentation.
-* **High Willingness-to-Pay:** High-Net-Worth Individuals (HNWIs) and corporate leaders in Dubai readily pay AED 5,000–15,000 annually for an air-gapped, zero-leak executive exocortex that guarantees deal confidentiality.
+### Slide 9: Privacy Sovereignty, Grounding Shield & Self-Model
+* **100% Air-Gapped Local Sovereignty:**
+  * Zero external cloud exfiltration: models and memory databases run on the executive's physical laptop over Landlock-jailed `AF_UNIX` sockets.
+  * Complete immunity to third-party data breaches, cloud downtime, or subpoena disclosures.
+* **C99 Grounding Shield Fact-Checking:**
+  * Scrubs executive names and sensitive deal amounts before local querying.
+  * Deterministically cross-checks numerical claims (DIFC filing fees, statutory deadlines) against authoritative local reference caches.
+* **SARSI Persistent Self-Model:**
+  * Tracks executive communication preferences, delegated authorities, and stakeholder relationships locally without cloud profiling.
 
 ---
 
-### Slide 10: Roadmap & Go-to-Market via DIFC & Dubai AI Campus
-* **Pilot Cohort:** Initial closed-beta deployment with 25 C-suite executives and family office principals across DIFC and Downtown Dubai.
-* **Milestones:**
-  * *December 2026:* Local GGUF binding of Jais 3 (7B) and 7-day memory consolidation pilot.
-  * *January 2027:* Final submission of working agent, video demo, and architecture report.
-  * *May 2027:* Live stage demonstration at the Grand Final.
-  * *Q3 2027:* Commercial rollout through DIFC Dubai AI Campus and private wealth networks.
+### Slide 10: The Ask & Dubai Leadership Roadmap
+* **The Championship Ask:** Deploy Nibras across Dubai's leadership ecosystem:
+  * Seed funding allocation: 40% local desktop client integration, 30% hardware appliance deployment, 20% security hardening, 10% pilot operations.
+* **Execution Roadmap:**
+  * *Dec 2026:* Closed-beta deployment with 25 C-suite executives and family office principals across DIFC and Downtown Dubai.
+  * *Q1 2027:* 7-day memory consolidation evaluation with 10,080x accelerated timeline proving 97% token savings live.
+  * *May 2027:* Grand Final live air-gapped stage demonstration presenting long-horizon memory and zero-leak executive briefings.
+  * *Q3 2027:* Commercial rollout through DIFC Dubai AI Campus and regional private wealth networks.
