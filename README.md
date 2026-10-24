@@ -41,6 +41,13 @@
 
 ---
 
+## 🛡️ Implementation Architecture & Taryaq v0 Status
+* **Current Runtime Status:** `v0 — deterministic C99 rule engine; model layer in integration`.
+* **Deterministic Core:** The current compiled binary (`build/taryaq_agent`) executes the bare-metal deterministic rule engine (pharmacovigilance graph, renal cutoffs, single-use cryptographic overrides, and DHA SN 03/2019 billing delay penalties) in < 3 ms with zero dependencies. It does not run neural inference in-process.
+* **Model Layer Integration:** Foundation bilingual reasoning (Jais 3 7B) and non-autoregressive triage (Laya 322M) are coupled via our IPC harness (`adapters/laya_triage_adapter.py`, `bench/taryaq_tool_call.gbnf`) with GBNF grammar constraints.
+
+---
+
 ## 🚀 Quick Start & Build Verification
 
 ```bash

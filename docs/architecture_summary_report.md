@@ -80,6 +80,9 @@ To achieve mathematical determinism and sub-millisecond safety guarantees on cos
 
 ---
 
+> [!NOTE]
+> **Runtime Implementation Status (v0):** The shipped binary (`build/taryaq_agent`) executes the bare-metal deterministic C99 rule engine (pharmacovigilance, renal thresholds, single-use cryptographic overrides, and DHA SN 03/2019 billing delay penalties) in < 3 ms. Model inference (Tier 1 Laya 322M and Tier 2 Jais 3 7B) operates out-of-process via IPC/GBNF grammar harnesses (`adapters/laya_triage_adapter.py`, `bench/taryaq_tool_call.gbnf`), preserving deterministic safety invariants independent of neural hallucination.
+
 ## 3. Mandatory DCDE Component Glossary
 
 In direct compliance with DCDE Deliverable #4 specifications (*"explaining the core architecture and what each component element stands for"*), the table below details every architectural subsystem:
