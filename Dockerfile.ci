@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-dev \
     git \
     ca-certificates \
+    python3 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace

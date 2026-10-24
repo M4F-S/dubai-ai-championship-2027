@@ -266,6 +266,7 @@ int mcp_stateless_build_request(
         "Accept: application/json\r\n"
         "MCP-Protocol-Version: 2026-07-28\r\n"
         "Mcp-Method: %s\r\n"
+        "Mcp-Name: qala-native-c99\r\n"
         "%s%s\r\n"
         "Content-Length: %d\r\n"
         "Connection: close\r\n"

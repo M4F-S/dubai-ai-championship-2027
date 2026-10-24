@@ -16,18 +16,23 @@ extern "C" {
 typedef enum {
     MCP_SUCCESS            = 0,
     MCP_ERR_CONNECT        = 1,
-    MCP_ERR_HTTP_STATUS    = 2,
-    MCP_ERR_AUTH_BLOCKED   = 3,
-    MCP_ERR_JSON_PARSE     = 4,
-    MCP_ERR_RPC_FAULT      = 5,
-    MCP_ERR_TIMEOUT        = 6,
-    MCP_ERR_INVALID_PARAM  = 7
+    MCP_ERR_NETWORK        = 1,   /* Alias for transport/connection failure */
+    MCP_ERR_HTTP_STATUS    = 2,   /* Generic HTTP 4xx/5xx status */
+    MCP_ERR_AUTH_BLOCKED   = 3,   /* Generic auth failure fallback */
+    MCP_ERR_UNAUTHORIZED   = 4,   /* HTTP 401: Missing or invalid token */
+    MCP_ERR_FORBIDDEN      = 5,   /* HTTP 403: Policy gate or ACL denied */
+    MCP_ERR_JSON_PARSE     = 6,   /* Malformed JSON or SSE payload */
+    MCP_ERR_PARSE          = 6,   /* Alias for parse failure */
+    MCP_ERR_RPC_FAULT      = 7,   /* MCP / JSON-RPC error returned by server */
+    MCP_ERR_TIMEOUT        = 8,   /* Network or socket timeout */
+    MCP_ERR_INVALID_PARAM  = 9    /* Missing or invalid input arguments */
 } mcp_status_t;
 
 /* Client configuration for MCP connection */
 typedef struct {
     const char *endpoint_url;     /* e.g., "http://127.0.0.1:8765/mcp" or "https://api.dubaicustoms.ae/mcp" */
     const char *bearer_token;     /* Optional auth token (never echoed to logs) */
+    const char *client_name;      /* Optional client name (default: "qala-native-c99") */
     uint32_t    timeout_ms;       /* Timeout in milliseconds (default 5000) */
 } mcp_client_config_t;
 
@@ -54,6 +59,12 @@ int mcp_client_global_init(void);
 void mcp_client_global_cleanup(void);
 
 /* Core execution functions */
+mcp_status_t mcp_client_initialize(
+    const mcp_client_config_t *config,
+    uint64_t                   request_id,
+    mcp_tool_call_resp_t      *out_resp
+);
+
 mcp_status_t mcp_client_call_tool(
     const mcp_client_config_t *config,
     const mcp_tool_call_req_t *req,

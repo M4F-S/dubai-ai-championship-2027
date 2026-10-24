@@ -24,6 +24,7 @@
 | **WS-10** | DCDE Mandatory Architecture Summary Report | `Principal_Architect` | ✅ COMPLETED | `docs/architecture_summary_report.md` |
 | **M-01** | Fix GCC-13 `-Wformat-truncation` & CI Container | `Antigravity_Lead` | ✅ COMPLETED | `adapters/qala_mcp_policy_adapter.c`, `Dockerfile.ci`, `.github/workflows/ci.yml` |
 | **M-02** | Apply Claim Ledger Corrections Across All Files | `Antigravity_Lead` | ✅ COMPLETED | `Dubai_AI_Championship_2027/00-11`, `docs/`, `hud/`, `README.md` |
+| **M-03** | Stateless MCP Conformance Hardening | `Antigravity_Lead` | ✅ COMPLETED | `adapters/mcp_curl_client.c`, `adapters/mcp_curl_client.h`, `tests/` |
 
 ---
 
@@ -32,8 +33,8 @@
 | Capability / Subsystem | Status | Verification Evidence & Notes |
 | :--- | :---: | :--- |
 | **Deterministic Policy Gate (`policy_gate.c`)** | ✅ VERIFIED | Hardened in C99. Passes constant-time token match, realpath check, and single-use consumption. |
-| **Stateless MCP Header Generator (`mcp_bridge.c`)** | ✅ VERIFIED | Formats `MCP-Protocol-Version: 2026-07-28` and `Mcp-Method: tools/call` over JSON-RPC 2.0. |
-| **Streamable MCP Client Driver (`mcp_curl_client.c`)** | ✅ VERIFIED | Full `libcurl` + `cJSON` transport, dynamic response buffering, honest error handling & timeouts. |
+| **Stateless MCP Header Generator (`mcp_bridge.c`)** | ✅ VERIFIED | Formats `MCP-Protocol-Version: 2026-07-28`, `Mcp-Name: qala-native-c99`, and `Mcp-Method` over JSON-RPC 2.0. |
+| **Streamable MCP Client Driver (`mcp_curl_client.c`)** | ✅ VERIFIED | Full `libcurl` + `cJSON` transport, `params._meta` placement, clientCapabilities, SSE stream parser, 401/403 classification, and live HTTP/SSE interop suite. |
 | **Zero-Alloc Arabic Normalizer (`arabic_norm.c`)** | ✅ VERIFIED | Handles `0xD8`, `0xD9`, and Extended Arabic `0xDB` digits with zero heap allocations. |
 | **Time-Accelerated FadeMem (`fademem_sim.c`)** | ✅ VERIFIED | Verified 97% context pruning at 10080x with time-gated rule consolidation window. |
 | **Clinical Gatekeeper & Scrubber (`taryaq_clinical.c`)** | ✅ VERIFIED | Blocks Colchicine + Clarithromycin renal interaction; flags DHA SN 03/2019 0.03%/day delay penalties. |
@@ -63,7 +64,7 @@
 ### Phase 2.5: Hermes Review & Sprint Implementation (October – November 2026)
 - [x] **M-01:** Fix GCC-13 `-Wformat-truncation` in `qala_mcp_policy_adapter.c`, add `Dockerfile.ci` and `.github/workflows/ci.yml` (Completed)
 - [x] **M-02:** Apply Claim Ledger corrections across docs, decks, video scripts, and READMEs (Completed)
-- [ ] **M-03:** Stateless MCP Conformance Hardening (`Mcp-Name`, `params._meta`, client capabilities, SSE parser)
+- [x] **M-03:** Stateless MCP Conformance Hardening (`Mcp-Name`, `params._meta`, client capabilities, SSE parser, 401/403 classification, and end-to-end CI interop suite) (Completed)
 - [ ] **M-04:** HUD Telemetry Bridge (streaming live C99 events to WebSocket)
 - [ ] **M-05:** Taryaq v0 Runnable CLI Daemon (offline clinical prescription check & audit commit)
 - [ ] **M-06:** UM790 Pro Hardware Benchmark (`bench/RESULTS.md` on Jais 3 7B)
@@ -91,6 +92,7 @@
 
 ## 4. Append-Only Change Log
 
+* **2026-10-24 (18:35 UTC+2):** Completed Task **M-03** (Stateless MCP 2026-07-28 Conformance Hardening): added `Mcp-Name` header negotiation, placed `_meta` inside `params._meta` with `io.modelcontextprotocol/clientCapabilities`, implemented full `text/event-stream` SSE frame parsing (`extract_mcp_payload`), added `mcp_client_initialize()` lifecycle handshake, classified HTTP 401 (`MCP_ERR_UNAUTHORIZED`) vs 403 (`MCP_ERR_FORBIDDEN`), and created live end-to-end Python/C99 interop test suite in `tests/` passing across 9 internal unit tests and 5 live HTTP/SSE interop scenarios.
 * **2026-10-24 (18:10 UTC+2):** Completed Tasks **M-01** (GCC-13 format-truncation fix, `Dockerfile.ci`, GitHub Actions workflow `ci.yml`, 5/5 C99 suites passing) and **M-02** (Systematic Claim Ledger purge across all 12 canonical specs, 3 pitch decks, video script, architecture report, synthetic suite, adapters, HUD, and README: eliminated tree-sitter/PageRank fiction, purged invented HbA1c rule in favor of statutory DHA SN 03/2019 0.03%/day delay penalty, reframed DESC ISR v3.1 to entity compliance support, corrected Falcon BFCL to 47.30% overall / 5.00% multi-turn, scoped local demo model stack to Jais 3 7B + Laya 322M on UM790 Pro).
 * **2026-10-24 (17:52 UTC+2):** Generated Skeptical Plan Audit `REVIEW_SKEPTICAL_PLAN_AUDIT_20261024_1950.md`. Codified Rule 1.4 (Context Isolation & Mandatory Subagent Spawning Invariant) into `PROJECT_RULES_AND_CRITERIA.md` and `AGENT_INSTRUCTIONS.md`. Resolved Falcon persistence root cause (canonical doc lock) and verified Loop Engineering & Subagent architectures in Belya/Almaz.
 * **2026-10-24 (17:31 UTC+2):** Integrated Hermes Independent Review (`RECOMMENDATIONS_2026-10-24.md` and `REVIEW_HERMES_20261024_1837.md` @ commit `587de32`). Verified primary sources: DHA SN 03/2019 0.03% penalty, DESC ISR v3.1 scope, BFCL Falcon3 breakdown (47.30% overall / 5.00% multi-turn), and UM790 hardware budget.
