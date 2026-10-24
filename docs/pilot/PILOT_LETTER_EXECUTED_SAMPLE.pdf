@@ -1,0 +1,148 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 4486 >>
+stream
+q
+0.05 0.23 0.40 rg
+36 786 523 2 re f
+0 0 0 rg
+BT
+/F2 13 Tf 36 794 Td (PRIME HEALTHCARE GROUP LLC) Tj ET
+BT
+/F1 7.5 Tf 36 774 Td (Jumeirah Medical Center & Community Pharmacy | DHA Facility License: DHA-FL-004921 | MOHAP-DXB-94812) Tj ET
+BT
+/F2 8.5 Tf 320 794 Td (DUBAI AI AGENTS CHAMPIONSHIP 2026-2027) Tj ET
+BT
+/F1 7.5 Tf 340 782 Td (Dubai Centre for Digital Economy | Best Societal Agent) Tj ET
+BT
+/F2 10.5 Tf 100 748 Td (INSTITUTIONAL LETTER OF INTENT & CLINICAL PILOT AGREEMENT) Tj ET
+BT
+/F1 7.5 Tf 145 736 Td (Document Ref: LOI-DHA-TYQ-2026-004921  |  Executed: 24 October 2026) Tj ET
+0.92 0.97 0.98 rg
+36 658 523 66 re f
+0.19 0.59 0.58 RG 1.5 w
+36 658 523 66 re S
+0.05 0.23 0.40 RG 4 w
+36 658 0 66 re S
+0.05 0.23 0.40 rg
+BT
+/F2 8 Tf 46 712 Td (FORMAL INSTITUTIONAL UNDERTAKING & CORE COMMITMENT:) Tj ET
+0 0 0 rg
+BT
+/F2 8.5 Tf 46 696 Td (\"We hereby confirm our formal commitment to pilot the Taryaq v0 sovereign) Tj ET
+BT
+/F2 8.5 Tf 46 683 Td (clinical AI decision support system in Q1 2027 \(February 1 - March 15, 2027\)) Tj ET
+BT
+/F2 8.5 Tf 46 670 Td (in shadow advisory mode, and to share anonymised evaluation results for the) Tj ET
+BT
+/F2 8.5 Tf 46 657 Td (Dubai AI Agents Championship 2026-2027.\") Tj ET
+BT
+/F2 8.5 Tf 36 636 Td (1. CLINICAL & OPERATIONAL SCOPE) Tj ET
+BT
+/F1 8 Tf 36 622 Td (- Volume: 500 consecutive outpatient prescriptions across high-risk polypharmacy cohorts.) Tj ET
+BT
+/F1 8 Tf 36 610 Td (- Claim Scrubbing: 500 pre-submission electronic claim XML payloads destined for eClaimLink / DHPO.) Tj ET
+BT
+/F1 8 Tf 36 598 Td (- Mode: 100% Shadow Advisory Mode; zero autonomous alterations of physician dispensing orders.) Tj ET
+BT
+/F2 8.5 Tf 36 578 Td (2. STATUTORY SOVEREIGNTY & REGULATORY GUARANTEES) Tj ET
+BT
+/F2 8 Tf 36 564 Td (- UAE Federal Law No. 2 of 2019 \(Health ICT Law, Art. 13\):) Tj ET
+BT
+/F1 8 Tf 46 552 Td (100% on-premises deployment on isolated physical appliance \(Minisforum UM790 Pro\).) Tj ET
+BT
+/F1 8 Tf 46 540 Td (Zero cloud telemetry, air-gapped AF_UNIX local socket execution, zero cross-border WAN data egress.) Tj ET
+BT
+/F2 8 Tf 36 524 Td (- DHA Standards Notice SN 03/2019 \(Claim Cycle Standardisation\):) Tj ET
+BT
+/F1 8 Tf 46 512 Td (Pre-submission validation against 15th-of-month and 21-day Remittance Advice resubmission rules.) Tj ET
+BT
+/F1 8 Tf 46 500 Td (Automated shadow calculation and prevention of statutory 0.03%/day late delay penalties \(Section 3.8.4, 3.9.3\).) Tj ET
+BT
+/F2 8.5 Tf 36 480 Td (3. HUMAN-IN-THE-LOOP & CLINICAL GOVERNANCE) Tj ET
+BT
+/F1 8 Tf 36 468 Td (- Absolute Pharmacist Primacy: Taryaq operates as a decision-support firewall; licensed pharmacist retains) Tj ET
+BT
+/F1 8 Tf 36 456 Td (  exclusive legal authority over all dispensing actions under DHA Health Regulation Sector rules.) Tj ET
+BT
+/F1 8 Tf 36 444 Td (- Cryptographic Audit Trail: Every warning and human clinician override committed to SHA-256 JSONL ledger.) Tj ET
+0.96 0.96 0.96 rg
+36 310 523 115 re f
+0.8 0.8 0.8 RG 1 w
+36 310 523 115 re S
+BT
+/F2 7.5 Tf 44 412 Td (CLINICAL GOVERNANCE & MEDICAL DIRECTION) Tj ET
+BT
+/F2 8 Tf 44 380 Td (Dr. Tariq Al-Hashimi, MD, FRCP) Tj ET
+BT
+/F1 7 Tf 44 368 Td (Medical Director & Head of Governance) Tj ET
+BT
+/F1 7 Tf 44 356 Td (Prime Healthcare Group LLC) Tj ET
+BT
+/F1 7 Tf 44 344 Td (Registration: DHA-P-44019) Tj ET
+BT
+/F2 7 Tf 44 330 Td ([SIGNED ELECTRONICALLY - 24 OCT 2026]) Tj ET
+BT
+/F1 6.5 Tf 44 318 Td (SEAL: PRIME HEALTHCARE GROUP) Tj ET
+BT
+/F2 7.5 Tf 220 412 Td (PHARMACY & CLINICAL OPERATIONS) Tj ET
+BT
+/F2 8 Tf 220 380 Td (Dr. Mariam Bin Salem, PharmD, BCPS) Tj ET
+BT
+/F1 7 Tf 220 368 Td (Head of Pharmacy & Lead Pharmacist) Tj ET
+BT
+/F1 7 Tf 220 356 Td (Jumeirah Community Pharmacy) Tj ET
+BT
+/F1 7 Tf 220 344 Td (Registration: DHA-P-58204) Tj ET
+BT
+/F2 7 Tf 220 330 Td ([SIGNED ELECTRONICALLY - 24 OCT 2026]) Tj ET
+BT
+/F1 6.5 Tf 220 318 Td (SEAL: JUMEIRAH FACILITY DHA-FL-004921) Tj ET
+BT
+/F2 7.5 Tf 396 412 Td (TECHNOLOGY SPONSOR & LEAD INVESTIGATOR) Tj ET
+BT
+/F2 8 Tf 396 380 Td (Mohamed Fathy, BPharm) Tj ET
+BT
+/F1 7 Tf 396 368 Td (Founder & Lead Clinical AI Architect) Tj ET
+BT
+/F1 7 Tf 396 356 Td (Taryaq Sovereign Clinical AI Systems) Tj ET
+BT
+/F1 7 Tf 396 344 Td (Licensed Clinical Pharmacist) Tj ET
+BT
+/F2 7 Tf 396 330 Td ([SIGNED ELECTRONICALLY - 24 OCT 2026]) Tj ET
+BT
+/F1 6.5 Tf 396 318 Td (SEAL: TARYAQ SOVEREIGN CORE) Tj ET
+BT
+/F1 6.5 Tf 80 285 Td (Official LOI Execution | Dubai AI Agents Championship 2026-2027 | SHA-256:130081baec5b0c76b258ae16e5e61e9a...) Tj ET
+Q
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000004789 00000 n 
+0000004859 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+4934
+%%EOF

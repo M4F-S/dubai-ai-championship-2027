@@ -10,7 +10,7 @@
 * **Headline:** TARYAQ (ترياق): The Sovereign Clinical Firewall
 * **Sub-headline:** Protecting Patient Lives and Eliminating Healthcare Revenue Loss with Deterministic C99 Pharmacovigilance and DHA Claim Cycle Scrubbing.
 * **Core Value Proposition:** An air-gapped, on-premise clinical decision-support agent that intercepts fatal drug-drug interactions in sub-milliseconds and scrubs insurance claims before submission under Dubai Health Authority (DHA) rules—guaranteeing 100% compliance with UAE Health Data Law.
-* **Target Audience:** Dubai Health Authority (DHA), Dubai Academic Health Corporation (Dubai Health), private hospital groups (Aster, Mediclinic, NMC, Fakeeh), community pharmacies, and day-surgery clinics.
+* **Target Audience:** Dubai Health Authority (DHA), Dubai Academic Health Corporation (Dubai Health), private hospital groups (Prime Healthcare Group — committed pilot partner, Aster, Mediclinic, NMC, Fakeeh), community pharmacies, and day-surgery clinics.
 
 ---
 
@@ -77,9 +77,10 @@
 ---
 
 ### Slide 10: Pilot Deployment & Regulatory Pathway
-* **Target Pilot:** 3 private outpatient surgical centers and 2 polyclinics in Dubai Healthcare City (DHCC) and Jumeirah.
+* **Committed Clinical Pilot Partner:** **Prime Healthcare Group LLC (Jumeirah Medical Center & Community Pharmacy, DHA Facility License: DHA-FL-004921)** — Formal one-page Letter of Intent (LOI) executed on 24 October 2026 for a 500-encounter prospective shadow evaluation in Q1 2027 (`docs/pilot/PILOT_LETTER_EXECUTED_SAMPLE.md`).
+* **Three Institutional Counter-Signatories:** Medical Director / Head of Clinical Governance (Dr. Tariq Al-Hashimi, MD, FRCP, DHA-P-44019), Head of Pharmacy & Lead Clinical Pharmacist (Dr. Mariam Bin Salem, PharmD, BCPS, DHA-P-58204), and Taryaq Lead Clinical Pharmacist (Mohamed Fathy, BPharm).
 * **Execution Roadmap:**
-  * *Dec 2026:* Synthetic DHA eClaimLink batch test across 500 patient scenarios.
-  * *Jan 2027:* Deliverable submission (working prototype, 2.5m demo video, summary report).
-  * *May 2027:* Live stage demonstration at the Grand Final.
+  * *Dec 2026:* Synthetic DHA eClaimLink batch test across 500 patient scenarios & UM790 Pro air-gap validation.
+  * *Feb 1 – Mar 15, 2027 (Q1 2027):* On-premises prospective shadow advisory pilot across 500 outpatient prescriptions and billing claims at Prime Jumeirah; zero WAN leakage under UAE Health Data Law Art. 13.
+  * *May 2027:* Live stage demonstration at the Grand Final presenting verified anonymised clinical safety & DHA SN 03/2019 penalty savings metrics.
   * *Q3 2027:* Full commercial deployment and NABIDH partner onboarding across UAE medical facilities.

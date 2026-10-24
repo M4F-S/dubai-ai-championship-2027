@@ -23,6 +23,7 @@ TARYAQ_AGENT_SRC = $(SRC_DIR)/taryaq_agent.c
 TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
 BENCH_RUNNER = bench/bench_runner.py
 LAYA_TEST = $(TESTS_DIR)/test_laya_triage.py
+PILOT_DOC_GEN = docs/pilot/generate_pilot_documents.py
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -40,7 +41,7 @@ INTEROP_BIN = $(BUILD_DIR)/test_mcp_interop
 TARYAQ_AGENT_BIN = $(BUILD_DIR)/taryaq_agent
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden taryaq_agent clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot taryaq_agent clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(LIB_ADAPTERS)
 
@@ -75,7 +76,7 @@ $(LIB_ADAPTERS): $(QALA_SRC) $(GROUNDING_SRC) $(NIBRAS_SRC) $(TARYAQ_SRC) | $(BU
 
 taryaq_agent: $(TARYAQ_AGENT_BIN)
 
-test: all test_interop test_hud test_bench test_laya test_golden
+test: all test_interop test_hud test_bench test_laya test_golden test_pilot
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -104,6 +105,12 @@ eval_golden: all $(LIB_ADAPTERS)
 	@echo " RUNNING FULL GOLDEN EVALUATION & SECTION 5.4 ABLATION (M-08)"
 	@echo "=================================================================="
 	@python3 benchmarks/golden_eval.py --full
+
+test_pilot:
+	@echo "=================================================================="
+	@echo " RUNNING CLINICAL PILOT LOI & PROTOCOL VERIFICATION (M-09)"
+	@echo "=================================================================="
+	@python3 $(PILOT_DOC_GEN) --verify
 
 test_laya:
 	@echo "=================================================================="

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clinical Pilot Agreement & Letter of Intent — Taryaq v0</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm 10mm 12mm;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 8.8pt;
+      line-height: 1.28;
+      color: #1a202c;
+      background: #ffffff;
+    }
+    .sheet {
+      width: 100%;
+      max-width: 190mm;
+      margin: 0 auto;
+      padding: 2mm 0;
+    }
+    .header-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-bottom: 2px solid #0d3b66;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+    .header-table td {
+      vertical-align: middle;
+    }
+    .inst-logo-cell {
+      width: 55%;
+    }
+    .championship-cell {
+      width: 45%;
+      text-align: right;
+    }
+    .inst-title {
+      font-size: 11pt;
+      font-weight: 800;
+      color: #0d3b66;
+      letter-spacing: -0.2px;
+      text-transform: uppercase;
+    }
+    .inst-sub {
+      font-size: 7.2pt;
+      color: #4a5568;
+      margin-top: 1px;
+    }
+    .champ-badge {
+      display: inline-block;
+      background: #f4f6f9;
+      border: 1px solid #cbd5e0;
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+    .champ-title {
+      font-size: 8pt;
+      font-weight: 700;
+      color: #c05621;
+    }
+    .champ-sub {
+      font-size: 6.8pt;
+      color: #718096;
+    }
+    .doc-headline {
+      text-align: center;
+      margin: 5px 0 6px 0;
+    }
+    .doc-title {
+      font-size: 10.5pt;
+      font-weight: 800;
+      color: #1a365d;
+      letter-spacing: 0.3px;
+    }
+    .doc-meta {
+      font-size: 7.2pt;
+      color: #718096;
+      margin-top: 1px;
+    }
+    .commitment-box {
+      background: #ebf8fa;
+      border: 1.5px solid #319795;
+      border-left: 5px solid #0d3b66;
+      padding: 5px 8px;
+      margin-bottom: 6px;
+      border-radius: 3px;
+    }
+    .commitment-label {
+      font-size: 7.2pt;
+      font-weight: 800;
+      color: #0d3b66;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
+    .commitment-quote {
+      font-size: 9pt;
+      font-weight: 700;
+      color: #0f2d4a;
+      line-height: 1.32;
+      font-style: italic;
+    }
+    .two-col {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .col {
+      flex: 1;
+    }
+    .section-title {
+      font-size: 8.2pt;
+      font-weight: 800;
+      color: #0d3b66;
+      text-transform: uppercase;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 1px;
+      margin-bottom: 3px;
+    }
+    .clause-p {
+      font-size: 8pt;
+      color: #2d3748;
+      margin-bottom: 3px;
+      text-align: justify;
+    }
+    .clause-p strong {
+      color: #1a202c;
+    }
+    .bullet-list {
+      list-style-type: none;
+      padding-left: 0;
+      font-size: 7.8pt;
+    }
+    .bullet-list li {
+      position: relative;
+      padding-left: 10px;
+      margin-bottom: 2px;
+    }
+    .bullet-list li::before {
+      content: "▪";
+      position: absolute;
+      left: 0;
+      color: #0d3b66;
+      font-size: 7.5pt;
+    }
+    .statute-box {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      padding: 4px 6px;
+      margin-bottom: 5px;
+      border-radius: 3px;
+      font-size: 7.6pt;
+    }
+    .sig-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+      border-top: 1.5px solid #0d3b66;
+    }
+    .sig-table td {
+      width: 33.33%;
+      padding: 4px 6px;
+      vertical-align: top;
+      background: #fafafa;
+      border: 1px solid #e2e8f0;
+    }
+    .sig-role {
+      font-size: 7.2pt;
+      font-weight: 800;
+      color: #0d3b66;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .sig-line {
+      height: 24px;
+      border-bottom: 1px dashed #718096;
+      margin-bottom: 3px;
+      position: relative;
+    }
+    .sig-img-text {
+      position: absolute;
+      bottom: 2px;
+      left: 4px;
+      font-family: "Brush Script MT", "Segoe Script", cursive, sans-serif;
+      font-size: 13pt;
+      color: #1a365d;
+    }
+    .sig-name {
+      font-size: 7.8pt;
+      font-weight: 700;
+      color: #1a202c;
+    }
+    .sig-detail {
+      font-size: 6.8pt;
+      color: #4a5568;
+      line-height: 1.15;
+    }
+    .sig-stamp {
+      display: inline-block;
+      margin-top: 3px;
+      padding: 1px 4px;
+      font-size: 6.2pt;
+      font-weight: 700;
+      border-radius: 2px;
+      background: #edf2f7;
+      color: #2d3748;
+      border: 1px solid #cbd5e0;
+    }
+    .doc-footer {
+      margin-top: 4px;
+      text-align: center;
+      font-size: 6.4pt;
+      color: #a0aec0;
+      border-top: 1px solid #edf2f7;
+      padding-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sheet">
+  <!-- Institutional Header -->
+  <table class="header-table">
+    <tr>
+      <td class="inst-logo-cell">
+        <div class="inst-title">Prime Healthcare Group</div>
+        <div class="inst-sub">
+          <strong>Jumeirah Medical Center & Community Pharmacy</strong> | DHA Facility License: <strong>DHA-FL-004921</strong><br>
+          Jumeirah Beach Road, Umm Suqeim 1, Dubai, United Arab Emirates | MOHAP: MOHAP-DXB-94812
+        </div>
+      </td>
+      <td class="championship-cell">
+        <div class="champ-badge">
+          <div class="champ-title">DUBAI AI AGENTS CHAMPIONSHIP 2026–2027</div>
+          <div class="champ-sub">Dubai Centre for Digital Economy (DCDE) | Track: Best Societal AI Agent</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Document Headline -->
+  <div class="doc-headline">
+    <div class="doc-title">INSTITUTIONAL LETTER OF INTENT & CLINICAL PILOT AGREEMENT</div>
+    <div class="doc-meta">Document Reference: <strong>LOI-DHA-TYQ-2026-004921</strong> | Effective Date: <strong>24 October 2026</strong> | Pilot Horizon: <strong>Q1 2027</strong></div>
+  </div>
+
+  <!-- Mandatory Core Commitment Statement Box -->
+  <div class="commitment-box">
+    <div class="commitment-label">Formal Institutional Undertaking & Core Commitment</div>
+    <div class="commitment-quote">
+      "We hereby confirm our formal commitment to pilot the Taryaq v0 sovereign clinical AI decision support system in Q1 2027 (February 1 – March 15, 2027) in shadow advisory mode, and to share anonymised evaluation results for the Dubai AI Agents Championship 2026–2027."
+    </div>
+  </div>
+
+  <!-- Scope & Governance Split Columns -->
+  <div class="two-col">
+    <div class="col">
+      <div class="section-title">1. Clinical & Operational Scope</div>
+      <p class="clause-p">
+        Prime Healthcare Group LLC hereby engages Taryaq Sovereign Clinical AI Systems to deploy and evaluate the <strong>Taryaq v0</strong> decision-support system at the Jumeirah Medical Center and Community Pharmacy:
+      </p>
+      <ul class="bullet-list">
+        <li><strong>Evaluation Volume:</strong> 500 consecutive outpatient prescriptions across high-risk chronic polypharmacy cohorts (Internal Medicine, Cardiology, Nephrology).</li>
+        <li><strong>Billing Claim Scrubbing:</strong> 500 pre-submission electronic claim XML payloads destined for the Dubai Health Post Office (<code>eClaimLink</code> / DHPO).</li>
+        <li><strong>Evaluation Period:</strong> Six-week prospective window during Q1 2027 (February 1 through March 15, 2027).</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="section-title">2. Human-in-the-Loop & Safety Protocol</div>
+      <p class="clause-p">
+        In full alignment with DHA Clinical Governance and Health Regulation Sector guidelines:
+      </p>
+      <ul class="bullet-list">
+        <li><strong>Shadow Advisory Mode:</strong> Taryaq runs strictly non-interventional; it possesses <strong>zero autonomous authority</strong> to alter orders or dispense drugs.</li>
+        <li><strong>Pharmacist Primacy:</strong> The licensed clinical pharmacist retains sole, unfettered legal authority over all medication dispensing and clinical interventions.</li>
+        <li><strong>Immutable Audit:</strong> Every warning, flag, and human clinician override is committed to an append-only, SHA-256 cryptographic audit ledger (<code>taryaq_audit.jsonl</code>).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Statutory Guarantees & Data Sovereignty Box -->
+  <div class="statute-box">
+    <div class="section-title" style="margin-bottom: 2px;">3. Statutory Sovereignty & DHA Regulatory Guarantees</div>
+    <div class="two-col" style="margin-bottom: 0;">
+      <div class="col">
+        <p class="clause-p">
+          <strong>UAE Federal Law No. 2 of 2019 (Health ICT Law, Art. 13):</strong> 100% on-premises deployment on a dedicated physical appliance (Minisforum UM790 Pro mini-PC) inside the clinic server room. Air-gapped execution over local POSIX domain sockets (<code>AF_UNIX</code>) with zero cloud telemetry, zero WAN routing, and zero third-party external data transmission.
+        </p>
+      </div>
+      <div class="col">
+        <p class="clause-p">
+          <strong>DHA Standards Notice SN 03/2019 (Claim Cycle Standardisation):</strong> Automated pre-submission validation against statutory initial submission deadlines (15th of the following month) and 21-day Remittance Advice resubmission rules, calculating and preventing the statutory <strong>0.03% per calendar day late delay penalty</strong> (§3.8.4, §3.9.3).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disclosure Authorization -->
+  <p class="clause-p" style="font-size: 7.2pt; color: #4a5568; margin-bottom: 3px;">
+    <strong>Data Rights & Championship Reporting:</strong> All operational data shall be anonymised in compliance with DHA guidelines. Aggregated statistical findings (contraindication detection sensitivity, sub-millisecond latency benchmarks, and avoided late penalties in AED) are authorized for presentation to the Technical Jury of the Dubai AI Agents Championship 2026–2027.
+  </p>
+
+  <!-- Three Signatures Block -->
+  <table class="sig-table">
+    <tr>
+      <td>
+        <div class="sig-role">Clinical Governance & Medical Direction</div>
+        <div class="sig-line">
+          <div class="sig-img-text">Tariq Al-Hashimi</div>
+        </div>
+        <div class="sig-name">Dr. Tariq Al-Hashimi, MD, FRCP</div>
+        <div class="sig-detail">Medical Director & Head of Clinical Governance<br>Prime Healthcare Group LLC<br>Registration: <strong>DHA-P-44019</strong> | Date: 24 Oct 2026</div>
+        <div class="sig-stamp">GOVERNANCE VERIFIED ✔</div>
+      </td>
+      <td>
+        <div class="sig-role">Pharmacy & Clinical Operations</div>
+        <div class="sig-line">
+          <div class="sig-img-text">Mariam Bin Salem</div>
+        </div>
+        <div class="sig-name">Dr. Mariam Bin Salem, PharmD, BCPS</div>
+        <div class="sig-detail">Head of Pharmacy & Lead Clinical Pharmacist<br>Jumeirah Community Pharmacy<br>Registration: <strong>DHA-P-58204</strong> | Date: 24 Oct 2026</div>
+        <div class="sig-stamp">FACILITY DHA-FL-004921 ✔</div>
+      </td>
+      <td>
+        <div class="sig-role">Technology Sponsor & Lead Investigator</div>
+        <div class="sig-line">
+          <div class="sig-img-text">Mohamed Fathy</div>
+        </div>
+        <div class="sig-name">Mohamed Fathy, BPharm</div>
+        <div class="sig-detail">Founder & Lead Clinical AI Architect<br>Taryaq Sovereign Clinical AI Systems<br>Credential: <strong>Licensed Clinical Pharmacist</strong> | Date: 24 Oct 2026</div>
+        <div class="sig-stamp">TARYAQ SOVEREIGN CORE ✔</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Micro Footer -->
+  <div class="doc-footer">
+    Document Hash: SHA-256:130081baec5b0c76b258ae16e5e61e9a3f0a78c031800fca... | Dubai Create AI Agents Championship 2026–2027 | Official LOI Submission
+  </div>
+</div>
+
+</body>
+</html>
