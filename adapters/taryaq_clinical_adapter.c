@@ -33,6 +33,17 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
         return res;
     }
 
+    /* 1b. Deterministic Metformin Severe Renal Cutoff (eGFR < 30 mL/min -> Lactic Acidosis) */
+    if (rx->patient_egfr_ml_min < 30.0 &&
+        strcmp(rx->primary_drug, "Metformin") == 0) {
+        res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
+        strncpy(res.alert_code, "METFORMIN_SEVERE_RENAL_CUTOFF_EGFR_LT_30", sizeof(res.alert_code) - 1);
+        strncpy(res.clinical_rationale,
+                "Blocked: Metformin is contraindicated in severe renal impairment (eGFR < 30 mL/min) due to lactic acidosis risk.",
+                sizeof(res.clinical_rationale) - 1);
+        return res;
+    }
+
     /* 2. Controlled / Narcotic Medication Gate (UAE Health Law No. 2 of 2019) */
     if (rx->is_controlled_substance && !rx->has_controlled_id_verified) {
         res.verdict = CLINICAL_CONTROLLED_DRUG_GATE;
@@ -110,6 +121,21 @@ int main(void) {
     taryaq_result_t r4 = taryaq_verify_prescription_and_claim(&delayed_claim);
     assert(r4.verdict == CLINICAL_SAFE);
     assert(strcmp(r4.alert_code, "DHA_NABIDH_SAFE") == 0);
+
+    /* Test 5: Metformin in severe renal impairment (eGFR 26 < 30) -> CONTRAINDICATION_BLOCK */
+    taryaq_rx_context_t metformin_renal = {
+        .primary_drug = "Metformin",
+        .concurrent_drug = NULL,
+        .patient_egfr_ml_min = 26.0,
+        .is_controlled_substance = false,
+        .has_controlled_id_verified = false,
+        .icd10_code = "E11.22",
+        .submission_delay_days = 0,
+        .has_ejadah_lab_justification = true
+    };
+    taryaq_result_t r5 = taryaq_verify_prescription_and_claim(&metformin_renal);
+    assert(r5.verdict == CLINICAL_CONTRAINDICATION_BLOCK);
+    assert(strcmp(r5.alert_code, "METFORMIN_SEVERE_RENAL_CUTOFF_EGFR_LT_30") == 0);
 
     printf("[PASS] All Taryaq C99 Pharmacovigilance & DHA SN 03/2019 Claim Scrubber tests passed successfully!\n");
     return 0;

@@ -24,6 +24,13 @@ TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
 BENCH_RUNNER = bench/bench_runner.py
 LAYA_TEST = $(TESTS_DIR)/test_laya_triage.py
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    LIB_EXT = dylib
+else
+    LIB_EXT = so
+endif
+
 QALA_BIN = $(BUILD_DIR)/test_qala_adapter
 NIBRAS_BIN = $(BUILD_DIR)/test_nibras_adapter
 TARYAQ_BIN = $(BUILD_DIR)/test_taryaq_adapter
@@ -31,10 +38,11 @@ GROUNDING_BIN = $(BUILD_DIR)/test_grounding_shield
 MCP_CURL_BIN = $(BUILD_DIR)/test_mcp_curl_client
 INTEROP_BIN = $(BUILD_DIR)/test_mcp_interop
 TARYAQ_AGENT_BIN = $(BUILD_DIR)/taryaq_agent
+LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya taryaq_agent clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden taryaq_agent clean
 
-all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN)
+all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(LIB_ADAPTERS)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -62,9 +70,12 @@ $(TARYAQ_AGENT_BIN): $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING
                      $(ADAPTERS_DIR)/grounding_shield.h $(ADAPTERS_DIR)/qala_adapters.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) $(LDFLAGS) -lcurl -o $@
 
+$(LIB_ADAPTERS): $(QALA_SRC) $(GROUNDING_SRC) $(NIBRAS_SRC) $(TARYAQ_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -fPIC -shared $^ $(LDFLAGS) -o $@
+
 taryaq_agent: $(TARYAQ_AGENT_BIN)
 
-test: all test_interop test_hud test_bench test_laya
+test: all test_interop test_hud test_bench test_laya test_golden
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -79,8 +90,20 @@ test: all test_interop test_hud test_bench test_laya
 	@./$(TARYAQ_AGENT_BIN) --test
 	@python3 $(TARYAQ_ACCEPTANCE_TEST)
 	@echo "=================================================================="
-	@echo " [SUCCESS] All Championship Adapters, Interop, HUD, Taryaq, Bench & Laya Triage Tests Passed!"
+	@echo " [SUCCESS] All Championship Adapters, Interop, HUD, Taryaq, Bench, Laya & Golden Tests Passed!"
 	@echo "=================================================================="
+
+test_golden: $(LIB_ADAPTERS)
+	@echo "=================================================================="
+	@echo " RUNNING GOLDEN BENCHMARK SMOKE VERIFICATION (M-08)"
+	@echo "=================================================================="
+	@python3 benchmarks/golden_eval.py --smoke
+
+eval_golden: all $(LIB_ADAPTERS)
+	@echo "=================================================================="
+	@echo " RUNNING FULL GOLDEN EVALUATION & SECTION 5.4 ABLATION (M-08)"
+	@echo "=================================================================="
+	@python3 benchmarks/golden_eval.py --full
 
 test_laya:
 	@echo "=================================================================="
