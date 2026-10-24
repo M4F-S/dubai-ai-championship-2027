@@ -8,6 +8,7 @@ LDFLAGS ?= -lm
 BUILD_DIR = build
 ADAPTERS_DIR = adapters
 TESTS_DIR = tests
+SRC_DIR = src
 
 QALA_SRC = $(ADAPTERS_DIR)/qala_mcp_policy_adapter.c
 NIBRAS_SRC = $(ADAPTERS_DIR)/nibras_arabic_fademem_adapter.c
@@ -18,6 +19,8 @@ MCP_CURL_SRC = $(ADAPTERS_DIR)/mcp_curl_client.c
 INTEROP_SRC = $(TESTS_DIR)/test_mcp_interop.c
 MOCK_SERVER = $(TESTS_DIR)/mcp_mock_server.py
 HUD_TEST = $(TESTS_DIR)/test_hud_telemetry.py
+TARYAQ_AGENT_SRC = $(SRC_DIR)/taryaq_agent.c
+TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
 
 QALA_BIN = $(BUILD_DIR)/test_qala_adapter
 NIBRAS_BIN = $(BUILD_DIR)/test_nibras_adapter
@@ -25,10 +28,11 @@ TARYAQ_BIN = $(BUILD_DIR)/test_taryaq_adapter
 GROUNDING_BIN = $(BUILD_DIR)/test_grounding_shield
 MCP_CURL_BIN = $(BUILD_DIR)/test_mcp_curl_client
 INTEROP_BIN = $(BUILD_DIR)/test_mcp_interop
+TARYAQ_AGENT_BIN = $(BUILD_DIR)/taryaq_agent
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud taryaq_agent clean
 
-all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN)
+all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -51,6 +55,13 @@ $(MCP_CURL_BIN): $(MCP_CURL_SRC) $(CJSON_SRC) $(ADAPTERS_DIR)/mcp_curl_client.h 
 $(INTEROP_BIN): $(INTEROP_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) $(ADAPTERS_DIR)/mcp_curl_client.h $(ADAPTERS_DIR)/cJSON.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INTEROP_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) $(LDFLAGS) -lcurl -o $@
 
+$(TARYAQ_AGENT_BIN): $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) \
+                     $(ADAPTERS_DIR)/taryaq_adapters.h $(ADAPTERS_DIR)/nibras_adapters.h \
+                     $(ADAPTERS_DIR)/grounding_shield.h $(ADAPTERS_DIR)/qala_adapters.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) $(LDFLAGS) -lcurl -o $@
+
+taryaq_agent: $(TARYAQ_AGENT_BIN)
+
 test: all test_interop test_hud
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
@@ -61,7 +72,12 @@ test: all test_interop test_hud
 	@./$(GROUNDING_BIN)
 	@./$(MCP_CURL_BIN)
 	@echo "=================================================================="
-	@echo " [SUCCESS] All C99 Championship Adapters, Interop & HUD Tests Passed!"
+	@echo " RUNNING TARYAQ RUNNABLE AGENT ACCEPTANCE BATTERY (M-05)"
+	@echo "=================================================================="
+	@./$(TARYAQ_AGENT_BIN) --test
+	@python3 $(TARYAQ_ACCEPTANCE_TEST)
+	@echo "=================================================================="
+	@echo " [SUCCESS] All Championship Adapters, Interop, HUD & Taryaq Agent Tests Passed!"
 	@echo "=================================================================="
 
 test_interop: $(INTEROP_BIN)
@@ -102,8 +118,10 @@ test_qala: $(QALA_BIN)
 test_nibras: $(NIBRAS_BIN)
 	@./$(NIBRAS_BIN)
 
-test_taryaq: $(TARYAQ_BIN)
+test_taryaq: $(TARYAQ_BIN) $(TARYAQ_AGENT_BIN)
 	@./$(TARYAQ_BIN)
+	@./$(TARYAQ_AGENT_BIN) --test
+	@python3 $(TARYAQ_ACCEPTANCE_TEST)
 
 test_grounding: $(GROUNDING_BIN)
 	@./$(GROUNDING_BIN)
