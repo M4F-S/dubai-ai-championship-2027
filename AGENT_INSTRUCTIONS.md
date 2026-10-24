@@ -37,6 +37,7 @@ Before writing any new feature or modifying any file:
 3. **Never Fabricate, Extrapolate, or Guess a Metric:** If a benchmark run, token count, or latency measurement has not been physically measured by running code on this machine, mark it as `⏳ PENDING_EXECUTION` or `🟠 UNVERIFIED_IN_PROD`.
 4. **Zero Cloud Exfiltration:** All agent communication must assume an air-gapped environment. Never echo API secrets, Telegram bot tokens, or private customer records.
 5. **Strict C99 Standards:** All new C code must compile cleanly with `-std=c99 -Wall -Wextra -Werror -O2`.
+6. **Mandatory Subagent Delegation for Context Hygiene:** Whenever conducting codebase searches, documentation audits, deep research, or running multi-step diagnostics, you MUST spawn isolated subagents. Never dump raw grep outputs, directory scans, or multi-page tool outputs into the primary agent context. The main context is reserved for high-level reasoning and synthesis. Subagents must return distilled, actionable findings and terminate within bounded turns.
 
 ---
 

@@ -25,6 +25,12 @@ The official DCDE rules permit a single team to submit multiple applications wit
 * **Build Phase & Final Deliverables (Code, Deck, 2.5m Video, Report):** Closes in **January 2027**.
 * **Grand Final Live Pitch (12 Teams):** First week of **May 2027** in Dubai.
 
+### 1.4 Context Isolation & Mandatory Subagent Spawning Invariant
+* **Official Invariant:** To prevent context contamination, prompt bloat, and context window exhaustion, all autonomous AI agents and engineers working on this project MUST delegate research, code auditing, verification, and distinct subtasks to isolated subagents.
+* **Execution Boundary:** The primary conversation context must remain dedicated to high-level coordination, architectural synthesis, and decision-making. 
+* **Envelope Isolation:** Intermediate tool outputs, raw grep traces, file dumps, and multi-step investigation logs must be contained within the subagent's execution envelope and discarded after synthesis, returning only concise, actionable findings to the primary agent.
+* **Recursion Guard:** Subagents must operate with bounded turn limits (max 5 turns) and must never spawn unbounded recursive child agent chains.
+
 ---
 
 ## 2. Technical & Architectural Standards

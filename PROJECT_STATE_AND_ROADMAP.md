@@ -53,10 +53,22 @@
 - [x] Initialize Git repository, commit initial release, and tag `v0.1.0-dubai-init`
 
 ### Phase 2: Grounding Shield & Transport Integration (November 2026)
-- [ ] Implement `adapters/grounding_shield.c` (C99 Search-Augmented Verification Loop)
-- [ ] Connect `mcp_bridge.c` with production `libcurl` and `cJSON` drivers
-- [ ] Build end-to-end telemetry bridge streaming JSON to `ws://127.0.0.1:8787/telemetry`
-- [ ] Benchmark multi-turn $\text{pass}^8$ repeatability over `dubai_synthetic_suite.json`
+- [x] Implement `adapters/grounding_shield.c` (C99 Search-Augmented Verification Loop)
+- [x] Connect `mcp_bridge.c` with production `libcurl` and `cJSON` drivers (`adapters/mcp_curl_client.c`)
+- [ ] Build end-to-end telemetry bridge streaming JSON to `ws://127.0.0.1:8787/telemetry` (M-04)
+- [ ] Benchmark multi-turn $\text{pass}^8$ repeatability over `dubai_synthetic_suite.json` (M-08)
+
+### Phase 2.5: Hermes Review & Sprint Implementation (October – November 2026)
+- [ ] **M-01:** Fix GCC-13 `-Wformat-truncation` in `qala_mcp_policy_adapter.c` and add `Dockerfile.ci`
+- [ ] **M-02:** Apply Claim Ledger corrections across docs, decks, video scripts, and READMEs
+- [ ] **M-03:** Stateless MCP Conformance Hardening (`Mcp-Name`, `params._meta`, client capabilities, SSE parser)
+- [ ] **M-04:** HUD Telemetry Bridge (streaming live C99 events to WebSocket)
+- [ ] **M-05:** Taryaq v0 Runnable CLI Daemon (offline clinical prescription check & audit commit)
+- [ ] **M-06:** UM790 Pro Hardware Benchmark (`bench/RESULTS.md` on Jais 3 7B)
+- [ ] **M-07:** Laya Multilingual 322M Integration & Domain Dataset Fine-Tuning
+- [ ] **M-08:** Golden Evaluation Set (30 Dubai Tasks with $\text{pass}^1$ / $\text{pass}^8$ reporting)
+- [ ] **M-09:** Pilot Letter Outreach (Dubai Pharmacy / Clinic)
+- [ ] **M-10:** Final Submission Package Synchronization (Decks, Video, Report)
 
 ### Phase 3: Pitch Decks, Summary Reports & Video Production (December 2026)
 - [ ] Ensure all team members complete individual profile enrolment on `dubaichamberdigital.com` before **December 2026**
@@ -74,5 +86,7 @@
 
 ## 4. Append-Only Change Log
 
+* **2026-10-24 (17:52 UTC+2):** Generated Skeptical Plan Audit `REVIEW_SKEPTICAL_PLAN_AUDIT_20261024_1950.md`. Codified Rule 1.4 (Context Isolation & Mandatory Subagent Spawning Invariant) into `PROJECT_RULES_AND_CRITERIA.md` and `AGENT_INSTRUCTIONS.md`. Resolved Falcon persistence root cause (canonical doc lock) and verified Loop Engineering & Subagent architectures in Belya/Almaz.
+* **2026-10-24 (17:31 UTC+2):** Integrated Hermes Independent Review (`RECOMMENDATIONS_2026-10-24.md` and `REVIEW_HERMES_20261024_1837.md` @ commit `587de32`). Verified primary sources: DHA SN 03/2019 0.03% penalty, DESC ISR v3.1 scope, BFCL Falcon3 breakdown (47.30% overall / 5.00% multi-turn), and UM790 hardware budget.
 * **2026-10-24 (16:03 UTC+2):** Initialized master control plane repo. Hardened C99 adapters (`qala`, `nibras`, `taryaq`), compiled clean with `make test`, tagged `v0.1.0-dubai-init`. Commit `3742659`.
 * **2026-10-24 (15:39 UTC+2):** Generated Red-Team Audit Report `REVIEW_SKEPTICAL_PRINCIPAL_ARCHITECT_20261024_1338.md` identifying the Falcon3 BFCL discrepancy and establishing the 3-entry portfolio.
