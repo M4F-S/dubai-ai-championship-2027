@@ -19,9 +19,9 @@
 | **WS-05** | Master Tracking & Governance Docs | `Principal_Architect` | ✅ COMPLETED | `PROJECT_RULES_AND_CRITERIA.md`, `PROJECT_STATE_AND_ROADMAP.md`, `AGENT_INSTRUCTIONS.md` |
 | **WS-06** | C99 Grounding Shield (Search-Verification Loop) | `Principal_Architect` | ✅ COMPLETED | `adapters/grounding_shield.c`, `adapters/grounding_shield.h` |
 | **WS-07** | `libcurl` + `cJSON` Streamable MCP Client | `Principal_Architect` | ✅ COMPLETED | `adapters/mcp_curl_client.c`, `adapters/mcp_curl_client.h`, `adapters/cJSON.*`, `Makefile` |
-| **WS-08** | 10-Slide Pitch Decks (Qala, Nibras, Taryaq) | *AVAILABLE* | 🟢 OPEN | `docs/pitch_decks/` |
-| **WS-09** | 2.5-Minute Video Screenplay & Demo Script | *AVAILABLE* | 🟢 OPEN | `docs/video_script.md` |
-| **WS-10** | DCDE Mandatory Architecture Summary Report | *AVAILABLE* | 🟢 OPEN | `docs/architecture_summary_report.pdf` |
+| **WS-08** | 10-Slide Pitch Decks (Qala, Nibras Executive, Taryaq) | `Principal_Architect` | ✅ COMPLETED | `docs/pitch_decks/PITCH_DECK_*.md` |
+| **WS-09** | 2.5-Minute Video Screenplay & Demo Script | `Principal_Architect` | ✅ COMPLETED | `docs/video_script.md` |
+| **WS-10** | DCDE Mandatory Architecture Summary Report | `Principal_Architect` | ✅ COMPLETED | `docs/architecture_summary_report.md` |
 
 ---
 
@@ -60,9 +60,9 @@
 
 ### Phase 3: Pitch Decks, Summary Reports & Video Production (December 2026)
 - [ ] Ensure all team members complete individual profile enrolment on `dubaichamberdigital.com` before **December 2026**
-- [ ] Draft 10-Slide Pitch Decks for `Qala`, `Nibras Executive`, and `Taryaq`
-- [ ] Produce 2.5-minute demonstration video showing the live air-gapped cable pull and HUD
-- [ ] Complete the DCDE Architecture Summary Report PDF
+- [x] Draft 10-Slide Pitch Decks for `Qala`, `Nibras Executive`, and `Taryaq` (`docs/pitch_decks/`)
+- [x] Produce 2.5-minute demonstration video script showing the live air-gapped cable pull and HUD (`docs/video_script.md`)
+- [x] Complete the DCDE Architecture Summary Report (`docs/architecture_summary_report.md`)
 
 ### Phase 4: Final Submission & Tech Accelerator (January – May 2027)
 - [ ] Submit all final deliverables on the DCDE portal by **January 2027**
