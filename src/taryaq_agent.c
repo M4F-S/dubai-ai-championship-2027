@@ -437,8 +437,8 @@ static taryaq_check_result_t taryaq_interaction_check(
 
     taryaq_result_t ar = taryaq_verify_prescription_and_claim(&rx);
     res.verdict = ar.verdict;
-    strncpy(res.alert_code, ar.alert_code, sizeof(res.alert_code) - 1);
-    strncpy(res.clinical_rationale, ar.clinical_rationale, sizeof(res.clinical_rationale) - 1);
+    snprintf(res.alert_code, sizeof(res.alert_code), "%s", ar.alert_code);
+    snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", ar.clinical_rationale);
 
     if (p_med && p_med->renal_egfr_cutoff > 0.0 && egfr < p_med->renal_egfr_cutoff) {
         res.has_renal_risk = true;
@@ -484,7 +484,7 @@ static taryaq_claim_scrub_result_t taryaq_claim_scrub(
     if (claim_narrative && claim_narrative[0] != '\0') {
         grounding_scrub_search_query(claim_narrative, res.scrubbed_query, sizeof(res.scrubbed_query));
     } else {
-        strncpy(res.scrubbed_query, "DHA eClaimLink SN 03/2019 standard claim", sizeof(res.scrubbed_query) - 1);
+        snprintf(res.scrubbed_query, sizeof(res.scrubbed_query), "DHA eClaimLink SN 03/2019 standard claim");
     }
 
     res.penalty_rate_pct = (double)delay_days * 0.03;
@@ -504,8 +504,8 @@ static taryaq_claim_scrub_result_t taryaq_claim_scrub(
 
     taryaq_result_t ar = taryaq_verify_prescription_and_claim(&rx);
     res.verdict = ar.verdict;
-    strncpy(res.alert_code, ar.alert_code, sizeof(res.alert_code) - 1);
-    strncpy(res.rationale, ar.clinical_rationale, sizeof(res.rationale) - 1);
+    snprintf(res.alert_code, sizeof(res.alert_code), "%s", ar.alert_code);
+    snprintf(res.rationale, sizeof(res.rationale), "%s", ar.clinical_rationale);
 
     return res;
 }
@@ -534,9 +534,8 @@ static taryaq_override_result_t taryaq_human_override(
 
     if (!clinical_rationale || strlen(clinical_rationale) < 8) {
         res.override_approved = false;
-        strncpy(res.err_message,
-                "REJECTED: Mandatory clinical rationale missing or too brief (min 8 chars).",
-                sizeof(res.err_message) - 1);
+        snprintf(res.err_message, sizeof(res.err_message),
+                 "REJECTED: Mandatory clinical rationale missing or too brief (min 8 chars).");
         return res;
     }
 
@@ -549,9 +548,8 @@ static taryaq_override_result_t taryaq_human_override(
     }
     if (!non_space) {
         res.override_approved = false;
-        strncpy(res.err_message,
-                "REJECTED: Clinical rationale cannot be empty or whitespace only.",
-                sizeof(res.err_message) - 1);
+        snprintf(res.err_message, sizeof(res.err_message),
+                 "REJECTED: Clinical rationale cannot be empty or whitespace only.");
         return res;
     }
 
@@ -569,12 +567,12 @@ static taryaq_override_result_t taryaq_human_override(
 
     if (pr.verdict == VERDICT_SAFE) {
         res.override_approved = true;
-        strncpy(res.token, approval_code ? approval_code : "", sizeof(res.token) - 1);
-        strncpy(res.scope, "clinical_override", sizeof(res.scope) - 1);
-        strncpy(res.rationale, clinical_rationale, sizeof(res.rationale) - 1);
+        snprintf(res.token, sizeof(res.token), "%s", approval_code ? approval_code : "");
+        snprintf(res.scope, sizeof(res.scope), "clinical_override");
+        snprintf(res.rationale, sizeof(res.rationale), "%s", clinical_rationale ? clinical_rationale : "");
     } else {
         res.override_approved = false;
-        strncpy(res.err_message, pr.reason, sizeof(res.err_message) - 1);
+        snprintf(res.err_message, sizeof(res.err_message), "%s", pr.reason);
     }
 
     return res;
@@ -742,13 +740,13 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
     qala_approval_slot_t approval_slots[4];
     memset(approval_slots, 0, sizeof(approval_slots));
 
-    strncpy(approval_slots[0].token, "TARYAQ-OVERRIDE-8842-CLIN", sizeof(approval_slots[0].token) - 1);
-    strncpy(approval_slots[0].scope, "clinical_override", sizeof(approval_slots[0].scope) - 1);
+    snprintf(approval_slots[0].token, sizeof(approval_slots[0].token), "TARYAQ-OVERRIDE-8842-CLIN");
+    snprintf(approval_slots[0].scope, sizeof(approval_slots[0].scope), "clinical_override");
     approval_slots[0].expires_utc = taryaq_now_utc() + 86400 * 365;
     approval_slots[0].consumed = false;
 
-    strncpy(approval_slots[1].token, "DUBAI-CLIN-APPROVE-7701", sizeof(approval_slots[1].token) - 1);
-    strncpy(approval_slots[1].scope, "clinical_override", sizeof(approval_slots[1].scope) - 1);
+    snprintf(approval_slots[1].token, sizeof(approval_slots[1].token), "DUBAI-CLIN-APPROVE-7701");
+    snprintf(approval_slots[1].scope, sizeof(approval_slots[1].scope), "clinical_override");
     approval_slots[1].expires_utc = taryaq_now_utc() + 86400 * 365;
     approval_slots[1].consumed = false;
 
@@ -786,8 +784,8 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
 
     /* Milestone 3: Tool 2 - interaction_check (Fatal CYP3A4 renal block) */
     memset(&g_session, 0, sizeof(g_session));
-    strncpy(g_session.primary_drug, med_colch->canonical_name, sizeof(g_session.primary_drug) - 1);
-    strncpy(g_session.concurrent_drug, med_clari->canonical_name, sizeof(g_session.concurrent_drug) - 1);
+    snprintf(g_session.primary_drug, sizeof(g_session.primary_drug), "%s", med_colch->canonical_name);
+    snprintf(g_session.concurrent_drug, sizeof(g_session.concurrent_drug), "%s", med_clari->canonical_name);
     g_session.patient_egfr = 22.0; /* Severe renal failure */
     g_session.created_utc = taryaq_now_utc();
     g_session.state = SESSION_DRAFT;
@@ -802,8 +800,8 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
         return 1;
     }
     g_session.state = SESSION_BLOCKED;
-    strncpy(g_session.alert_code, chk.alert_code, sizeof(g_session.alert_code) - 1);
-    strncpy(g_session.clinical_rationale, chk.clinical_rationale, sizeof(g_session.clinical_rationale) - 1);
+    snprintf(g_session.alert_code, sizeof(g_session.alert_code), "%s", chk.alert_code);
+    snprintf(g_session.clinical_rationale, sizeof(g_session.clinical_rationale), "%s", chk.clinical_rationale);
 
     printf("[MILESTONE 3/8] Tool 2 (interaction_check): Blocked FATAL_CYP3A4_RENAL_CONTRAINDICATION -> PASS\n");
 
@@ -825,11 +823,11 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
     printf("[MILESTONE 4/8] Tool 5 (commit_audit Guard): Blocked commit rejected & state rolled back -> PASS\n");
 
     /* Milestone 5: Tool 4 Guard - Re-intake and test mandatory clinical rationale */
-    strncpy(g_session.primary_drug, "Colchicine", sizeof(g_session.primary_drug) - 1);
-    strncpy(g_session.concurrent_drug, "Clarithromycin", sizeof(g_session.concurrent_drug) - 1);
+    snprintf(g_session.primary_drug, sizeof(g_session.primary_drug), "%s", "Colchicine");
+    snprintf(g_session.concurrent_drug, sizeof(g_session.concurrent_drug), "%s", "Clarithromycin");
     g_session.patient_egfr = 22.0;
     g_session.state = SESSION_BLOCKED;
-    strncpy(g_session.alert_code, "FATAL_CYP3A4_RENAL_CONTRAINDICATION", sizeof(g_session.alert_code) - 1);
+    snprintf(g_session.alert_code, sizeof(g_session.alert_code), "%s", "FATAL_CYP3A4_RENAL_CONTRAINDICATION");
 
     taryaq_override_result_t bad_ov = taryaq_human_override(
         "TARYAQ-OVERRIDE-8842-CLIN", "   ", approval_slots, slot_count, taryaq_now_utc());
@@ -849,8 +847,8 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
         return 1;
     }
     g_session.override_approved = true;
-    strncpy(g_session.override_token, good_ov.token, sizeof(g_session.override_token) - 1);
-    strncpy(g_session.override_rationale, good_ov.rationale, sizeof(g_session.override_rationale) - 1);
+    snprintf(g_session.override_token, sizeof(g_session.override_token), "%s", good_ov.token);
+    snprintf(g_session.override_rationale, sizeof(g_session.override_rationale), "%s", good_ov.rationale);
     g_session.state = SESSION_OVERRIDDEN;
 
     printf("[MILESTONE 6/8] Tool 4 (human_override): Verified code '%s' and consumed slot -> PASS\n", approval_code);
@@ -899,7 +897,7 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
     char buf[2048];
     while (fgets(buf, sizeof(buf), fp)) {
         if (strlen(buf) > 10) {
-            strncpy(last_line, buf, sizeof(last_line) - 1);
+            snprintf(last_line, sizeof(last_line), "%s", buf);
         }
     }
     fclose(fp);
@@ -964,13 +962,13 @@ static void run_cli_loop(const char *audit_path, bool enable_telemetry) {
 
     qala_approval_slot_t approval_slots[4];
     memset(approval_slots, 0, sizeof(approval_slots));
-    strncpy(approval_slots[0].token, "TARYAQ-OVERRIDE-8842-CLIN", sizeof(approval_slots[0].token) - 1);
-    strncpy(approval_slots[0].scope, "clinical_override", sizeof(approval_slots[0].scope) - 1);
+    snprintf(approval_slots[0].token, sizeof(approval_slots[0].token), "TARYAQ-OVERRIDE-8842-CLIN");
+    snprintf(approval_slots[0].scope, sizeof(approval_slots[0].scope), "clinical_override");
     approval_slots[0].expires_utc = taryaq_now_utc() + 86400 * 365;
     approval_slots[0].consumed = false;
 
-    strncpy(approval_slots[1].token, "DUBAI-CLIN-APPROVE-7701", sizeof(approval_slots[1].token) - 1);
-    strncpy(approval_slots[1].scope, "clinical_override", sizeof(approval_slots[1].scope) - 1);
+    snprintf(approval_slots[1].token, sizeof(approval_slots[1].token), "DUBAI-CLIN-APPROVE-7701");
+    snprintf(approval_slots[1].scope, sizeof(approval_slots[1].scope), "clinical_override");
     approval_slots[1].expires_utc = taryaq_now_utc() + 86400 * 365;
     approval_slots[1].consumed = false;
 
@@ -1058,9 +1056,9 @@ static void run_cli_loop(const char *audit_path, bool enable_telemetry) {
             }
 
             memset(&g_session, 0, sizeof(g_session));
-            strncpy(g_session.primary_drug, p_drug, sizeof(g_session.primary_drug) - 1);
+            snprintf(g_session.primary_drug, sizeof(g_session.primary_drug), "%s", p_drug);
             if (c_drug[0] != '\0' && strcmp(c_drug, "none") != 0 && strcmp(c_drug, "-") != 0) {
-                strncpy(g_session.concurrent_drug, c_drug, sizeof(g_session.concurrent_drug) - 1);
+                snprintf(g_session.concurrent_drug, sizeof(g_session.concurrent_drug), "%s", c_drug);
             }
             g_session.patient_egfr = egfr;
             g_session.created_utc = taryaq_now_utc();
@@ -1074,8 +1072,8 @@ static void run_cli_loop(const char *audit_path, bool enable_telemetry) {
 
             taryaq_check_result_t chk = taryaq_interaction_check(
                 g_session.primary_drug, g_session.concurrent_drug, g_session.patient_egfr, false);
-            strncpy(g_session.alert_code, chk.alert_code, sizeof(g_session.alert_code) - 1);
-            strncpy(g_session.clinical_rationale, chk.clinical_rationale, sizeof(g_session.clinical_rationale) - 1);
+            snprintf(g_session.alert_code, sizeof(g_session.alert_code), "%s", chk.alert_code);
+            snprintf(g_session.clinical_rationale, sizeof(g_session.clinical_rationale), "%s", chk.clinical_rationale);
 
             if (chk.verdict == CLINICAL_CONTRAINDICATION_BLOCK) {
                 g_session.state = SESSION_BLOCKED;
@@ -1140,8 +1138,8 @@ static void run_cli_loop(const char *audit_path, bool enable_telemetry) {
                 token, rationale, approval_slots, slot_count, taryaq_now_utc());
             if (ov.override_approved) {
                 g_session.override_approved = true;
-                strncpy(g_session.override_token, ov.token, sizeof(g_session.override_token) - 1);
-                strncpy(g_session.override_rationale, ov.rationale, sizeof(g_session.override_rationale) - 1);
+                snprintf(g_session.override_token, sizeof(g_session.override_token), "%s", ov.token);
+                snprintf(g_session.override_rationale, sizeof(g_session.override_rationale), "%s", ov.rationale);
                 g_session.state = SESSION_OVERRIDDEN;
                 printf("[+] OVERRIDE SUCCESS: Approval code '%s' accepted & consumed.\n", token);
                 printf("    Rationale: %s\n", rationale);
