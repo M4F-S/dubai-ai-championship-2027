@@ -44,17 +44,17 @@
 
 ---
 
-### Slide 5: Measured Results & Empirical Benchmarks
+### Slide 5: Edge Performance & Verification Benchmarks
 * **M-06 UM790 Pro Hardware Benchmark (`bench/RESULTS.md`):**
   * AMD Ryzen 9 7940HS / Radeon 780M / 64GB DDR5-5600 dual channel (**89.6 GB/s** bandwidth).
-  * Jais 3 7B Q4_K_M (4.50 GB): **19.91 tok/s at 4K context (50.23 ms/tok)**, **16.42 tok/s at 8K context (60.90 ms/tok)**.
+  * Jais 3 7B Q4_K_M (4.50 GB): **19.91 tok/s at 4K context (50.23 ms/tok)**, **16.42 tok/s at 8K context (60.90 ms/tok)** (published reference baseline).
   * GBNF Tool Grammar (`bench/taryaq_tool_call.gbnf`): **100.0% schema compliance** vs 68.0% unconstrained (**+32.0% reliability delta**, eliminating 32/100 syntax failures).
 * **M-07 Laya Multilingual 322M Calibrated Triage (`docs/models/LAYA_322M_MODEL_CARD.md`):**
   * 10 canonical decision heads across 2,400 labeled examples (1,200 AR / 1,200 EN, 400 patients, zero data leakage).
   * Dev temperature scaling reduces Expected Calibration Error (ECE) from **0.3954 down to 0.0919** (76.8% error reduction).
-  * Uncertainty-gated abstention at $\tau=0.85$: **13.89% abstention**, achieving **100.00% accuracy on retained cases** in **0.05 ms CPU latency**.
+  * Uncertainty-gated abstention at $\tau=0.85$: **13.89% abstention**, achieving **100.00% accuracy on retained cases** with local decision head in **<1 ms** (<40 ms CPU SLA).
 * **M-08 Golden 30 Benchmark Suite (`benchmarks/GOLDEN_EVAL_REPORT.md`):**
-  * 30 tasks $\times$ 8 trials = **240 test executions**: **100.0% first-trial pass rate ($\text{pass}^1$)**, **100.0% empirical 8-trial pass rate ($\text{pass}^8$)**, and **0.0% unsafe actions**.
+  * 30 tasks $\times$ 8 trials = **240 deterministic test executions**: **100.0% first-trial pass rate ($\text{pass}^1$)**, **100.0% 8-trial pass rate ($\text{pass}^8$)**, and **0.0% unsafe actions**.
 
 ---
 
@@ -67,13 +67,13 @@
 ---
 
 ### Slide 7: 3-Tier Sovereign Architecture & Dual-Stream Memory
-* **Tier 1: Fast Calibrated Triage (Laya Multilingual 322M on CPU):**
-  * Evaluates 10 canonical heads in **0.05 ms** (<1 GB RAM).
+* **Tier 1: Fast Calibrated Triage (Laya Multilingual 322M on CPU — Coupled via IPC):**
+  * Evaluates 10 canonical heads (<40 ms CPU SLA, local decision head in <1 ms, <1 GB RAM).
   * Routes queries, identifies urgent commitments, and flags sensitive confidential topics.
-* **Tier 2: Sovereign Multilingual Generator (Jais 3 7B on Radeon 780M iGPU):**
-  * Bilingual Arabic/English generation running locally at **19.91 tok/s** via Vulkan.
+* **Tier 2: Sovereign Multilingual Generator (Jais 3 7B on Radeon 780M iGPU — Coupled via IPC / GBNF):**
+  * Bilingual Arabic/English generation running locally at **19.91 tok/s** reference rate via Vulkan.
   * Formulates briefings and action drafts constrained by strict GBNF schemas.
-* **Tier 3: Bare-Metal C99 Cognitive Engine (CORAL, FadeMem & VIGIL):**
+* **Tier 3: Bare-Metal C99 Cognitive Engine (CORAL, FadeMem & VIGIL — Shipped Core):**
   * CORAL Dual-Stream Memory: Separates chronological JSONL episodic logs from permanent SQLite FTS5 BM25 semantic graphs.
   * FadeMem Decay Engine: Mathematically models forgetting ($I(t') = I_0 \cdot 2^{-\Delta t / \tau_{1/2}}$), pruning noise below $I < 0.25$ and saving **97% of context tokens**.
   * VIGIL Appraisal: Distills high-friction operational experiences into permanent procedural guardrails (+20 to +47 percentage points accuracy boost on GBA-Bench).
@@ -81,7 +81,7 @@
 ---
 
 ### Slide 8: Section 5.4 Ablation Study (The Technical Proof)
-* **Empirical Ablation Across 200 Tasks on Physical UM790 Hardware:**
+* **Ablation Study Across 200 Tasks (Projected Model / Deterministic Suite):**
 
 | Configuration | Task Accuracy | p95 Latency | Unsafe-Action Rate | Abstention Rate |
 | :--- | :---: | :---: | :---: | :---: |
@@ -98,7 +98,7 @@
 
 ### Slide 9: Privacy Sovereignty, Grounding Shield & Self-Model
 * **100% Air-Gapped Local Sovereignty:**
-  * Zero external cloud exfiltration: models and memory databases run on the executive's physical laptop over Landlock-jailed `AF_UNIX` sockets.
+  * Zero external cloud exfiltration: models and memory databases run on the executive's physical laptop over isolated local `AF_UNIX` sockets.
   * Complete immunity to third-party data breaches, cloud downtime, or subpoena disclosures.
 * **C99 Grounding Shield Fact-Checking:**
   * Scrubs executive names and sensitive deal amounts before local querying.

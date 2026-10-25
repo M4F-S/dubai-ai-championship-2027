@@ -39,8 +39,11 @@ typedef struct {
     char             clinical_rationale[256];
 } taryaq_result_t;
 
-/* Function Prototype */
+/* Function Prototypes */
 taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *rx);
+
+/* F-15 Fix: Pointer-based ABI export to prevent large struct return-by-value across compiler/FFI boundaries */
+taryaq_verdict_t taryaq_verify_prescription_and_claim_ptr(const taryaq_rx_context_t *rx, taryaq_result_t *out_result);
 
 #ifdef __cplusplus
 }

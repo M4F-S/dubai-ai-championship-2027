@@ -36,8 +36,15 @@
 3. **100% Sovereign Air-Gapped Inference:** Operates locally over `AF_UNIX` sockets using sovereign open-weight foundation models:
    * **`Jais 3 7B`** (Inception42 / MBZUAI): Arabic-native bilingual policy reasoning (scoped to 8K context on edge hardware).
    * **`Laya Multilingual 322M`** (Convai Innovations): Fast System-1 triage layer (~33ms) with calibrated intent and risk scoring.
-4. **Linux Landlock LSM Kernel Isolation:** In-process unprivileged kernel sandboxing blocking unauthorized file access (`/confidential/uae_citizens.db`, `.env`) before syscalls touch disk.
+4. **C99 Path Allowlist & Sandbox Security:** In-process deterministic boundary enforcement blocking unauthorized file access (`/confidential/uae_citizens.db`, `.env`) and directory traversal attacks.
 5. **Universal Enterprise Connectivity:** Connects to SAP, Salesforce, ERPNext, or Dubai Customs via the **Stateless Model Context Protocol (`2026-07-28` specification)**.
+
+---
+
+## 🛡️ Implementation Architecture & Taryaq v0 Status
+* **Current Runtime Status:** `v0 — deterministic C99 rule engine; model layer in integration`.
+* **Deterministic Core:** The current compiled binary (`build/taryaq_agent`) executes the bare-metal deterministic rule engine (pharmacovigilance graph, renal cutoffs, single-use cryptographic overrides, and DHA SN 03/2019 billing delay penalties) in < 3 ms with zero dependencies. It does not run neural inference in-process.
+* **Model Layer Integration:** Foundation bilingual reasoning (Jais 3 7B) and non-autoregressive triage (Laya 322M) are coupled via our IPC harness (`adapters/laya_triage_adapter.py`, `bench/taryaq_tool_call.gbnf`) with GBNF grammar constraints.
 
 ---
 

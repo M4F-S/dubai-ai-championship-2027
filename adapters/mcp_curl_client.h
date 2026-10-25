@@ -48,7 +48,7 @@ typedef struct {
     mcp_status_t status;
     long         http_status_code;
     bool         is_rpc_error;
-    int          rpc_error_code;
+    int32_t      rpc_error_code;
     char         rpc_error_message[256];
     char        *result_text_payload;  /* Caller must free with mcp_response_free() */
     char        *raw_json_response;    /* Caller must free with mcp_response_free() */

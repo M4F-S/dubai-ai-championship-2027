@@ -473,7 +473,7 @@ def get_demo_events():
             "event_type": "security_block",
             "tool": "fs_read",
             "target": "/confidential/uae_citizens.db",
-            "reason": "Landlock LSM Kernel Deny (EACCES)",
+            "reason": "C99 Path Allowlist Deny (EACCES)",
             "log": json.dumps({
                 "timestamp_utc": now + 4,
                 "tool": "fs_read",

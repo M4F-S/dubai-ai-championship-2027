@@ -23,8 +23,9 @@ TARYAQ_AGENT_SRC = $(SRC_DIR)/taryaq_agent.c
 TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
 BENCH_RUNNER = bench/bench_runner.py
 LAYA_TEST = $(TESTS_DIR)/test_laya_triage.py
-PILOT_DOC_GEN = docs/pilot/generate_pilot_documents.py
+PILOT_TEST = tests/test_pilot.py
 TRACEABILITY_TEST = $(TESTS_DIR)/test_submission_traceability.py
+BRIDGE_TEST = $(TESTS_DIR)/test_openrouter_bridge.py
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -42,7 +43,7 @@ INTEROP_BIN = $(BUILD_DIR)/test_mcp_interop
 TARYAQ_AGENT_BIN = $(BUILD_DIR)/taryaq_agent
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability taryaq_agent clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge taryaq_agent clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(LIB_ADAPTERS)
 
@@ -77,7 +78,7 @@ $(LIB_ADAPTERS): $(QALA_SRC) $(GROUNDING_SRC) $(NIBRAS_SRC) $(TARYAQ_SRC) | $(BU
 
 taryaq_agent: $(TARYAQ_AGENT_BIN)
 
-test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability
+test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -92,8 +93,14 @@ test: all test_interop test_hud test_bench test_laya test_golden test_pilot test
 	@./$(TARYAQ_AGENT_BIN) --test
 	@python3 $(TARYAQ_ACCEPTANCE_TEST)
 	@echo "=================================================================="
-	@echo " [SUCCESS] All Championship Adapters, Interop, HUD, Taryaq, Bench, Laya, Golden & Traceability Tests Passed!"
+	@echo " [SUCCESS] All Championship Adapters, Interop, HUD, Taryaq, Bench, Laya, Golden, Traceability & Bridge Tests Passed!"
 	@echo "=================================================================="
+
+test_bridge: $(LIB_ADAPTERS)
+	@echo "=================================================================="
+	@echo " RUNNING SOVEREIGN OPENROUTER AGENT BRIDGE VERIFICATION SUITE"
+	@echo "=================================================================="
+	@python3 $(BRIDGE_TEST)
 
 test_traceability:
 	@echo "=================================================================="
@@ -117,7 +124,7 @@ test_pilot:
 	@echo "=================================================================="
 	@echo " RUNNING CLINICAL PILOT LOI & PROTOCOL VERIFICATION (M-09)"
 	@echo "=================================================================="
-	@python3 $(PILOT_DOC_GEN) --verify
+	@python3 $(PILOT_TEST)
 
 test_laya:
 	@echo "=================================================================="

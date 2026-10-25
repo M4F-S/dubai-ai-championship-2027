@@ -58,6 +58,17 @@ size_t grounding_scrub_search_query(
 );
 
 /**
+ * AF-02: Non-destructive in-place PII redactor. Copies UTF-8 prompts verbatim
+ * while redacting only Emirates IDs, DOBs, phone numbers, emails, and patient names.
+ * Preserves all clinical Arabic text, dosages, prescription names, ICD-10 codes, and numbers.
+ */
+size_t grounding_redact_prompt_pii_c99(
+    const char *src,
+    char       *dst,
+    size_t      dst_cap
+);
+
+/**
  * Deterministically cross-checks a generated hypothesis claim against
  * retrieved authoritative sources.
  */
@@ -65,6 +76,14 @@ grounding_result_t grounding_verify_claim(
     const grounding_claim_t  *claim,
     const grounding_source_t *sources,
     size_t                    source_count
+);
+
+/* F-15 Fix: Pointer-based ABI export to prevent large struct return-by-value across compiler/FFI boundaries */
+grounding_verdict_t grounding_verify_claim_ptr(
+    const grounding_claim_t  *claim,
+    const grounding_source_t *sources,
+    size_t                    source_count,
+    grounding_result_t       *out_result
 );
 
 #ifdef __cplusplus

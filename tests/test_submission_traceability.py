@@ -34,7 +34,8 @@ class TestSubmissionTraceability(unittest.TestCase):
         cls.golden_eval_json = cls.repo_root / "benchmarks" / "golden_eval_results.json"
         cls.golden_eval_report = cls.repo_root / "benchmarks" / "GOLDEN_EVAL_REPORT.md"
         cls.laya_model_card = cls.repo_root / "docs" / "models" / "LAYA_322M_MODEL_CARD.md"
-        cls.pilot_letter = cls.repo_root / "docs" / "pilot" / "PILOT_LETTER_LOI.md"
+        cls.pilot_template = cls.repo_root / "docs" / "pilot" / "PILOT_LETTER_TEMPLATE_DRAFT.md"
+        cls.pilot_protocol = cls.repo_root / "docs" / "pilot" / "PILOT_PROTOCOL_BRIEF.md"
 
     def test_01_pitch_deck_slide_count_and_naming(self):
         """1. Verify every pitch deck exists and has exactly 10 slides."""
@@ -136,7 +137,7 @@ class TestSubmissionTraceability(unittest.TestCase):
         self.assertIn("0.03%", content)
         self.assertIn("ws://127.0.0.1:8787", content)
         self.assertIn("TARYAQ-OVERRIDE-8842-CLIN", content)
-        self.assertIn("Prime Healthcare Group", content)
+        self.assertNotIn("Prime Healthcare Group", content)
 
     def test_04_hardware_bench_numbers_traceability(self):
         """4. Verify hardware and bandwidth physics metrics trace to bench/results.json."""
@@ -205,7 +206,7 @@ class TestSubmissionTraceability(unittest.TestCase):
             self.assertIn("322M", text, f"Missing 322M in {path.name}")
             self.assertIn("0.0919", text, f"Missing 0.0919 ECE in {path.name}")
             self.assertIn("13.89%", text, f"Missing 13.89% in {path.name}")
-            self.assertIn("0.05 ms", text, f"Missing 0.05 ms in {path.name}")
+            self.assertIn("<40 ms", text, f"Missing <40 ms in {path.name}")
 
     def test_06_golden_eval_and_ablation_traceability(self):
         """6. Verify Golden 30 and Section 5.4 Ablation study metrics."""
@@ -247,37 +248,50 @@ class TestSubmissionTraceability(unittest.TestCase):
             self.assertIn("202.1 ms", deck_text, f"Missing 202.1 ms in {deck_name}")
 
     def test_07_clinical_pilot_letter_traceability(self):
-        """7. Verify Clinical Pilot LOI details and institutional citations."""
-        self.assertTrue(self.pilot_letter.exists())
-        letter_text = self.pilot_letter.read_text(encoding="utf-8")
+        """7. Verify Clinical Pilot draft template and protocol brief governance integrity."""
+        self.assertTrue(self.pilot_template.exists(), "Missing draft pilot template")
+        self.assertTrue(self.pilot_protocol.exists(), "Missing protocol brief")
+        template_text = self.pilot_template.read_text(encoding="utf-8")
+        protocol_text = self.pilot_protocol.read_text(encoding="utf-8")
 
+        # Must be watermarked draft with placeholders
+        self.assertIn("DRAFT — UNSIGNED — NOT AN AGREEMENT", template_text)
+        self.assertIn("[PARTNER HEALTHCARE ENTITY NAME]", template_text)
+
+        # Protocol brief must contain authentic clinical and regulatory citations
         required_citations = [
+            "$N = 500$ consecutive outpatient electronic prescriptions",
+            "$N = 500$ paired electronic claim XML payloads",
+            "Q1 2027",
+            "Mohamed Fathy, BPharm",
+            "0.03%",
+            "UAE Federal Law No. 2 of 2019",
+            "DHA SN 03/2019",
+            "SHADOW_ADVISORY_MODE",
+        ]
+        for citation in required_citations:
+            self.assertIn(citation, protocol_text, f"Missing protocol citation: {citation}")
+
+        # Strict negative governance check: no active document in docs/ may claim an executed agreement or fabricated entity
+        forbidden = [
             "Prime Healthcare Group LLC",
             "DHA-FL-004921",
             "MOHAP-DXB-94812",
-            "500 consecutive",
-            "500 pre-submission",
-            "Q1 2027",
             "Dr. Tariq Al-Hashimi",
-            "DHA-P-44019",
             "Dr. Mariam Bin Salem",
+            "DHA-P-44019",
             "DHA-P-58204",
-            "Mohamed Fathy",
-            "0.03%",
-            "Article 13 of UAE Federal Law No. 2 of 2019",
         ]
-        for citation in required_citations:
-            self.assertIn(citation, letter_text, f"Missing pilot citation: {citation}")
-
-        # Check appearance in Taryaq deck and architecture report
         taryaq_deck = (self.decks_dir / "PITCH_DECK_TARYAQ_SOCIETAL.md").read_text(encoding="utf-8")
-        self.assertIn("Prime Healthcare Group LLC", taryaq_deck)
-        self.assertIn("DHA-FL-004921", taryaq_deck)
-        self.assertIn("Dr. Tariq Al-Hashimi", taryaq_deck)
-        self.assertIn("Dr. Mariam Bin Salem", taryaq_deck)
+        arch_report = self.arch_report_path.read_text(encoding="utf-8")
+        for f in forbidden:
+            self.assertNotIn(f, template_text, f"Forbidden entity {f} in template")
+            self.assertNotIn(f, protocol_text, f"Forbidden entity {f} in protocol")
+            self.assertNotIn(f, taryaq_deck, f"Forbidden entity {f} in Taryaq deck")
+            self.assertNotIn(f, arch_report, f"Forbidden entity {f} in architecture report")
 
     def test_08_number_traceability_matrix_completeness(self):
-        """8. Verify NUMBER_TRACEABILITY_MATRIX.md exists and covers all key metrics."""
+        """8. Verify NUMBER_TRACEABILITY_MATRIX.md exists, has provenance schema, and every raw log exists."""
         self.assertTrue(self.traceability_matrix_path.exists())
         matrix_text = self.traceability_matrix_path.read_text(encoding="utf-8")
 
@@ -299,8 +313,8 @@ class TestSubmissionTraceability(unittest.TestCase):
             "754.0 ms",
             "88.0%",
             "202.1 ms",
-            "Prime Healthcare Group LLC",
-            "DHA-FL-004921",
+            "Prospective Evaluation Protocol (Unsigned Draft)",
+            "PILOT_LETTER_TEMPLATE_DRAFT.md",
             "0.03% per calendar day",
             "TARYAQ-OVERRIDE-8842-CLIN",
             "97% token savings",
@@ -308,20 +322,26 @@ class TestSubmissionTraceability(unittest.TestCase):
         for row in rows_to_check:
             self.assertIn(row, matrix_text, f"Number Traceability Matrix missing row: {row}")
 
-        # Verify backing files mentioned in matrix actually exist on disk
-        backing_files = [
-            "bench/results.json",
-            "docs/models/LAYA_322M_MODEL_CARD.md",
-            "benchmarks/GOLDEN_EVAL_REPORT.md",
-            "docs/pilot/PILOT_LETTER_LOI.md",
-            "src/taryaq_agent.c",
-            "adapters/qala_mcp_policy_adapter.c",
-            "adapters/nibras_arabic_fademem_adapter.c",
-            "docs/architecture_summary_report.md",
-        ]
-        for bf in backing_files:
-            file_on_disk = self.repo_root / bf
-            self.assertTrue(file_on_disk.exists(), f"Backing file in matrix does not exist on disk: {bf}")
+        # Assert unverified claims (AST Symbol Indexer) are purged
+        self.assertNotIn("AST Symbol Index", matrix_text)
+        self.assertNotIn("AST Token Savings", matrix_text)
+
+        # Parse table rows and verify every Raw Log / Evidence Path exists on disk
+        lines = matrix_text.splitlines()
+        table_rows = [l for l in lines if l.startswith("| **") and not l.startswith("| #")]
+        self.assertGreaterEqual(len(table_rows), 60, "Expected at least 60 verified rows in matrix")
+
+        for r in table_rows:
+            cols = [c.strip() for c in r.split("|")]
+            # Format: ['', '#', 'Domain / Category', 'Exact Value / Claim', 'Context in Submission', 'Backing Repository File', 'Raw Log / Evidence Path', 'Machine / Environment', 'Provenance Timestamp', 'Verification Command', '']
+            self.assertGreaterEqual(len(cols), 8, f"Malformed row in matrix: {r}")
+            raw_path_col = cols[6].strip("`").strip()
+            # If path has multiple or notes, extract file path
+            m = re.search(r"([\w\-./]+\.\w+)", raw_path_col)
+            self.assertIsNotNone(m, f"Could not find valid file path in Raw Log column: '{raw_path_col}' (row: {r})")
+            rel_file = m.group(1)
+            file_on_disk = self.repo_root / rel_file
+            self.assertTrue(file_on_disk.exists(), f"Raw log / evidence path does not exist on disk: {rel_file} (from row: {r})")
 
 
 if __name__ == "__main__":
