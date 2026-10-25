@@ -34,7 +34,9 @@ export interface AuditRecord {
   reporting_tz: string;
   agent: string;
   action: string;
-  state: string;
+  state?: string;
+  status?: string;
+  prev_sha256?: string;
   sha256_signature: string;
   reason?: string;
   primary_drug?: string;
