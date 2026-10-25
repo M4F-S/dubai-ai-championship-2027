@@ -23,6 +23,8 @@ __pycache__/
 # Local runtime & audit logs
 taryaq_audit.jsonl
 *.audit.jsonl
+*-audit.jsonl
+qala-audit.jsonl
 
 # Node.js & Next.js
 node_modules/
