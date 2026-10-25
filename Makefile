@@ -189,3 +189,4 @@ test_mcp_curl: $(MCP_CURL_BIN)
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -f taryaq_audit.jsonl qala-audit.jsonl *.audit.jsonl
