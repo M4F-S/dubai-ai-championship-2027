@@ -64,6 +64,7 @@ TARYAQ_VERDICTS = {
     1: "CLINICAL_CLAIM_CYCLE_WARN",
     2: "CLINICAL_CONTROLLED_DRUG_GATE",
     3: "CLINICAL_CONTRAINDICATION_BLOCK",
+    4: "CLINICAL_UNVERIFIED_REVIEW",
 }
 
 if _lib and hasattr(_lib, "taryaq_verify_prescription_and_claim"):
@@ -115,7 +116,7 @@ def taryaq_verify_rx(
         "clinical_rationale": rationale,
         "is_safe": res.verdict == 0,
         "is_blocked": res.verdict == 3,
-        "is_warning": res.verdict in (1, 2),
+        "is_warning": res.verdict in (1, 2, 4),
         "execution_time_ms": round(elapsed_ms, 4),
         "engine": "C99_BARE_METAL"
     }

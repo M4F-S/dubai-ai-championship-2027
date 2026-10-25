@@ -29,6 +29,18 @@ class TestTaryaqAcceptance(unittest.TestCase):
         if not os.path.isfile(AGENT_BIN):
             raise FileNotFoundError(f"Binary {AGENT_BIN} not found and make failed.")
 
+    def setUp(self):
+        for fname in ["qala-tokens.jsonl", "taryaq_tokens.jsonl", "qala_test_tokens.jsonl"]:
+            fpath = os.path.join(ROOT_DIR, fname)
+            if os.path.exists(fpath):
+                try:
+                    os.remove(fpath)
+                except OSError:
+                    pass
+
+    def tearDown(self):
+        self.setUp()
+
     def test_01_automated_test_scenario_and_audit_line(self):
         """Verifies deterministic --test mode and validates signed JSONL audit line on disk."""
         with tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False) as f:

@@ -20,6 +20,9 @@ INTEROP_SRC = $(TESTS_DIR)/test_mcp_interop.c
 MOCK_SERVER = $(TESTS_DIR)/mcp_mock_server.py
 HUD_TEST = $(TESTS_DIR)/test_hud_telemetry.py
 TARYAQ_AGENT_SRC = $(SRC_DIR)/taryaq_agent.c
+QALA_AGENT_SRC = $(SRC_DIR)/qala_agent.c
+NIBRAS_AGENT_SRC = $(SRC_DIR)/nibras_agent.c
+NIBRAS_STORE_SRC = $(ADAPTERS_DIR)/nibras_memory_store.c
 TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
 BENCH_RUNNER = bench/bench_runner.py
 LAYA_TEST = $(TESTS_DIR)/test_laya_triage.py
@@ -41,11 +44,13 @@ GROUNDING_BIN = $(BUILD_DIR)/test_grounding_shield
 MCP_CURL_BIN = $(BUILD_DIR)/test_mcp_curl_client
 INTEROP_BIN = $(BUILD_DIR)/test_mcp_interop
 TARYAQ_AGENT_BIN = $(BUILD_DIR)/taryaq_agent
+QALA_AGENT_BIN = $(BUILD_DIR)/qala_agent
+NIBRAS_AGENT_BIN = $(BUILD_DIR)/nibras_agent
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge taryaq_agent clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge taryaq_agent qala_agent nibras_agent clean
 
-all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(LIB_ADAPTERS)
+all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(LIB_ADAPTERS)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -73,10 +78,18 @@ $(TARYAQ_AGENT_BIN): $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING
                      $(ADAPTERS_DIR)/grounding_shield.h $(ADAPTERS_DIR)/qala_adapters.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) $(LDFLAGS) -lcurl -o $@
 
+$(QALA_AGENT_BIN): $(QALA_AGENT_SRC) $(QALA_SRC) $(GROUNDING_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) -lcurl -o $@
+
+$(NIBRAS_AGENT_BIN): $(NIBRAS_AGENT_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(NIBRAS_STORE_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
+
 $(LIB_ADAPTERS): $(QALA_SRC) $(GROUNDING_SRC) $(NIBRAS_SRC) $(TARYAQ_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -fPIC -shared $^ $(LDFLAGS) -o $@
 
 taryaq_agent: $(TARYAQ_AGENT_BIN)
+qala_agent: $(QALA_AGENT_BIN)
+nibras_agent: $(NIBRAS_AGENT_BIN)
 
 test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge
 	@echo "=================================================================="
@@ -88,12 +101,14 @@ test: all test_interop test_hud test_bench test_laya test_golden test_pilot test
 	@./$(GROUNDING_BIN)
 	@./$(MCP_CURL_BIN)
 	@echo "=================================================================="
-	@echo " RUNNING TARYAQ RUNNABLE AGENT ACCEPTANCE BATTERY (M-05)"
+	@echo " RUNNING AGENT DAEMON ACCEPTANCE BATTERIES (Taryaq, Qala, Nibras)"
 	@echo "=================================================================="
 	@./$(TARYAQ_AGENT_BIN) --test
 	@python3 $(TARYAQ_ACCEPTANCE_TEST)
+	@./$(QALA_AGENT_BIN) --test
+	@./$(NIBRAS_AGENT_BIN) --demo
 	@echo "=================================================================="
-	@echo " [SUCCESS] All Championship Adapters, Interop, HUD, Taryaq, Bench, Laya, Golden, Traceability & Bridge Tests Passed!"
+	@echo " [SUCCESS] All Championship Adapters, Interop, HUD, Taryaq, Qala, Nibras, Bench, Laya, Golden, Traceability & Bridge Tests Passed!"
 	@echo "=================================================================="
 
 test_bridge: $(LIB_ADAPTERS)
@@ -189,4 +204,4 @@ test_mcp_curl: $(MCP_CURL_BIN)
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f taryaq_audit.jsonl qala-audit.jsonl *.audit.jsonl
+	rm -f taryaq_audit.jsonl qala-audit.jsonl *.audit.jsonl *.tokens.jsonl *.jsonl data/*.jsonl
