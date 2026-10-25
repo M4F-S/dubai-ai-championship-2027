@@ -24,7 +24,7 @@ typedef enum {
 typedef struct {
     uint64_t            id;
     char                summary[128];
-    int                 valence;         /* -1 (Thorn/Friction), 0 (Neutral), +1 (Rose/Success) */
+    int32_t             valence;         /* -1 (Thorn/Friction), 0 (Neutral), +1 (Rose/Success) */
     double              initial_intensity; /* I_0 in [0.0, 1.0] */
     double              current_intensity; /* Decayed intensity */
     uint64_t            created_utc;

@@ -62,6 +62,16 @@ qala_policy_result_t policy_verify_call(
     const char                 *audit_log_path
 );
 
+/* F-15 Fix: Pointer-based ABI export to prevent large struct return-by-value across compiler/FFI boundaries */
+qala_verdict_t policy_verify_call_ptr(
+    const qala_tool_call_ctx_t *ctx,
+    qala_approval_slot_t       *slots,
+    size_t                      slot_count,
+    uint64_t                    now_utc,
+    const char                 *audit_log_path,
+    qala_policy_result_t       *out_result
+);
+
 int mcp_stateless_build_request(
     char       *out_http_buf,
     size_t      buf_cap,

@@ -21,9 +21,16 @@ typedef struct {
     size_t size;
 } http_memory_buf_t;
 
+#define MCP_MAX_RESPONSE_BYTES (16 * 1024 * 1024)
+
 static size_t curl_write_memory_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     size_t realsize = size * nmemb;
     http_memory_buf_t *mem = (http_memory_buf_t *)userp;
+
+    /* F-14 Fix: Cap response buffer at 16MB to prevent unbounded OOM */
+    if (mem->size + realsize > MCP_MAX_RESPONSE_BYTES) {
+        return 0;
+    }
 
     char *ptr = (char *)realloc(mem->data, mem->size + realsize + 1);
     if (!ptr) {
@@ -104,7 +111,9 @@ static char *build_mcp_jsonrpc_body(
                 if (args_parsed) {
                     cJSON_AddItemToObject(params, "arguments", args_parsed);
                 } else {
-                    cJSON_AddObjectToObject(params, "arguments");
+                    /* F-14 Fix: Reject unparseable arguments rather than silently dropping */
+                    cJSON_Delete(root);
+                    return NULL;
                 }
             } else {
                 cJSON_AddObjectToObject(params, "arguments");
@@ -272,9 +281,17 @@ static void parse_mcp_response(
             /* Fallback to printing unformatted result object */
             out_resp->result_text_payload = cJSON_PrintUnformatted(res_obj);
         }
-        out_resp->status = MCP_SUCCESS;
+        /* F-14 Fix: Check isError flag in tools/call */
+        cJSON *is_err = cJSON_GetObjectItemCaseSensitive(res_obj, "isError");
+        if (is_err && cJSON_IsTrue(is_err)) {
+            out_resp->status = MCP_ERR_RPC_FAULT;
+            out_resp->is_rpc_error = true;
+        } else {
+            out_resp->status = MCP_SUCCESS;
+        }
     } else {
-        out_resp->status = MCP_SUCCESS;
+        /* F-14 Fix: Missing both result and error is an invalid JSON-RPC response */
+        out_resp->status = MCP_ERR_JSON_PARSE;
     }
 
     cJSON_Delete(root);
@@ -322,9 +339,21 @@ static mcp_status_t execute_mcp_http_post(
     headers = curl_slist_append(headers, method_hdr);
 
     if (config->bearer_token && config->bearer_token[0] != '\0') {
-        char auth_hdr[256];
-        snprintf(auth_hdr, sizeof(auth_hdr), "Authorization: Bearer %s", config->bearer_token);
-        headers = curl_slist_append(headers, auth_hdr);
+        /* F-14 Fix: Reject CRLF in bearer token and dynamically allocate header buffer */
+        if (strpbrk(config->bearer_token, "\r\n") != NULL) {
+            curl_slist_free_all(headers);
+            curl_easy_cleanup(curl);
+            free(chunk.data);
+            out_resp->status = MCP_ERR_INVALID_PARAM;
+            return MCP_ERR_INVALID_PARAM;
+        }
+        size_t b_len = strlen(config->bearer_token);
+        char *auth_hdr = (char *)malloc(b_len + 32);
+        if (auth_hdr) {
+            snprintf(auth_hdr, b_len + 32, "Authorization: Bearer %s", config->bearer_token);
+            headers = curl_slist_append(headers, auth_hdr);
+            free(auth_hdr);
+        }
     }
 
     curl_easy_setopt(curl, CURLOPT_URL, config->endpoint_url);
@@ -348,6 +377,11 @@ static mcp_status_t execute_mcp_http_post(
     } else {
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &out_resp->http_status_code);
 
+        /* F-14 Fix: Parse JSON-RPC payload if available even on HTTP errors to capture error message/code */
+        if (chunk.size > 0 && chunk.data[0] != '\0') {
+            parse_mcp_response(chunk.data, out_resp);
+        }
+
         if (out_resp->http_status_code == 401) {
             final_status = MCP_ERR_UNAUTHORIZED;
             out_resp->status = final_status;
@@ -358,7 +392,6 @@ static mcp_status_t execute_mcp_http_post(
             final_status = MCP_ERR_HTTP_STATUS;
             out_resp->status = final_status;
         } else {
-            parse_mcp_response(chunk.data, out_resp);
             final_status = out_resp->status;
         }
     }

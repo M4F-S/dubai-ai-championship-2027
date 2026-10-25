@@ -67,6 +67,14 @@ grounding_result_t grounding_verify_claim(
     size_t                    source_count
 );
 
+/* F-15 Fix: Pointer-based ABI export to prevent large struct return-by-value across compiler/FFI boundaries */
+grounding_verdict_t grounding_verify_claim_ptr(
+    const grounding_claim_t  *claim,
+    const grounding_source_t *sources,
+    size_t                    source_count,
+    grounding_result_t       *out_result
+);
+
 #ifdef __cplusplus
 }
 #endif
