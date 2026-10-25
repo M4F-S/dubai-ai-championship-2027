@@ -55,6 +55,26 @@ size_t arabic_normalize_utf8_hardened(const char *src, char *dst, size_t dst_cap
                     continue;
                 }
 
+                /* AF-09 Fix: Normalize Hamza-on-Waw U+0624 (ؤ 0xD8 0xA4) -> Waw U+0648 (و 0xD9 0x88) */
+                if (b1 == 0xA4) {
+                    if (out_idx + 2 < dst_cap) {
+                        d[out_idx++] = 0xD9;
+                        d[out_idx++] = 0x88;
+                    }
+                    s += 2;
+                    continue;
+                }
+
+                /* AF-09 Fix: Normalize Hamza-on-Ya U+0626 (ئ 0xD8 0xA6) -> Ya U+064A (ي 0xD9 0x8A) */
+                if (b1 == 0xA6) {
+                    if (out_idx + 2 < dst_cap) {
+                        d[out_idx++] = 0xD9;
+                        d[out_idx++] = 0x8A;
+                    }
+                    s += 2;
+                    continue;
+                }
+
                 /* Fold Ta Marbuta U+0629 (ة 0xD8 0xA9) -> Heh U+0647 (ه 0xD9 0x87) */
                 if (b1 == 0xA9) {
                     if (out_idx + 2 < dst_cap) {
@@ -154,6 +174,14 @@ void nibras_fademem_step_hardened(
     for (size_t i = 0; i < count; ++i) {
         out_snap->total_raw_tokens += nodes[i].token_cost;
 
+        /* AF-09 Fix: Preserve previously distilled permanent rules */
+        if (nodes[i].state == TRAJ_DISTILLED_RULE) {
+            nodes[i].current_intensity = 1.0;
+            out_snap->distilled_rules_count++;
+            out_snap->active_tokens_after_prune += (nodes[i].token_cost > 0) ? ((nodes[i].token_cost + 5U) / 6U) : 0;
+            continue;
+        }
+
         double raw_dt = (now_utc > nodes[i].created_utc)
                       ? (double)(now_utc - nodes[i].created_utc)
                       : 0.0;
@@ -175,7 +203,7 @@ void nibras_fademem_step_hardened(
             nodes[i].state = TRAJ_DISTILLED_RULE;
             nodes[i].current_intensity = 1.0; /* Permanent procedural rule */
             out_snap->distilled_rules_count++;
-            out_snap->active_tokens_after_prune += (nodes[i].token_cost / 6);
+            out_snap->active_tokens_after_prune += (nodes[i].token_cost > 0) ? ((nodes[i].token_cost + 5U) / 6U) : 0;
         }
         /* Prune noise below 0.25 threshold unless valence inverted */
         else if (nodes[i].current_intensity < 0.25 && !nodes[i].valence_inverted) {

@@ -39,7 +39,8 @@ from bridge.openrouter_client import (
     OpenRouterAgentEngine,
     VALID_OVERRIDE_TOKEN,
     append_audit_log,
-    AUDIT_LOG_FILE
+    AUDIT_LOG_FILE,
+    _consumed_override_tokens
 )
 from bridge.server import ChampionshipRequestHandler, ThreadingHTTPServer, DEFAULT_HOST
 
@@ -59,6 +60,10 @@ class TestOpenRouterBridge(unittest.TestCase):
         if hasattr(cls, "server"):
             cls.server.shutdown()
             cls.server.server_close()
+
+    def setUp(self):
+        """Reset consumed tokens before each test."""
+        _consumed_override_tokens.clear()
 
     def test_01_c99_bindings_taryaq_fatal_block(self):
         """Verify C99 bare-metal engine blocks fatal drug interaction in < 0.5 ms."""
@@ -182,6 +187,12 @@ class TestOpenRouterBridge(unittest.TestCase):
             data = json.loads(resp.read().decode("utf-8"))
             self.assertEqual(data["status"], "VALIDATED")
 
+        # AF-04: Verify single-use replay protection raises HTTP 409 Conflict
+        req_replay = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req_replay, timeout=5)
+        self.assertEqual(ctx.exception.code, 409)
+
     def test_12_api_chat_sse_stream(self):
         """Verify HTTP POST /api/chat streams Server-Sent Events (SSE) frames."""
         url = f"http://{DEFAULT_HOST}:{self.port}/api/chat"
@@ -210,6 +221,18 @@ class TestOpenRouterBridge(unittest.TestCase):
             self.assertIn("TARYAQ", html)
             self.assertIn("QALA", html)
             self.assertIn("NIBRAS", html)
+
+    def test_14_api_audit_verify_endpoint(self):
+        """Verify HTTP GET /api/audit/verify validates SHA-256 hash chaining from genesis."""
+        url = f"http://{DEFAULT_HOST}:{self.port}/api/audit/verify"
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            self.assertEqual(resp.status, 200)
+            self.assertIn("application/json", resp.headers.get("Content-Type", ""))
+            data = json.loads(resp.read().decode("utf-8"))
+            self.assertTrue(data["chain_intact"])
+            self.assertEqual(data["status"], "VERIFIED_TAMPER_EVIDENT")
+            self.assertGreater(data["total_records"], 0)
 
 
 if __name__ == "__main__":

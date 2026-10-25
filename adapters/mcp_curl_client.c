@@ -77,7 +77,8 @@ static char *build_mcp_jsonrpc_body(
     if (!root) return NULL;
 
     cJSON_AddStringToObject(root, "jsonrpc", "2.0");
-    cJSON_AddNumberToObject(root, "id", (double)request_id);
+    /* AF-10 Fix: Mask request_id to safe 53-bit integer range to prevent double precision loss */
+    cJSON_AddNumberToObject(root, "id", (double)(request_id & 0x1FFFFFFFFFFFFFULL));
     cJSON_AddStringToObject(root, "method", method);
 
     cJSON *params = cJSON_CreateObject();
@@ -258,7 +259,7 @@ static void parse_mcp_response(
 
         cJSON *msg = cJSON_GetObjectItemCaseSensitive(err_obj, "message");
         if (msg && cJSON_IsString(msg) && msg->valuestring) {
-            strncpy(out_resp->rpc_error_message, msg->valuestring, sizeof(out_resp->rpc_error_message) - 1);
+            snprintf(out_resp->rpc_error_message, sizeof(out_resp->rpc_error_message), "%s", msg->valuestring);
         }
         cJSON_Delete(root);
         return;

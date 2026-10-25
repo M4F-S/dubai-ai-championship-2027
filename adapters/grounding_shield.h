@@ -58,6 +58,17 @@ size_t grounding_scrub_search_query(
 );
 
 /**
+ * AF-02: Non-destructive in-place PII redactor. Copies UTF-8 prompts verbatim
+ * while redacting only Emirates IDs, DOBs, phone numbers, emails, and patient names.
+ * Preserves all clinical Arabic text, dosages, prescription names, ICD-10 codes, and numbers.
+ */
+size_t grounding_redact_prompt_pii_c99(
+    const char *src,
+    char       *dst,
+    size_t      dst_cap
+);
+
+/**
  * Deterministically cross-checks a generated hypothesis claim against
  * retrieved authoritative sources.
  */

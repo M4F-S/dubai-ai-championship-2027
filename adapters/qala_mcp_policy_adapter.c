@@ -18,7 +18,6 @@
 #ifdef __linux__
 #include <sys/prctl.h>
 #include <sys/syscall.h>
-#include <linux/landlock.h>
 #endif
 
 #include "qala_adapters.h"
@@ -66,12 +65,16 @@ static void json_escape_string(const char *src, char *dst, size_t dst_cap) {
     dst[w] = '\0';
 }
 
+/* AF-07 Fix: Expanded restricted system and confidential tokens */
 static const char *RESTRICTED_TOKENS[] = {
     "confidential",
-    "/etc/shadow",
-    "/etc/passwd",
-    "/etc/sudoers",
+    "/etc",
     "/root",
+    "/proc",
+    "/sys",
+    "/dev",
+    ".ssh",
+    "id_rsa",
     ".env",
     "uae_citizens.db",
     "customers_pii.db",
@@ -102,7 +105,7 @@ static bool is_restricted_path_hardened(const char *raw_path, const char *raw_ar
         } else {
             /* File does not exist yet: check parent directory to prevent symlink escape */
             char path_copy[PATH_MAX];
-            strncpy(path_copy, raw_path, sizeof(path_copy) - 1);
+            snprintf(path_copy, sizeof(path_copy), "%s", raw_path);
             path_copy[sizeof(path_copy) - 1] = '\0';
             char *parent = dirname(path_copy);
             if (parent && realpath(parent, resolved) != NULL) {
@@ -178,15 +181,15 @@ qala_policy_result_t policy_verify_call(
 
     if (!ctx || !ctx->tool_name) {
         res.verdict = VERDICT_ERROR;
-        strncpy(res.code, "invalid_context", sizeof(res.code) - 1);
-        strncpy(res.reason, "Null tool context provided to Qala policy gate.", sizeof(res.reason) - 1);
+        snprintf(res.code, sizeof(res.code), "%s", "invalid_context");
+        snprintf(res.reason, sizeof(res.reason), "%s", "Null tool context provided to Qala policy gate.");
         return res;
     }
 
     /* 1. DESC ISR v3.1 Filesystem Sandbox Barrier */
     if (is_restricted_path_hardened(ctx->target_path, ctx->raw_args_json)) {
         res.verdict = VERDICT_UNSAFE;
-        strncpy(res.code, "landlock_fs_denied", sizeof(res.code) - 1);
+        snprintf(res.code, sizeof(res.code), "%s", "landlock_fs_denied");
         snprintf(res.reason, sizeof(res.reason),
                  "Access to restricted path '%s' denied by DESC ISR v3.1 policy gate.",
                  ctx->target_path ? ctx->target_path : "unspecified");
@@ -203,7 +206,7 @@ qala_policy_result_t policy_verify_call(
         );
         if (g_res.verdict == GROUNDING_HALLUCINATION_TRIPPED) {
             res.verdict = VERDICT_HALLUCINATION;
-            strncpy(res.code, "grounding_hallucination_blocked", sizeof(res.code) - 1);
+            snprintf(res.code, sizeof(res.code), "%s", "grounding_hallucination_blocked");
             snprintf(res.reason, sizeof(res.reason),
                      "Grounding Shield Intercept: %.220s", g_res.discrepancy_note);
             write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
@@ -219,7 +222,7 @@ qala_policy_result_t policy_verify_call(
     if (requires_human_gate) {
         if (!ctx->supplied_code || ctx->supplied_code[0] == '\0') {
             res.verdict = VERDICT_REVIEW;
-            strncpy(res.code, "approval_required", sizeof(res.code) - 1);
+            snprintf(res.code, sizeof(res.code), "%s", "approval_required");
             snprintf(res.reason, sizeof(res.reason),
                      "Gated operation '%.64s' (AED %.2f) requires a single-use approval_code (scope: %.32s).",
                      ctx->tool_name, isfinite(ctx->amount_aed) ? ctx->amount_aed : 0.0,
@@ -231,8 +234,8 @@ qala_policy_result_t policy_verify_call(
         /* F-07 Fix: Check NULL slots table before indexing */
         if (!slots || slot_count == 0) {
             res.verdict = VERDICT_UNSAFE;
-            strncpy(res.code, "no_approval_slots_configured", sizeof(res.code) - 1);
-            strncpy(res.reason, "Approval code provided but no active approval slots configured on host.", sizeof(res.reason) - 1);
+            snprintf(res.code, sizeof(res.code), "%s", "no_approval_slots_configured");
+            snprintf(res.reason, sizeof(res.reason), "%s", "Approval code provided but no active approval slots configured on host.");
             write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
             return res;
         }
@@ -255,9 +258,8 @@ qala_policy_result_t policy_verify_call(
 
         if (!found_valid) {
             res.verdict = VERDICT_UNSAFE;
-            strncpy(res.code, "invalid_or_expired_approval", sizeof(res.code) - 1);
-            strncpy(res.reason, "Supplied approval_code is invalid, expired, wrong scope, or already consumed.",
-                    sizeof(res.reason) - 1);
+            snprintf(res.code, sizeof(res.code), "%s", "invalid_or_expired_approval");
+            snprintf(res.reason, sizeof(res.reason), "%s", "Supplied approval_code is invalid, expired, wrong scope, or already consumed.");
             write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
             return res;
         }
@@ -265,7 +267,7 @@ qala_policy_result_t policy_verify_call(
 
     /* Safe Execution Verified */
     res.verdict = VERDICT_SAFE;
-    strncpy(res.code, "policy_verified", sizeof(res.code) - 1);
+    snprintf(res.code, sizeof(res.code), "%s", "policy_verified");
     snprintf(res.reason, sizeof(res.reason),
              "Tool '%.64s' verified under DESC ISR v3.1 deterministic policy.", ctx->tool_name);
     write_desc_audit_log(audit_log_path, now_utc, ctx, &res);

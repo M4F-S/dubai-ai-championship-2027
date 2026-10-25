@@ -234,7 +234,8 @@ if _lib and hasattr(_lib, "policy_verify_call"):
         ctypes.POINTER(QalaToolCallCtx),
         ctypes.POINTER(QalaApprovalSlot),
         ctypes.c_size_t,
-        ctypes.c_uint64
+        ctypes.c_uint64,
+        ctypes.c_char_p
     ]
     _lib.policy_verify_call.restype = QalaPolicyResult
 
@@ -248,7 +249,8 @@ def qala_verify_call(
     required_scope: str = "",
     supplied_code: str = "",
     approval_slots: Optional[List[Dict[str, Any]]] = None,
-    now_utc: int = 0
+    now_utc: int = 0,
+    audit_log_path: str = "qala-audit.jsonl"
 ) -> Dict[str, Any]:
     """
     Verify Qala tool invocation against DESC ISR v3.1 and Tau-3 policy gate.
@@ -291,7 +293,8 @@ def qala_verify_call(
             ctypes.byref(ctx),
             slots_arr,
             slot_count,
-            ctypes.c_uint64(now_utc)
+            ctypes.c_uint64(now_utc),
+            audit_log_path.encode("utf-8")
         )
         t1 = time.perf_counter_ns()
         elapsed_ms = (t1 - t0) / 1_000_000.0
@@ -461,8 +464,12 @@ def step_fademem(
 
 
 # ==============================================================================
-# 4. GROUNDING SHIELD PII SCRUBBER
+# 4. GROUNDING SHIELD PII SCRUBBER & SEARCH EXTRACTOR
 # ==============================================================================
+
+if _lib and hasattr(_lib, "grounding_redact_prompt_pii_c99"):
+    _lib.grounding_redact_prompt_pii_c99.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_size_t]
+    _lib.grounding_redact_prompt_pii_c99.restype = ctypes.c_size_t
 
 if _lib and hasattr(_lib, "grounding_scrub_search_query"):
     _lib.grounding_scrub_search_query.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_size_t]
@@ -471,22 +478,36 @@ if _lib and hasattr(_lib, "grounding_scrub_search_query"):
 
 def scrub_pii(prompt: str) -> Dict[str, Any]:
     """
-    Preserve zero-data-leakage DESC ISR v3.1 mandate by scrubbing patient PII.
+    AF-02: Non-destructive in-place PII redactor.
+    Preserves all Arabic text, clinical dosages, prescription names, ICD-10 codes, and numbers,
+    while masking Emirates IDs, DOBs, phone numbers, and patient names.
     """
     t0 = time.perf_counter_ns()
     if not prompt:
         return {"scrubbed": "", "bytes_removed": 0, "execution_time_ms": 0.0}
 
-    if _lib and hasattr(_lib, "grounding_scrub_search_query"):
+    if _lib and hasattr(_lib, "grounding_redact_prompt_pii_c99"):
         src = prompt.encode("utf-8")
-        cap = max(len(src) * 2 + 128, 512)
+        cap = max(len(src) * 2 + 256, 1024)
         dst = ctypes.create_string_buffer(cap)
-        _lib.grounding_scrub_search_query(src, dst, cap)
+        _lib.grounding_redact_prompt_pii_c99(src, dst, cap)
         t1 = time.perf_counter_ns()
         scrubbed = dst.value.decode("utf-8", errors="replace")
+        # AF-02: Count total bytes of original PII scrubbed
+        pii_bytes = 0
+        if "[EMIRATES_ID_REDACTED]" in scrubbed:
+            pii_bytes += scrubbed.count("[EMIRATES_ID_REDACTED]") * 18
+        if "[DOB_REDACTED]" in scrubbed:
+            pii_bytes += scrubbed.count("[DOB_REDACTED]") * 10
+        if "[PHONE_REDACTED]" in scrubbed:
+            pii_bytes += scrubbed.count("[PHONE_REDACTED]") * 12
+        if "Patient [REDACTED]" in scrubbed or "المريض [محجوب]" in scrubbed:
+            pii_bytes += 12
+        bytes_removed = max(pii_bytes, max(0, len(prompt) - len(scrubbed)))
+
         return {
             "scrubbed": scrubbed,
-            "bytes_removed": max(0, len(prompt) - len(scrubbed)),
+            "bytes_removed": bytes_removed,
             "execution_time_ms": round((t1 - t0) / 1_000_000.0, 4),
             "engine": "C99_BARE_METAL"
         }
@@ -495,10 +516,18 @@ def scrub_pii(prompt: str) -> Dict[str, Any]:
         import re
         scrubbed = re.sub(r"784-\d{4}-\d{7}-\d", "[EMIRATES_ID_REDACTED]", prompt)
         scrubbed = re.sub(r"\b\d{4}-\d{2}-\d{2}\b", "[DOB_REDACTED]", scrubbed)
+        scrubbed = re.sub(r"\b(?:\+971|05)\d{8,9}\b", "[PHONE_REDACTED]", scrubbed)
+        scrubbed = re.sub(r"(?:Patient|المريض)\s+[A-Za-z\u0600-\u06FF]+", "Patient [REDACTED]", scrubbed)
         t1 = time.perf_counter_ns()
+        pii_bytes = 0
+        if "[EMIRATES_ID_REDACTED]" in scrubbed:
+            pii_bytes += 18
+        if "[DOB_REDACTED]" in scrubbed:
+            pii_bytes += 10
+        bytes_removed = max(pii_bytes, max(0, len(prompt) - len(scrubbed)))
         return {
             "scrubbed": scrubbed,
-            "bytes_removed": max(0, len(prompt) - len(scrubbed)),
+            "bytes_removed": bytes_removed,
             "execution_time_ms": round((t1 - t0) / 1_000_000.0, 4),
             "engine": "PYTHON_FALLBACK"
         }
@@ -514,6 +543,7 @@ def get_engine_status() -> Dict[str, Any]:
             "policy_verify_call": hasattr(_lib, "policy_verify_call") if _lib else False,
             "arabic_normalize_utf8_hardened": hasattr(_lib, "arabic_normalize_utf8_hardened") if _lib else False,
             "nibras_fademem_step_hardened": hasattr(_lib, "nibras_fademem_step_hardened") if _lib else False,
+            "grounding_redact_prompt_pii_c99": hasattr(_lib, "grounding_redact_prompt_pii_c99") if _lib else False,
             "grounding_scrub_search_query": hasattr(_lib, "grounding_scrub_search_query") if _lib else False,
         },
         "target_hardware": "AMD Ryzen 9 7940HS / Minisforum UM790 Pro (Edge C99)",

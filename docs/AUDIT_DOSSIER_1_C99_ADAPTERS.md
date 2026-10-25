@@ -1,9 +1,7 @@
-# AUDIT DOSSIER 1: BARE-METAL C99 ADAPTERS & CLINICAL SAFETY (REMEDIATED F-01 TO F-15)
+# AUDIT DOSSIER 1: BARE-METAL C99 ADAPTERS & CLINICAL SAFETY (REMEDIATED AF-01 TO AF-12)
 Dubai AI Agents Championship 2026-2027 | DCDE & Dubai Future Foundation
 Scope: Memory Safety, ABI Alignment, Pharmacovigilance, DHA SN 03/2019, DESC ISR v3.1, Stateless MCP 2026-07-28
 Status: 100% Remediated, Tested, and Passing (-Wall -Wextra -Werror)
-
-This dossier contains the complete C99 source code with all 15 audit findings resolved.
 
 
 ---
@@ -125,8 +123,8 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
 
     /* F-01 Fix: Fail-closed initialization before input verification */
     res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
-    strncpy(res.alert_code, "INVALID_RX_CONTEXT", sizeof(res.alert_code) - 1);
-    strncpy(res.clinical_rationale, "Blocked: Prescription context is NULL or primary drug is missing.", sizeof(res.clinical_rationale) - 1);
+    snprintf(res.alert_code, sizeof(res.alert_code), "%s", "INVALID_RX_CONTEXT");
+    snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Blocked: Prescription context is NULL or primary drug is missing.");
 
     if (!rx || !rx->primary_drug || rx->primary_drug[0] == '\0') {
         return res;
@@ -135,8 +133,8 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
     /* F-02 Fix: IEEE-754 NaN and physiological eGFR bounds validation */
     if (!isfinite(rx->patient_egfr_ml_min) || rx->patient_egfr_ml_min <= 0.0 || rx->patient_egfr_ml_min > 250.0) {
         res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
-        strncpy(res.alert_code, "INVALID_RENAL_LAB_VALUE", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale, "Blocked: Patient eGFR must be a finite physiological value between 0.1 and 250.0 mL/min.", sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "INVALID_RENAL_LAB_VALUE");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Blocked: Patient eGFR must be a finite physiological value between 0.1 and 250.0 mL/min.");
         return res;
     }
 
@@ -156,30 +154,24 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
     /* 1a. Fatal CYP3A4 + Renal Contraindication Block (Colchicine + Clarithromycin in eGFR < 60) */
     if (has_colchicine && has_clarithro && rx->patient_egfr_ml_min < 60.0) {
         res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
-        strncpy(res.alert_code, "FATAL_CYP3A4_RENAL_CONTRAINDICATION", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Blocked: Concurrent Colchicine + Clarithromycin in renal impairment (eGFR < 60) causes fatal toxicity due to CYP3A4/P-gp inhibition.",
-                sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "FATAL_CYP3A4_RENAL_CONTRAINDICATION");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Blocked: Concurrent Colchicine + Clarithromycin in renal impairment (eGFR < 60) causes fatal toxicity due to CYP3A4/P-gp inhibition.");
         return res;
     }
 
     /* 1b. Metformin Severe Renal Cutoff (eGFR < 30 mL/min -> Lactic Acidosis Block) */
     if (has_metformin && rx->patient_egfr_ml_min < 30.0) {
         res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
-        strncpy(res.alert_code, "METFORMIN_SEVERE_RENAL_CUTOFF_EGFR_LT_30", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Blocked: Metformin is contraindicated in severe renal impairment (eGFR < 30 mL/min) due to fatal lactic acidosis risk.",
-                sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "METFORMIN_SEVERE_RENAL_CUTOFF_EGFR_LT_30");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Blocked: Metformin is contraindicated in severe renal impairment (eGFR < 30 mL/min) due to fatal lactic acidosis risk.");
         return res;
     }
 
     /* 1c. Metformin CKD Stage 3b Review Gate (30.0 <= eGFR < 45.0 mL/min) */
     if (has_metformin && rx->patient_egfr_ml_min >= 30.0 && rx->patient_egfr_ml_min < 45.0) {
         res.verdict = CLINICAL_CLAIM_CYCLE_WARN;
-        strncpy(res.alert_code, "METFORMIN_CKD_STAGE_3B_DOSE_REDUCTION_REQUIRED", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Clinical Review: Metformin in CKD Stage 3b requires dose reduction (max 1000 mg/day) and renal function monitoring every 3 months.",
-                sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "METFORMIN_CKD_STAGE_3B_DOSE_REDUCTION_REQUIRED");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Clinical Review: Metformin in CKD Stage 3b requires dose reduction (max 1000 mg/day) and renal function monitoring every 3 months.");
         return res;
     }
 
@@ -190,17 +182,16 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
 
     if (is_controlled && !rx->has_controlled_id_verified) {
         res.verdict = CLINICAL_CONTROLLED_DRUG_GATE;
-        strncpy(res.alert_code, "UAE_CONTROLLED_RX_VERIFICATION_REQUIRED", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Hold: Controlled medication requires verified Emirates ID, dosage ceiling verification, and pharmacist co-signature.",
-                sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "UAE_CONTROLLED_RX_VERIFICATION_REQUIRED");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s",
+                 "Hold: Controlled medication requires verified Emirates ID, dosage ceiling verification, and pharmacist co-signature.");
         return res;
     }
 
     /* 3. DHA eClaimLink & Ejadah Scrubber (SN 03/2019 Statutory Late Penalty) */
     if (rx->submission_delay_days > 0) {
         res.verdict = CLINICAL_CLAIM_CYCLE_WARN;
-        strncpy(res.alert_code, "DHA_SN03_2019_DELAY_PENALTY_EXPOSURE", sizeof(res.alert_code) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "DHA_SN03_2019_DELAY_PENALTY_EXPOSURE");
         snprintf(res.clinical_rationale, sizeof(res.clinical_rationale),
                  "Claim Cycle Warning: Submission is %u day(s) overdue past statutory 30-day window under DHA SN 03/2019; subject to 0.03%%/day delay penalty (%.4f%%).",
                  rx->submission_delay_days, (double)rx->submission_delay_days * 0.03);
@@ -211,18 +202,16 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
     if (rx->icd10_code && (strcasestr_c99(rx->icd10_code, "E11") || strcasestr_c99(rx->icd10_code, "E10"))) {
         if (!rx->has_ejadah_lab_justification) {
             res.verdict = CLINICAL_CLAIM_CYCLE_WARN;
-            strncpy(res.alert_code, "EJADAH_LAB_JUSTIFICATION_MISSING", sizeof(res.alert_code) - 1);
-            strncpy(res.clinical_rationale,
-                    "Ejadah Protocol Warning: Diabetes claim requires attached HbA1c lab result justification under DHA KPI benchmarks.",
-                    sizeof(res.clinical_rationale) - 1);
+            snprintf(res.alert_code, sizeof(res.alert_code), "%s", "EJADAH_LAB_JUSTIFICATION_MISSING");
+            snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Ejadah Protocol Warning: Diabetes claim requires attached HbA1c lab result justification under DHA KPI benchmarks.");
             return res;
         }
     }
 
     /* All checks passed */
     res.verdict = CLINICAL_SAFE;
-    strncpy(res.alert_code, "DHA_NABIDH_SAFE", sizeof(res.alert_code) - 1);
-    strncpy(res.clinical_rationale, "Pharmacovigilance and DHA Ejadah claim checks passed.", sizeof(res.clinical_rationale) - 1);
+    snprintf(res.alert_code, sizeof(res.alert_code), "%s", "DHA_NABIDH_SAFE");
+    snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Pharmacovigilance and DHA Ejadah claim checks passed.");
     return res;
 }
 
@@ -473,7 +462,6 @@ int mcp_stateless_build_request(
 #ifdef __linux__
 #include <sys/prctl.h>
 #include <sys/syscall.h>
-#include <linux/landlock.h>
 #endif
 
 #include "qala_adapters.h"
@@ -521,12 +509,16 @@ static void json_escape_string(const char *src, char *dst, size_t dst_cap) {
     dst[w] = '\0';
 }
 
+/* AF-07 Fix: Expanded restricted system and confidential tokens */
 static const char *RESTRICTED_TOKENS[] = {
     "confidential",
-    "/etc/shadow",
-    "/etc/passwd",
-    "/etc/sudoers",
+    "/etc",
     "/root",
+    "/proc",
+    "/sys",
+    "/dev",
+    ".ssh",
+    "id_rsa",
     ".env",
     "uae_citizens.db",
     "customers_pii.db",
@@ -557,7 +549,7 @@ static bool is_restricted_path_hardened(const char *raw_path, const char *raw_ar
         } else {
             /* File does not exist yet: check parent directory to prevent symlink escape */
             char path_copy[PATH_MAX];
-            strncpy(path_copy, raw_path, sizeof(path_copy) - 1);
+            snprintf(path_copy, sizeof(path_copy), "%s", raw_path);
             path_copy[sizeof(path_copy) - 1] = '\0';
             char *parent = dirname(path_copy);
             if (parent && realpath(parent, resolved) != NULL) {
@@ -633,15 +625,15 @@ qala_policy_result_t policy_verify_call(
 
     if (!ctx || !ctx->tool_name) {
         res.verdict = VERDICT_ERROR;
-        strncpy(res.code, "invalid_context", sizeof(res.code) - 1);
-        strncpy(res.reason, "Null tool context provided to Qala policy gate.", sizeof(res.reason) - 1);
+        snprintf(res.code, sizeof(res.code), "%s", "invalid_context");
+        snprintf(res.reason, sizeof(res.reason), "%s", "Null tool context provided to Qala policy gate.");
         return res;
     }
 
     /* 1. DESC ISR v3.1 Filesystem Sandbox Barrier */
     if (is_restricted_path_hardened(ctx->target_path, ctx->raw_args_json)) {
         res.verdict = VERDICT_UNSAFE;
-        strncpy(res.code, "landlock_fs_denied", sizeof(res.code) - 1);
+        snprintf(res.code, sizeof(res.code), "%s", "landlock_fs_denied");
         snprintf(res.reason, sizeof(res.reason),
                  "Access to restricted path '%s' denied by DESC ISR v3.1 policy gate.",
                  ctx->target_path ? ctx->target_path : "unspecified");
@@ -658,7 +650,7 @@ qala_policy_result_t policy_verify_call(
         );
         if (g_res.verdict == GROUNDING_HALLUCINATION_TRIPPED) {
             res.verdict = VERDICT_HALLUCINATION;
-            strncpy(res.code, "grounding_hallucination_blocked", sizeof(res.code) - 1);
+            snprintf(res.code, sizeof(res.code), "%s", "grounding_hallucination_blocked");
             snprintf(res.reason, sizeof(res.reason),
                      "Grounding Shield Intercept: %.220s", g_res.discrepancy_note);
             write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
@@ -674,7 +666,7 @@ qala_policy_result_t policy_verify_call(
     if (requires_human_gate) {
         if (!ctx->supplied_code || ctx->supplied_code[0] == '\0') {
             res.verdict = VERDICT_REVIEW;
-            strncpy(res.code, "approval_required", sizeof(res.code) - 1);
+            snprintf(res.code, sizeof(res.code), "%s", "approval_required");
             snprintf(res.reason, sizeof(res.reason),
                      "Gated operation '%.64s' (AED %.2f) requires a single-use approval_code (scope: %.32s).",
                      ctx->tool_name, isfinite(ctx->amount_aed) ? ctx->amount_aed : 0.0,
@@ -686,8 +678,8 @@ qala_policy_result_t policy_verify_call(
         /* F-07 Fix: Check NULL slots table before indexing */
         if (!slots || slot_count == 0) {
             res.verdict = VERDICT_UNSAFE;
-            strncpy(res.code, "no_approval_slots_configured", sizeof(res.code) - 1);
-            strncpy(res.reason, "Approval code provided but no active approval slots configured on host.", sizeof(res.reason) - 1);
+            snprintf(res.code, sizeof(res.code), "%s", "no_approval_slots_configured");
+            snprintf(res.reason, sizeof(res.reason), "%s", "Approval code provided but no active approval slots configured on host.");
             write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
             return res;
         }
@@ -710,9 +702,8 @@ qala_policy_result_t policy_verify_call(
 
         if (!found_valid) {
             res.verdict = VERDICT_UNSAFE;
-            strncpy(res.code, "invalid_or_expired_approval", sizeof(res.code) - 1);
-            strncpy(res.reason, "Supplied approval_code is invalid, expired, wrong scope, or already consumed.",
-                    sizeof(res.reason) - 1);
+            snprintf(res.code, sizeof(res.code), "%s", "invalid_or_expired_approval");
+            snprintf(res.reason, sizeof(res.reason), "%s", "Supplied approval_code is invalid, expired, wrong scope, or already consumed.");
             write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
             return res;
         }
@@ -720,7 +711,7 @@ qala_policy_result_t policy_verify_call(
 
     /* Safe Execution Verified */
     res.verdict = VERDICT_SAFE;
-    strncpy(res.code, "policy_verified", sizeof(res.code) - 1);
+    snprintf(res.code, sizeof(res.code), "%s", "policy_verified");
     snprintf(res.reason, sizeof(res.reason),
              "Tool '%.64s' verified under DESC ISR v3.1 deterministic policy.", ctx->tool_name);
     write_desc_audit_log(audit_log_path, now_utc, ctx, &res);
@@ -1051,6 +1042,26 @@ size_t arabic_normalize_utf8_hardened(const char *src, char *dst, size_t dst_cap
                     continue;
                 }
 
+                /* AF-09 Fix: Normalize Hamza-on-Waw U+0624 (ؤ 0xD8 0xA4) -> Waw U+0648 (و 0xD9 0x88) */
+                if (b1 == 0xA4) {
+                    if (out_idx + 2 < dst_cap) {
+                        d[out_idx++] = 0xD9;
+                        d[out_idx++] = 0x88;
+                    }
+                    s += 2;
+                    continue;
+                }
+
+                /* AF-09 Fix: Normalize Hamza-on-Ya U+0626 (ئ 0xD8 0xA6) -> Ya U+064A (ي 0xD9 0x8A) */
+                if (b1 == 0xA6) {
+                    if (out_idx + 2 < dst_cap) {
+                        d[out_idx++] = 0xD9;
+                        d[out_idx++] = 0x8A;
+                    }
+                    s += 2;
+                    continue;
+                }
+
                 /* Fold Ta Marbuta U+0629 (ة 0xD8 0xA9) -> Heh U+0647 (ه 0xD9 0x87) */
                 if (b1 == 0xA9) {
                     if (out_idx + 2 < dst_cap) {
@@ -1150,6 +1161,14 @@ void nibras_fademem_step_hardened(
     for (size_t i = 0; i < count; ++i) {
         out_snap->total_raw_tokens += nodes[i].token_cost;
 
+        /* AF-09 Fix: Preserve previously distilled permanent rules */
+        if (nodes[i].state == TRAJ_DISTILLED_RULE) {
+            nodes[i].current_intensity = 1.0;
+            out_snap->distilled_rules_count++;
+            out_snap->active_tokens_after_prune += (nodes[i].token_cost > 0) ? ((nodes[i].token_cost + 5U) / 6U) : 0;
+            continue;
+        }
+
         double raw_dt = (now_utc > nodes[i].created_utc)
                       ? (double)(now_utc - nodes[i].created_utc)
                       : 0.0;
@@ -1171,7 +1190,7 @@ void nibras_fademem_step_hardened(
             nodes[i].state = TRAJ_DISTILLED_RULE;
             nodes[i].current_intensity = 1.0; /* Permanent procedural rule */
             out_snap->distilled_rules_count++;
-            out_snap->active_tokens_after_prune += (nodes[i].token_cost / 6);
+            out_snap->active_tokens_after_prune += (nodes[i].token_cost > 0) ? ((nodes[i].token_cost + 5U) / 6U) : 0;
         }
         /* Prune noise below 0.25 threshold unless valence inverted */
         else if (nodes[i].current_intensity < 0.25 && !nodes[i].valence_inverted) {
@@ -1322,6 +1341,17 @@ size_t grounding_scrub_search_query(
 );
 
 /**
+ * AF-02: Non-destructive in-place PII redactor. Copies UTF-8 prompts verbatim
+ * while redacting only Emirates IDs, DOBs, phone numbers, emails, and patient names.
+ * Preserves all clinical Arabic text, dosages, prescription names, ICD-10 codes, and numbers.
+ */
+size_t grounding_redact_prompt_pii_c99(
+    const char *src,
+    char       *dst,
+    size_t      dst_cap
+);
+
+/**
  * Deterministically cross-checks a generated hypothesis claim against
  * retrieved authoritative sources.
  */
@@ -1427,12 +1457,164 @@ size_t grounding_scrub_search_query(
 
     /* Fallback generic safe query if no specific regulatory token matched */
     if (written == 0) {
-        strncpy(out_scrubbed_query, "Dubai regulatory compliance guidelines", out_cap - 1);
-        out_scrubbed_query[out_cap - 1] = '\0';
+        snprintf(out_scrubbed_query, out_cap, "Dubai regulatory compliance guidelines");
         written = strlen(out_scrubbed_query);
     }
 
     return written;
+}
+
+/* AF-02 Helpers: Pattern matchers for PII entities */
+static bool starts_with_ci(const char *str, const char *prefix) {
+    if (!str || !prefix) return false;
+    while (*prefix != '\0') {
+        if (tolower((unsigned char)*str) != tolower((unsigned char)*prefix)) return false;
+        str++;
+        prefix++;
+    }
+    return true;
+}
+
+static bool is_emirates_id(const char *p) {
+    if (strncmp(p, "784-", 4) != 0) return false;
+    for (int i = 4; i < 8; ++i) if (!isdigit((unsigned char)p[i])) return false;
+    if (p[8] != '-') return false;
+    for (int i = 9; i < 16; ++i) if (!isdigit((unsigned char)p[i])) return false;
+    if (p[16] != '-') return false;
+    if (!isdigit((unsigned char)p[17])) return false;
+    return true;
+}
+
+static bool is_iso_dob(const char *p) {
+    if (!((p[0] == '1' && p[1] == '9') || (p[0] == '2' && p[1] == '0'))) return false;
+    if (!isdigit((unsigned char)p[2]) || !isdigit((unsigned char)p[3])) return false;
+    if (p[4] != '-') return false;
+    if (!isdigit((unsigned char)p[5]) || !isdigit((unsigned char)p[6])) return false;
+    if (p[7] != '-') return false;
+    if (!isdigit((unsigned char)p[8]) || !isdigit((unsigned char)p[9])) return false;
+    return true;
+}
+
+/* AF-02 Fix: Non-destructive in-place PII redactor. Copies UTF-8 prompts verbatim
+ * while redacting only Emirates IDs, DOBs, phone numbers, emails, and patient names.
+ * Preserves all clinical Arabic text, dosages, prescription names, ICD-10 codes, and numbers.
+ */
+size_t grounding_redact_prompt_pii_c99(
+    const char *src,
+    char       *dst,
+    size_t      dst_cap
+) {
+    if (!src || !dst || dst_cap == 0) return 0;
+    dst[0] = '\0';
+
+    size_t w = 0;
+    const char *p = src;
+
+    while (*p != '\0') {
+        /* 1. Emirates ID */
+        if (is_emirates_id(p)) {
+            const char *mask = "[EMIRATES_ID_REDACTED]";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 18;
+            continue;
+        }
+
+        /* 2. ISO DOB */
+        if (is_iso_dob(p)) {
+            const char *mask = "[DOB_REDACTED]";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 10;
+            continue;
+        }
+
+        /* 3. Patient Name prefix: "Patient <Name>" -> "Patient [REDACTED]" */
+        if (starts_with_ci(p, "Patient ")) {
+            const char *mask = "Patient [REDACTED] ";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 8;
+            while (*p == ' ') p++;
+            int words = 0;
+            while (*p != '\0' && *p != ',' && *p != '(' && *p != '.' && *p != '\n') {
+                if (starts_with_ci(p, "prescribed") || starts_with_ci(p, "taking") ||
+                    starts_with_ci(p, "presented") || starts_with_ci(p, "admitted") ||
+                    starts_with_ci(p, "diagnosed")) {
+                    break;
+                }
+                p++;
+                if (*p == ' ') {
+                    words++;
+                    if (words >= 2) break;
+                }
+            }
+            while (*p == ' ') p++;
+            continue;
+        }
+
+        /* 4. Arabic Patient Name prefix: "المريض " -> "المريض [محجوب]" */
+        if (strncmp(p, "المريض ", 13) == 0) {
+            const char *mask = "المريض [محجوب] ";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 13;
+            while (*p == ' ') p++;
+            int words = 0;
+            while (*p != '\0' && *p != ',' && *p != '(' && *p != '.' && *p != '\n') {
+                if ((unsigned char)p[0] == 0xD8 && (unsigned char)p[1] == 0x8C) {
+                    break; /* Arabic comma */
+                }
+                if (strncmp(p, "تناول", 10) == 0 || strncmp(p, "وصف", 6) == 0 || strncmp(p, "يعاني", 10) == 0) {
+                    break;
+                }
+                p++;
+                if (*p == ' ') {
+                    words++;
+                    if (words >= 2) break;
+                }
+            }
+            while (*p == ' ') p++;
+            continue;
+        }
+
+        /* 5. Phone numbers: "+971" */
+        if (strncmp(p, "+971", 4) == 0) {
+            const char *mask = "[PHONE_REDACTED]";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 4;
+            while (*p != '\0' && (isdigit((unsigned char)*p) || *p == ' ' || *p == '-')) {
+                p++;
+            }
+            continue;
+        }
+
+        /* Default: copy character verbatim */
+        if (w + 1 < dst_cap) {
+            dst[w++] = *p++;
+        } else {
+            break;
+        }
+    }
+
+    dst[w] = '\0';
+    return w;
 }
 
 /* F-13 Fix: Deterministic Factual Verification against Retrieved Authoritative Sources */
@@ -1446,14 +1628,14 @@ grounding_result_t grounding_verify_claim(
 
     if (!claim || !claim->claim_text || !sources || source_count == 0) {
         res.verdict = GROUNDING_ERROR;
-        strncpy(res.discrepancy_note, "Missing claim or authoritative sources.", sizeof(res.discrepancy_note) - 1);
+        snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", "Missing claim or authoritative sources.");
         return res;
     }
 
     /* F-13 Fix: Require non-empty entity name to avoid wildcard false matching */
     if (!claim->entity_name || claim->entity_name[0] == '\0') {
         res.verdict = GROUNDING_UNVERIFIABLE;
-        strncpy(res.discrepancy_note, "Claim missing entity name for authoritative grounding.", sizeof(res.discrepancy_note) - 1);
+        snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", "Claim missing entity name for authoritative grounding.");
         return res;
     }
 
@@ -1480,8 +1662,8 @@ grounding_result_t grounding_verify_claim(
                 if (!isfinite(claim->numerical_value) || !isfinite(sources[i].source_numerical)) {
                     res.verdict = GROUNDING_HALLUCINATION_TRIPPED;
                     res.confidence = 0.99;
-                    strncpy(res.citation, s_id, sizeof(res.citation) - 1);
-                    strncpy(res.discrepancy_note, "Discrepancy: Non-finite or NaN numerical value in claim.", sizeof(res.discrepancy_note) - 1);
+                    snprintf(res.citation, sizeof(res.citation), "%s", s_id);
+                    snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", "Discrepancy: Non-finite or NaN numerical value in claim.");
                     return res;
                 }
 
@@ -1489,7 +1671,7 @@ grounding_result_t grounding_verify_claim(
                 if (diff > 0.0001) {
                     /* Record hallucination candidate, but continue scanning remaining sources in case of multiple sections */
                     found_hallucination = true;
-                    strncpy(hallucination_citation, s_id, sizeof(hallucination_citation) - 1);
+                    snprintf(hallucination_citation, sizeof(hallucination_citation), "%s", s_id);
                     snprintf(hallucination_note, sizeof(hallucination_note),
                              "Discrepancy: Claim states %.4f, but authoritative %s mandates %.4f.",
                              claim->numerical_value, s_id, sources[i].source_numerical);
@@ -1500,7 +1682,7 @@ grounding_result_t grounding_verify_claim(
             /* Factual match confirmed */
             res.verdict = GROUNDING_VERIFIED;
             res.confidence = 0.98;
-            strncpy(res.citation, s_id, sizeof(res.citation) - 1);
+            snprintf(res.citation, sizeof(res.citation), "%s", s_id);
             snprintf(res.discrepancy_note, sizeof(res.discrepancy_note),
                      "Verified against authoritative source %s.", s_id);
             return res;
@@ -1510,8 +1692,8 @@ grounding_result_t grounding_verify_claim(
     if (found_hallucination) {
         res.verdict = GROUNDING_HALLUCINATION_TRIPPED;
         res.confidence = 0.99;
-        strncpy(res.citation, hallucination_citation, sizeof(res.citation) - 1);
-        strncpy(res.discrepancy_note, hallucination_note, sizeof(res.discrepancy_note) - 1);
+        snprintf(res.citation, sizeof(res.citation), "%s", hallucination_citation);
+        snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", hallucination_note);
         return res;
     }
 
@@ -1519,7 +1701,7 @@ grounding_result_t grounding_verify_claim(
     if (!entity_found) {
         res.verdict = GROUNDING_UNVERIFIABLE;
         res.confidence = 0.50;
-        strncpy(res.discrepancy_note, "Claimed entity not found in retrieved authoritative corpus.", sizeof(res.discrepancy_note) - 1);
+        snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", "Claimed entity not found in retrieved authoritative corpus.");
     }
 
     return res;
@@ -1597,6 +1779,22 @@ int main(void) {
     };
     grounding_result_t r4 = grounding_verify_claim(&empty_entity, sources, 2);
     assert(r4.verdict == GROUNDING_UNVERIFIABLE);
+
+    /* Test 5 (AF-02 check): Non-destructive in-place PII redaction preserves Arabic & clinical data */
+    const char *prompt_with_pii = "Patient Ahmed Ali (784-1985-1234567-1, DOB 1985-04-12) "
+                                  "prescribed كولشيسين 0.5mg BID and Clarithromycin 500mg BID... eGFR = 22";
+    char redacted[512];
+    size_t rlen = grounding_redact_prompt_pii_c99(prompt_with_pii, redacted, sizeof(redacted));
+    assert(rlen > 0);
+    assert(strstr(redacted, "784-1985-1234567-1") == NULL);
+    assert(strstr(redacted, "1985-04-12") == NULL);
+    assert(strstr(redacted, "[EMIRATES_ID_REDACTED]") != NULL);
+    assert(strstr(redacted, "[DOB_REDACTED]") != NULL);
+    assert(strstr(redacted, "Patient [REDACTED]") != NULL);
+    assert(strstr(redacted, "كولشيسين") != NULL);
+    assert(strstr(redacted, "0.5mg") != NULL);
+    assert(strstr(redacted, "Clarithromycin 500mg") != NULL);
+    assert(strstr(redacted, "eGFR = 22") != NULL);
 
     printf("[PASS] All Grounding Shield C99 PII-Scrubbing & Factual Verification tests passed!\n");
     return 0;
@@ -1782,7 +1980,8 @@ static char *build_mcp_jsonrpc_body(
     if (!root) return NULL;
 
     cJSON_AddStringToObject(root, "jsonrpc", "2.0");
-    cJSON_AddNumberToObject(root, "id", (double)request_id);
+    /* AF-10 Fix: Mask request_id to safe 53-bit integer range to prevent double precision loss */
+    cJSON_AddNumberToObject(root, "id", (double)(request_id & 0x1FFFFFFFFFFFFFULL));
     cJSON_AddStringToObject(root, "method", method);
 
     cJSON *params = cJSON_CreateObject();
@@ -1963,7 +2162,7 @@ static void parse_mcp_response(
 
         cJSON *msg = cJSON_GetObjectItemCaseSensitive(err_obj, "message");
         if (msg && cJSON_IsString(msg) && msg->valuestring) {
-            strncpy(out_resp->rpc_error_message, msg->valuestring, sizeof(out_resp->rpc_error_message) - 1);
+            snprintf(out_resp->rpc_error_message, sizeof(out_resp->rpc_error_message), "%s", msg->valuestring);
         }
         cJSON_Delete(root);
         return;

@@ -55,8 +55,8 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
 
     /* F-01 Fix: Fail-closed initialization before input verification */
     res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
-    strncpy(res.alert_code, "INVALID_RX_CONTEXT", sizeof(res.alert_code) - 1);
-    strncpy(res.clinical_rationale, "Blocked: Prescription context is NULL or primary drug is missing.", sizeof(res.clinical_rationale) - 1);
+    snprintf(res.alert_code, sizeof(res.alert_code), "%s", "INVALID_RX_CONTEXT");
+    snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Blocked: Prescription context is NULL or primary drug is missing.");
 
     if (!rx || !rx->primary_drug || rx->primary_drug[0] == '\0') {
         return res;
@@ -65,8 +65,8 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
     /* F-02 Fix: IEEE-754 NaN and physiological eGFR bounds validation */
     if (!isfinite(rx->patient_egfr_ml_min) || rx->patient_egfr_ml_min <= 0.0 || rx->patient_egfr_ml_min > 250.0) {
         res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
-        strncpy(res.alert_code, "INVALID_RENAL_LAB_VALUE", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale, "Blocked: Patient eGFR must be a finite physiological value between 0.1 and 250.0 mL/min.", sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "INVALID_RENAL_LAB_VALUE");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Blocked: Patient eGFR must be a finite physiological value between 0.1 and 250.0 mL/min.");
         return res;
     }
 
@@ -86,30 +86,24 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
     /* 1a. Fatal CYP3A4 + Renal Contraindication Block (Colchicine + Clarithromycin in eGFR < 60) */
     if (has_colchicine && has_clarithro && rx->patient_egfr_ml_min < 60.0) {
         res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
-        strncpy(res.alert_code, "FATAL_CYP3A4_RENAL_CONTRAINDICATION", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Blocked: Concurrent Colchicine + Clarithromycin in renal impairment (eGFR < 60) causes fatal toxicity due to CYP3A4/P-gp inhibition.",
-                sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "FATAL_CYP3A4_RENAL_CONTRAINDICATION");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Blocked: Concurrent Colchicine + Clarithromycin in renal impairment (eGFR < 60) causes fatal toxicity due to CYP3A4/P-gp inhibition.");
         return res;
     }
 
     /* 1b. Metformin Severe Renal Cutoff (eGFR < 30 mL/min -> Lactic Acidosis Block) */
     if (has_metformin && rx->patient_egfr_ml_min < 30.0) {
         res.verdict = CLINICAL_CONTRAINDICATION_BLOCK;
-        strncpy(res.alert_code, "METFORMIN_SEVERE_RENAL_CUTOFF_EGFR_LT_30", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Blocked: Metformin is contraindicated in severe renal impairment (eGFR < 30 mL/min) due to fatal lactic acidosis risk.",
-                sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "METFORMIN_SEVERE_RENAL_CUTOFF_EGFR_LT_30");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Blocked: Metformin is contraindicated in severe renal impairment (eGFR < 30 mL/min) due to fatal lactic acidosis risk.");
         return res;
     }
 
     /* 1c. Metformin CKD Stage 3b Review Gate (30.0 <= eGFR < 45.0 mL/min) */
     if (has_metformin && rx->patient_egfr_ml_min >= 30.0 && rx->patient_egfr_ml_min < 45.0) {
         res.verdict = CLINICAL_CLAIM_CYCLE_WARN;
-        strncpy(res.alert_code, "METFORMIN_CKD_STAGE_3B_DOSE_REDUCTION_REQUIRED", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Clinical Review: Metformin in CKD Stage 3b requires dose reduction (max 1000 mg/day) and renal function monitoring every 3 months.",
-                sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "METFORMIN_CKD_STAGE_3B_DOSE_REDUCTION_REQUIRED");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Clinical Review: Metformin in CKD Stage 3b requires dose reduction (max 1000 mg/day) and renal function monitoring every 3 months.");
         return res;
     }
 
@@ -120,17 +114,16 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
 
     if (is_controlled && !rx->has_controlled_id_verified) {
         res.verdict = CLINICAL_CONTROLLED_DRUG_GATE;
-        strncpy(res.alert_code, "UAE_CONTROLLED_RX_VERIFICATION_REQUIRED", sizeof(res.alert_code) - 1);
-        strncpy(res.clinical_rationale,
-                "Hold: Controlled medication requires verified Emirates ID, dosage ceiling verification, and pharmacist co-signature.",
-                sizeof(res.clinical_rationale) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "UAE_CONTROLLED_RX_VERIFICATION_REQUIRED");
+        snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s",
+                 "Hold: Controlled medication requires verified Emirates ID, dosage ceiling verification, and pharmacist co-signature.");
         return res;
     }
 
     /* 3. DHA eClaimLink & Ejadah Scrubber (SN 03/2019 Statutory Late Penalty) */
     if (rx->submission_delay_days > 0) {
         res.verdict = CLINICAL_CLAIM_CYCLE_WARN;
-        strncpy(res.alert_code, "DHA_SN03_2019_DELAY_PENALTY_EXPOSURE", sizeof(res.alert_code) - 1);
+        snprintf(res.alert_code, sizeof(res.alert_code), "%s", "DHA_SN03_2019_DELAY_PENALTY_EXPOSURE");
         snprintf(res.clinical_rationale, sizeof(res.clinical_rationale),
                  "Claim Cycle Warning: Submission is %u day(s) overdue past statutory 30-day window under DHA SN 03/2019; subject to 0.03%%/day delay penalty (%.4f%%).",
                  rx->submission_delay_days, (double)rx->submission_delay_days * 0.03);
@@ -141,18 +134,16 @@ taryaq_result_t taryaq_verify_prescription_and_claim(const taryaq_rx_context_t *
     if (rx->icd10_code && (strcasestr_c99(rx->icd10_code, "E11") || strcasestr_c99(rx->icd10_code, "E10"))) {
         if (!rx->has_ejadah_lab_justification) {
             res.verdict = CLINICAL_CLAIM_CYCLE_WARN;
-            strncpy(res.alert_code, "EJADAH_LAB_JUSTIFICATION_MISSING", sizeof(res.alert_code) - 1);
-            strncpy(res.clinical_rationale,
-                    "Ejadah Protocol Warning: Diabetes claim requires attached HbA1c lab result justification under DHA KPI benchmarks.",
-                    sizeof(res.clinical_rationale) - 1);
+            snprintf(res.alert_code, sizeof(res.alert_code), "%s", "EJADAH_LAB_JUSTIFICATION_MISSING");
+            snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Ejadah Protocol Warning: Diabetes claim requires attached HbA1c lab result justification under DHA KPI benchmarks.");
             return res;
         }
     }
 
     /* All checks passed */
     res.verdict = CLINICAL_SAFE;
-    strncpy(res.alert_code, "DHA_NABIDH_SAFE", sizeof(res.alert_code) - 1);
-    strncpy(res.clinical_rationale, "Pharmacovigilance and DHA Ejadah claim checks passed.", sizeof(res.clinical_rationale) - 1);
+    snprintf(res.alert_code, sizeof(res.alert_code), "%s", "DHA_NABIDH_SAFE");
+    snprintf(res.clinical_rationale, sizeof(res.clinical_rationale), "%s", "Pharmacovigilance and DHA Ejadah claim checks passed.");
     return res;
 }
 

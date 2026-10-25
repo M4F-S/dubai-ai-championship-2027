@@ -21,7 +21,13 @@ from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 from typing import Dict, Any, List
 
 from bridge.c99_bindings import get_engine_status
-from bridge.openrouter_client import OpenRouterAgentEngine, AUDIT_LOG_FILE, VALID_OVERRIDE_TOKEN
+from bridge.openrouter_client import (
+    OpenRouterAgentEngine,
+    AUDIT_LOG_FILE,
+    VALID_OVERRIDE_TOKEN,
+    _consumed_override_tokens,
+    _override_lock
+)
 
 DEFAULT_PORT = 8080
 DEFAULT_HOST = "127.0.0.1"
@@ -88,6 +94,8 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self._serve_health()
         elif url_path == "/api/audit":
             self._serve_audit()
+        elif url_path == "/api/audit/verify":
+            self._serve_audit_verify()
         elif url_path == "/api/scenarios":
             self._serve_scenarios()
         else:
@@ -224,8 +232,65 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             pass
         self.close_connection = True
 
+    def _serve_audit_verify(self):
+        """Cryptographically verify the SHA-256 hash chain from genesis (AF-11)."""
+        import hashlib
+        records = []
+        is_valid = True
+        error_msg = ""
+        prev_sha = None
+
+        if os.path.exists(AUDIT_LOG_FILE):
+            try:
+                with open(AUDIT_LOG_FILE, "r", encoding="utf-8") as f:
+                    for line_idx, line in enumerate(f):
+                        line = line.strip()
+                        if not line:
+                            continue
+                        record = json.loads(line)
+                        records.append(record)
+
+                        expected_sig = record.get("sha256_signature")
+                        recorded_prev = record.get("prev_sha256")
+
+                        if expected_sig and recorded_prev is not None:
+                            # Verify signature matches entry payload
+                            rec_copy = dict(record)
+                            rec_copy.pop("sha256_signature", None)
+                            recomputed = hashlib.sha256(json.dumps(rec_copy, sort_keys=True).encode("utf-8")).hexdigest()
+                            if expected_sig != recomputed:
+                                is_valid = False
+                                error_msg = f"Signature mismatch at record {line_idx}"
+                                break
+
+                            # If chained to a known previous hash, check continuity
+                            if prev_sha is not None and recorded_prev != prev_sha and recorded_prev != "0000000000000000000000000000000000000000000000000000000000000000":
+                                is_valid = False
+                                error_msg = f"Chain break at record {line_idx}: expected prev {prev_sha}, found {recorded_prev}"
+                                break
+
+                            prev_sha = expected_sig
+            except Exception as e:
+                is_valid = False
+                error_msg = str(e)
+
+        res = {
+            "chain_intact": is_valid,
+            "total_records": len(records),
+            "latest_sha256": prev_sha or "GENESIS",
+            "status": "VERIFIED_TAMPER_EVIDENT" if is_valid else "CHAIN_INTEGRITY_COMPROMISED",
+            "error": error_msg or None
+        }
+        body = json.dumps(res, indent=2).encode("utf-8")
+        self.send_response(200 if is_valid else 400)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(body)
+
     def _handle_override(self):
-        """Validate and consume clinician override token."""
+        """AF-04 Fix: Validate and consume clinician override token under lock with replay check."""
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length).decode("utf-8")
 
@@ -238,24 +303,29 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
         token = req_data.get("token", "").strip()
         rationale = req_data.get("rationale", "").strip()
 
-        if not token:
-            res = {"status": "ERROR", "message": "Missing override token"}
-            code = 400
-        elif token != VALID_OVERRIDE_TOKEN:
-            res = {"status": "REJECTED", "message": "Invalid token. Authorized clinician signature required."}
-            code = 403
-        elif not rationale:
-            res = {"status": "REJECTED", "message": "Clinical rationale justification cannot be empty."}
-            code = 400
-        else:
-            res = {
-                "status": "VALIDATED",
-                "token": token,
-                "rationale": rationale,
-                "timestamp_utc": int(time.time()),
-                "message": "Clinician token accepted. Gated safety barrier unblocked for single execution."
-            }
-            code = 200
+        with _override_lock:
+            if not token:
+                res = {"status": "ERROR", "message": "Missing override token"}
+                code = 400
+            elif token in _consumed_override_tokens:
+                res = {"status": "REJECTED", "message": "Conflict: Override token has already been consumed. Replay rejected under single-use security policy."}
+                code = 409
+            elif token != VALID_OVERRIDE_TOKEN:
+                res = {"status": "REJECTED", "message": "Invalid token. Authorized clinician signature required."}
+                code = 403
+            elif not rationale:
+                res = {"status": "REJECTED", "message": "Clinical rationale justification cannot be empty."}
+                code = 400
+            else:
+                _consumed_override_tokens.add(token)
+                res = {
+                    "status": "VALIDATED",
+                    "token": token,
+                    "rationale": rationale,
+                    "timestamp_utc": int(time.time()),
+                    "message": "Clinician token accepted. Gated safety barrier unblocked for single execution."
+                }
+                code = 200
 
         resp_bytes = json.dumps(res).encode("utf-8")
         self.send_response(code)

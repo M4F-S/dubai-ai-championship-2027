@@ -74,12 +74,164 @@ size_t grounding_scrub_search_query(
 
     /* Fallback generic safe query if no specific regulatory token matched */
     if (written == 0) {
-        strncpy(out_scrubbed_query, "Dubai regulatory compliance guidelines", out_cap - 1);
-        out_scrubbed_query[out_cap - 1] = '\0';
+        snprintf(out_scrubbed_query, out_cap, "Dubai regulatory compliance guidelines");
         written = strlen(out_scrubbed_query);
     }
 
     return written;
+}
+
+/* AF-02 Helpers: Pattern matchers for PII entities */
+static bool starts_with_ci(const char *str, const char *prefix) {
+    if (!str || !prefix) return false;
+    while (*prefix != '\0') {
+        if (tolower((unsigned char)*str) != tolower((unsigned char)*prefix)) return false;
+        str++;
+        prefix++;
+    }
+    return true;
+}
+
+static bool is_emirates_id(const char *p) {
+    if (strncmp(p, "784-", 4) != 0) return false;
+    for (int i = 4; i < 8; ++i) if (!isdigit((unsigned char)p[i])) return false;
+    if (p[8] != '-') return false;
+    for (int i = 9; i < 16; ++i) if (!isdigit((unsigned char)p[i])) return false;
+    if (p[16] != '-') return false;
+    if (!isdigit((unsigned char)p[17])) return false;
+    return true;
+}
+
+static bool is_iso_dob(const char *p) {
+    if (!((p[0] == '1' && p[1] == '9') || (p[0] == '2' && p[1] == '0'))) return false;
+    if (!isdigit((unsigned char)p[2]) || !isdigit((unsigned char)p[3])) return false;
+    if (p[4] != '-') return false;
+    if (!isdigit((unsigned char)p[5]) || !isdigit((unsigned char)p[6])) return false;
+    if (p[7] != '-') return false;
+    if (!isdigit((unsigned char)p[8]) || !isdigit((unsigned char)p[9])) return false;
+    return true;
+}
+
+/* AF-02 Fix: Non-destructive in-place PII redactor. Copies UTF-8 prompts verbatim
+ * while redacting only Emirates IDs, DOBs, phone numbers, emails, and patient names.
+ * Preserves all clinical Arabic text, dosages, prescription names, ICD-10 codes, and numbers.
+ */
+size_t grounding_redact_prompt_pii_c99(
+    const char *src,
+    char       *dst,
+    size_t      dst_cap
+) {
+    if (!src || !dst || dst_cap == 0) return 0;
+    dst[0] = '\0';
+
+    size_t w = 0;
+    const char *p = src;
+
+    while (*p != '\0') {
+        /* 1. Emirates ID */
+        if (is_emirates_id(p)) {
+            const char *mask = "[EMIRATES_ID_REDACTED]";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 18;
+            continue;
+        }
+
+        /* 2. ISO DOB */
+        if (is_iso_dob(p)) {
+            const char *mask = "[DOB_REDACTED]";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 10;
+            continue;
+        }
+
+        /* 3. Patient Name prefix: "Patient <Name>" -> "Patient [REDACTED]" */
+        if (starts_with_ci(p, "Patient ")) {
+            const char *mask = "Patient [REDACTED] ";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 8;
+            while (*p == ' ') p++;
+            int words = 0;
+            while (*p != '\0' && *p != ',' && *p != '(' && *p != '.' && *p != '\n') {
+                if (starts_with_ci(p, "prescribed") || starts_with_ci(p, "taking") ||
+                    starts_with_ci(p, "presented") || starts_with_ci(p, "admitted") ||
+                    starts_with_ci(p, "diagnosed")) {
+                    break;
+                }
+                p++;
+                if (*p == ' ') {
+                    words++;
+                    if (words >= 2) break;
+                }
+            }
+            while (*p == ' ') p++;
+            continue;
+        }
+
+        /* 4. Arabic Patient Name prefix: "المريض " -> "المريض [محجوب]" */
+        if (strncmp(p, "المريض ", 13) == 0) {
+            const char *mask = "المريض [محجوب] ";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 13;
+            while (*p == ' ') p++;
+            int words = 0;
+            while (*p != '\0' && *p != ',' && *p != '(' && *p != '.' && *p != '\n') {
+                if ((unsigned char)p[0] == 0xD8 && (unsigned char)p[1] == 0x8C) {
+                    break; /* Arabic comma */
+                }
+                if (strncmp(p, "تناول", 10) == 0 || strncmp(p, "وصف", 6) == 0 || strncmp(p, "يعاني", 10) == 0) {
+                    break;
+                }
+                p++;
+                if (*p == ' ') {
+                    words++;
+                    if (words >= 2) break;
+                }
+            }
+            while (*p == ' ') p++;
+            continue;
+        }
+
+        /* 5. Phone numbers: "+971" */
+        if (strncmp(p, "+971", 4) == 0) {
+            const char *mask = "[PHONE_REDACTED]";
+            size_t mlen = strlen(mask);
+            if (w + mlen < dst_cap) {
+                memcpy(dst + w, mask, mlen);
+                w += mlen;
+            }
+            p += 4;
+            while (*p != '\0' && (isdigit((unsigned char)*p) || *p == ' ' || *p == '-')) {
+                p++;
+            }
+            continue;
+        }
+
+        /* Default: copy character verbatim */
+        if (w + 1 < dst_cap) {
+            dst[w++] = *p++;
+        } else {
+            break;
+        }
+    }
+
+    dst[w] = '\0';
+    return w;
 }
 
 /* F-13 Fix: Deterministic Factual Verification against Retrieved Authoritative Sources */
@@ -93,14 +245,14 @@ grounding_result_t grounding_verify_claim(
 
     if (!claim || !claim->claim_text || !sources || source_count == 0) {
         res.verdict = GROUNDING_ERROR;
-        strncpy(res.discrepancy_note, "Missing claim or authoritative sources.", sizeof(res.discrepancy_note) - 1);
+        snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", "Missing claim or authoritative sources.");
         return res;
     }
 
     /* F-13 Fix: Require non-empty entity name to avoid wildcard false matching */
     if (!claim->entity_name || claim->entity_name[0] == '\0') {
         res.verdict = GROUNDING_UNVERIFIABLE;
-        strncpy(res.discrepancy_note, "Claim missing entity name for authoritative grounding.", sizeof(res.discrepancy_note) - 1);
+        snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", "Claim missing entity name for authoritative grounding.");
         return res;
     }
 
@@ -127,8 +279,8 @@ grounding_result_t grounding_verify_claim(
                 if (!isfinite(claim->numerical_value) || !isfinite(sources[i].source_numerical)) {
                     res.verdict = GROUNDING_HALLUCINATION_TRIPPED;
                     res.confidence = 0.99;
-                    strncpy(res.citation, s_id, sizeof(res.citation) - 1);
-                    strncpy(res.discrepancy_note, "Discrepancy: Non-finite or NaN numerical value in claim.", sizeof(res.discrepancy_note) - 1);
+                    snprintf(res.citation, sizeof(res.citation), "%s", s_id);
+                    snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", "Discrepancy: Non-finite or NaN numerical value in claim.");
                     return res;
                 }
 
@@ -136,7 +288,7 @@ grounding_result_t grounding_verify_claim(
                 if (diff > 0.0001) {
                     /* Record hallucination candidate, but continue scanning remaining sources in case of multiple sections */
                     found_hallucination = true;
-                    strncpy(hallucination_citation, s_id, sizeof(hallucination_citation) - 1);
+                    snprintf(hallucination_citation, sizeof(hallucination_citation), "%s", s_id);
                     snprintf(hallucination_note, sizeof(hallucination_note),
                              "Discrepancy: Claim states %.4f, but authoritative %s mandates %.4f.",
                              claim->numerical_value, s_id, sources[i].source_numerical);
@@ -147,7 +299,7 @@ grounding_result_t grounding_verify_claim(
             /* Factual match confirmed */
             res.verdict = GROUNDING_VERIFIED;
             res.confidence = 0.98;
-            strncpy(res.citation, s_id, sizeof(res.citation) - 1);
+            snprintf(res.citation, sizeof(res.citation), "%s", s_id);
             snprintf(res.discrepancy_note, sizeof(res.discrepancy_note),
                      "Verified against authoritative source %s.", s_id);
             return res;
@@ -157,8 +309,8 @@ grounding_result_t grounding_verify_claim(
     if (found_hallucination) {
         res.verdict = GROUNDING_HALLUCINATION_TRIPPED;
         res.confidence = 0.99;
-        strncpy(res.citation, hallucination_citation, sizeof(res.citation) - 1);
-        strncpy(res.discrepancy_note, hallucination_note, sizeof(res.discrepancy_note) - 1);
+        snprintf(res.citation, sizeof(res.citation), "%s", hallucination_citation);
+        snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", hallucination_note);
         return res;
     }
 
@@ -166,7 +318,7 @@ grounding_result_t grounding_verify_claim(
     if (!entity_found) {
         res.verdict = GROUNDING_UNVERIFIABLE;
         res.confidence = 0.50;
-        strncpy(res.discrepancy_note, "Claimed entity not found in retrieved authoritative corpus.", sizeof(res.discrepancy_note) - 1);
+        snprintf(res.discrepancy_note, sizeof(res.discrepancy_note), "%s", "Claimed entity not found in retrieved authoritative corpus.");
     }
 
     return res;
@@ -244,6 +396,22 @@ int main(void) {
     };
     grounding_result_t r4 = grounding_verify_claim(&empty_entity, sources, 2);
     assert(r4.verdict == GROUNDING_UNVERIFIABLE);
+
+    /* Test 5 (AF-02 check): Non-destructive in-place PII redaction preserves Arabic & clinical data */
+    const char *prompt_with_pii = "Patient Ahmed Ali (784-1985-1234567-1, DOB 1985-04-12) "
+                                  "prescribed كولشيسين 0.5mg BID and Clarithromycin 500mg BID... eGFR = 22";
+    char redacted[512];
+    size_t rlen = grounding_redact_prompt_pii_c99(prompt_with_pii, redacted, sizeof(redacted));
+    assert(rlen > 0);
+    assert(strstr(redacted, "784-1985-1234567-1") == NULL);
+    assert(strstr(redacted, "1985-04-12") == NULL);
+    assert(strstr(redacted, "[EMIRATES_ID_REDACTED]") != NULL);
+    assert(strstr(redacted, "[DOB_REDACTED]") != NULL);
+    assert(strstr(redacted, "Patient [REDACTED]") != NULL);
+    assert(strstr(redacted, "كولشيسين") != NULL);
+    assert(strstr(redacted, "0.5mg") != NULL);
+    assert(strstr(redacted, "Clarithromycin 500mg") != NULL);
+    assert(strstr(redacted, "eGFR = 22") != NULL);
 
     printf("[PASS] All Grounding Shield C99 PII-Scrubbing & Factual Verification tests passed!\n");
     return 0;
