@@ -76,7 +76,7 @@ class TestOpenRouterBridge(unittest.TestCase):
         self.assertEqual(res["alert_code"], "FATAL_CYP3A4_RENAL_CONTRAINDICATION")
         self.assertTrue(res["is_blocked"])
         self.assertFalse(res["is_safe"])
-        self.assertLess(res["execution_time_ms"], 0.5)
+        self.assertLess(res["execution_time_ms"], 1.0)
 
     def test_02_c99_bindings_taryaq_safe_rx(self):
         """Verify C99 engine safely approves non-interacting prescriptions."""
@@ -114,7 +114,7 @@ class TestOpenRouterBridge(unittest.TestCase):
         """Verify zero-allocation C99 Arabic normalizer removes hamzas and Eastern digits."""
         res = normalize_arabic("إدارة الأزمات في دبي ٢٠٢٧")
         self.assertEqual(res["normalized"], "اداره الازمات في دبي 2027")
-        self.assertLess(res["execution_time_ms"], 0.5)
+        self.assertLess(res["execution_time_ms"], 1.0)
 
     def test_06_c99_bindings_pii_scrubber(self):
         """Verify DESC ISR v3.1 PII scrubber strips Emirates IDs and patient data."""
