@@ -269,6 +269,7 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
                                 error_msg = f"Chain break at record {line_idx}: expected prev {prev_sha}, found {recorded_prev}"
                                 break
 
+                        if expected_sig:
                             prev_sha = expected_sig
             except Exception as e:
                 is_valid = False
