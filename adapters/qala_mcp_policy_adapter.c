@@ -5,6 +5,9 @@
  *   3. Stateless MCP (2026-07-28) JSON-RPC Transport Frame Builder
  */
 
+#define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 700
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -241,10 +244,10 @@ qala_policy_result_t policy_verify_call(
         }
 
         /* Verify single-use, scope-bound token in constant time */
+        const char *needed_scope = ctx->required_scope ? ctx->required_scope : "default";
         bool found_valid = false;
         for (size_t i = 0; i < slot_count; ++i) {
-            bool scope_matches = (ctx->required_scope == NULL) ||
-                                 (constant_time_streq(slots[i].scope, ctx->required_scope));
+            bool scope_matches = constant_time_streq(slots[i].scope, needed_scope);
 
             if (!slots[i].consumed &&
                 now_utc <= slots[i].expires_utc &&

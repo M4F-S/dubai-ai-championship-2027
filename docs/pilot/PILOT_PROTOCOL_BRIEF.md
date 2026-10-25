@@ -31,9 +31,9 @@
 In outpatient ambulatory clinics and community pharmacies across Dubai, clinical safety and insurance administration intersect under two acute constraints:
 1. **Severe Adverse Drug Events in Chronic Polypharmacy:** Patients with mild-to-moderate chronic kidney disease (CKD, eGFR < 60 mL/min) are frequently co-prescribed Colchicine and potent CYP3A4 inhibitors (e.g., Clarithromycin), producing acute neurotoxicity and fatal bone marrow suppression. Probabilistic cloud LLM assistants often fail to catch these deterministically.
 2. **Statutory Claim Cycle Penalties (DHA SN 03/2019):** Healthcare providers operating on Dubai's `eClaimLink` post office are subject to strict administrative windows under Standards Notice SN 03/2019:
-   * Initial claim submission: by the 15th calendar day of the subsequent month (§3.8.1).
-   * Resubmission window: within 21 calendar days from Remittance Advice receipt (§3.9.1).
-   * Statutory penalty: **0.03% of Net Claimed amount per calendar day of delay** (§3.8.4, §3.9.3).
+   * Initial claim submission: by the 15th calendar day of the subsequent month (§3.7.1).
+   * Resubmission window: within 21 calendar days from Remittance Advice receipt (§3.8.1).
+   * Statutory late penalty: **0.03% of Net Claimed amount per calendar day of delay** (§3.7.2, §3.8.4), plus monitoring payer reimbursement delay fees (§3.9.3).
 3. **Data Sovereignty Restrictions:** **Article 13 of UAE Federal Law No. 2 of 2019** prohibits cross-border transfer or foreign cloud storage of patient health information without explicit ministerial exemption, making cloud-based foreign clinical assistants legally non-compliant for Dubai healthcare providers.
 
 ---
