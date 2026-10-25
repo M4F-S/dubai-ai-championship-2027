@@ -30,7 +30,7 @@
    - 64 GB Dual-Channel DDR5-5600 SODIMM (89.6 GB/s bandwidth).
    - OS: Ubuntu 24.04 LTS / macOS air-gapped test enclave.
 2. **Display Output:** 4K Display (HDMI 2.1) rendering `hud/glass_cockpit_hud.html` in full-screen Google Chrome.
-3. **Telemetry Daemon:** Active local WebSocket server running on `ws://127.0.0.1:8787` (`hud/hud_telemetry_bridge.py`).
+3. **Telemetry Daemon:** Active local WebSocket server running on `ws://127.0.0.1:8787` (`hud/telemetry_bridge.py`).
 4. **Physical Prop:** High-visibility yellow Cat6 RJ-45 Ethernet cable connected to an unpowered desktop switch, positioned prominently on the demo table.
 
 ### 2. Live Cable Pull Choreography (At Exactly 0:52)

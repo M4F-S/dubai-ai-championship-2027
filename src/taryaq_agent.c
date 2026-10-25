@@ -380,13 +380,25 @@ static const taryaq_med_entry_t *taryaq_med_lookup(const char *query) {
         }
         lower_name[nlen] = '\0';
 
-        if (strstr(lower_q, lower_name) != NULL || strstr(lower_name, lower_q) != NULL) {
+        /* Query contains full medication name (e.g., "Colchicine 0.5mg BID") */
+        if (strstr(lower_q, lower_name) != NULL) {
+            return med;
+        }
+        /* Or query is an exact/prefix match of at least 4 characters */
+        size_t qlen = strlen(lower_q);
+        if (qlen >= 4 && strncmp(lower_name, lower_q, qlen) == 0) {
             return med;
         }
 
         char norm_med_ar[128];
         arabic_normalize_utf8_hardened(med->arabic_name, norm_med_ar, sizeof(norm_med_ar));
-        if (strstr(norm_q, norm_med_ar) != NULL || strstr(norm_med_ar, norm_q) != NULL) {
+        /* Arabic: query contains full drug name (e.g., "حبوب كولشيسين") */
+        if (strstr(norm_q, norm_med_ar) != NULL) {
+            return med;
+        }
+        /* Or exact/prefix match of at least 6 bytes (~3 Arabic UTF-8 chars) */
+        size_t ar_qlen = strlen(norm_q);
+        if (ar_qlen >= 6 && strncmp(norm_med_ar, norm_q, ar_qlen) == 0) {
             return med;
         }
     }

@@ -41,7 +41,7 @@ The purpose of this non-binding Letter of Intent (LOI) is to establish the prosp
    Pursuant to Article 13 of UAE Federal Law No. 2 of 2019 on the Use of Information and Communication Technology (ICT) in Health Fields, all computational processing shall occur strictly on a dedicated, on-premises physical appliance deployed inside the facility's secure server enclave. No patient health information (PHI), identifiable data, or prescription telemetry shall be transmitted outside the facility premises or to public cloud infrastructure.
 
 3. **Statutory Claim Cycle Scrubber Evaluation (DHA Standards Notice SN 03/2019):**  
-   The software shall shadow-audit outpatient electronic billing claims prior to submission to the Dubai Health Post Office (`eClaimLink` / DHPO), validating compliance against 15th-of-month and 21-day Remittance Advice timelines, and calculating potential exposure to the statutory **0.03% per calendar day late penalty** on Net Claimed amounts (§3.8.4, §3.9.3).
+   The software shall shadow-audit outpatient electronic billing claims prior to submission to the Dubai Health Post Office (`eClaimLink` / DHPO), validating compliance against 15th-of-month (§3.7.1) and 21-day Remittance Advice (§3.8.1) timelines, and calculating potential exposure to the statutory **0.03% per calendar day late penalty** on Net Claimed amounts (§3.7.2, §3.8.4), while monitoring statutory payer delay liabilities (§3.9.3).
 
 4. **Cryptographic Accountability & Auditability:**  
    Every software check, clinical alert, and pharmacist override shall be logged to an append-only, tamper-evident JSONL audit record sealed with SHA-256 cryptographic signatures. Overrides require verified authorized tokens and documented clinical rationales.

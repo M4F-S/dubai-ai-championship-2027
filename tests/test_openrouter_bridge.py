@@ -54,6 +54,8 @@ class TestOpenRouterBridge(unittest.TestCase):
         cls.server_thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.server_thread.start()
         time.sleep(0.2)  # Wait for socket to bind
+        # Warm up ctypes binding symbols to eliminate first-call dynamic linker latency
+        taryaq_verify_rx(primary_drug="Aspirin", concurrent_drug="Paracetamol", egfr=90.0)
 
     @classmethod
     def tearDownClass(cls):
