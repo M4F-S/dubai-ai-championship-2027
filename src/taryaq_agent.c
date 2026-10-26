@@ -3,6 +3,16 @@
  * Conforms strictly to ISO C99 (-std=c99 -Wall -Wextra -Werror -O2)
  */
 
+#ifndef _DARWIN_C_SOURCE
+#define _DARWIN_C_SOURCE 1
+#endif
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE 1
+#endif
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE 1
+#endif
+
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 700
 
@@ -14,6 +24,9 @@
 #include <ctype.h>
 #include <time.h>
 #include <sys/time.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/file.h>
 #include <curl/curl.h>
 
 #include "taryaq_adapters.h"
@@ -159,6 +172,121 @@ static void sha256_hex(const char *data, size_t len, char hex_out[65]) {
         snprintf(hex_out + (i * 2), 3, "%02x", hash[i]);
     }
     hex_out[64] = '\0';
+}
+
+static void hmac_sha256(
+    const uint8_t *key, size_t key_len,
+    const uint8_t *data, size_t data_len,
+    uint8_t mac_out[32]
+) {
+    uint8_t k0[64];
+    memset(k0, 0, sizeof(k0));
+
+    if (key_len > 64) {
+        taryaq_sha256_t k_ctx;
+        sha256_init(&k_ctx);
+        sha256_update(&k_ctx, key, key_len);
+        sha256_final(&k_ctx, k0);
+    } else {
+        memcpy(k0, key, key_len);
+    }
+
+    uint8_t k_ipad[64];
+    uint8_t k_opad[64];
+    for (int i = 0; i < 64; ++i) {
+        k_ipad[i] = k0[i] ^ 0x36;
+        k_opad[i] = k0[i] ^ 0x5c;
+    }
+
+    /* Inner hash: H(K_ipad || data) */
+    taryaq_sha256_t in_ctx;
+    uint8_t inner_hash[32];
+    sha256_init(&in_ctx);
+    sha256_update(&in_ctx, k_ipad, 64);
+    sha256_update(&in_ctx, data, data_len);
+    sha256_final(&in_ctx, inner_hash);
+
+    /* Outer hash: H(K_opad || inner_hash) */
+    taryaq_sha256_t out_ctx;
+    sha256_init(&out_ctx);
+    sha256_update(&out_ctx, k_opad, 64);
+    sha256_update(&out_ctx, inner_hash, 32);
+    sha256_final(&out_ctx, mac_out);
+}
+
+static void hmac_sha256_hex(
+    const char *key, size_t key_len,
+    const char *data, size_t data_len,
+    char hex_out[65]
+) {
+    uint8_t mac[32];
+    hmac_sha256((const uint8_t *)key, key_len, (const uint8_t *)data, data_len, mac);
+    for (int i = 0; i < 32; ++i) {
+        snprintf(hex_out + (i * 2), 3, "%02x", mac[i]);
+    }
+    hex_out[64] = '\0';
+}
+
+static bool taryaq_get_prev_mac(int fd, char prev_mac_out[65]) {
+    off_t file_size = lseek(fd, 0, SEEK_END);
+    if (file_size < 0) {
+        return false;
+    }
+    if (file_size == 0) {
+        memset(prev_mac_out, '0', 64);
+        prev_mac_out[64] = '\0';
+        return true;
+    }
+
+    size_t to_read = (file_size > 4096) ? 4096 : (size_t)file_size;
+    off_t seek_pos = file_size - (off_t)to_read;
+    if (lseek(fd, seek_pos, SEEK_SET) < 0) {
+        return false;
+    }
+
+    char buf[4097];
+    ssize_t bytes_read = read(fd, buf, to_read);
+    if (bytes_read <= 0) {
+        return false;
+    }
+    buf[bytes_read] = '\0';
+
+    char *p = buf + bytes_read - 1;
+    while (p >= buf && (*p == '\n' || *p == '\r' || isspace((unsigned char)*p))) {
+        *p = '\0';
+        p--;
+    }
+    if (p < buf) {
+        memset(prev_mac_out, '0', 64);
+        prev_mac_out[64] = '\0';
+        return true;
+    }
+
+    char *last_line = p;
+    while (last_line > buf && *(last_line - 1) != '\n' && *(last_line - 1) != '\r') {
+        last_line--;
+    }
+
+    char *mac_pos = strstr(last_line, "\"mac\":\"");
+    if (!mac_pos) {
+        mac_pos = strstr(last_line, "\"mac\": \"");
+        if (mac_pos) mac_pos += 8;
+    } else {
+        mac_pos += 7;
+    }
+
+    if (!mac_pos || strlen(mac_pos) < 64) {
+        return false;
+    }
+
+    for (int i = 0; i < 64; ++i) {
+        if (!isxdigit((unsigned char)mac_pos[i])) {
+            return false;
+        }
+        prev_mac_out[i] = (char)tolower((unsigned char)mac_pos[i]);
+    }
+    prev_mac_out[64] = '\0';
+    return true;
 }
 
 /* ========================================================================= */
@@ -337,6 +465,16 @@ static const taryaq_med_entry_t MED_DATABASE[] = {
         .clinical_notes = "Narrow therapeutic window; international normalized ratio monitoring required"
     },
     {
+        .canonical_name = "Amiodarone",
+        .arabic_name = "أميودارون",
+        .drug_class = "Class III Antiarrhythmic",
+        .renal_egfr_cutoff = 15.0,
+        .cyp3a4_profile = CYP3A4_INHIBITOR,
+        .is_controlled = false,
+        .icd10_indication = "I49.9",
+        .clinical_notes = "Inhibits CYP2C9 and CYP3A4; interacts with Warfarin causing fatal hemorrhage risk"
+    },
+    {
         .canonical_name = NULL,
         .arabic_name = NULL,
         .drug_class = NULL,
@@ -466,7 +604,41 @@ static taryaq_check_result_t taryaq_interaction_check(
 }
 
 /* ========================================================================= */
-/* 7. Tool 3: claim_scrub                                                    */
+/* 7. Session State Model                                                    */
+/* ========================================================================= */
+
+typedef enum {
+    SESSION_EMPTY       = 0,
+    SESSION_DRAFT       = 1,
+    SESSION_SAFE        = 2,
+    SESSION_BLOCKED     = 3,
+    SESSION_OVERRIDDEN  = 4,
+    SESSION_COMMITTED   = 5,
+    SESSION_ROLLED_BACK = 6
+} taryaq_session_state_t;
+
+typedef struct {
+    taryaq_session_state_t state;
+    char     primary_drug[64];
+    char     concurrent_drug[64];
+    double   patient_egfr;
+    bool     is_controlled;
+    bool     has_id_verified;
+    char     alert_code[64];
+    char     clinical_rationale[256];
+    bool     override_approved;
+    char     override_token[64];
+    char     override_rationale[256];
+    double   net_claim_aed;
+    uint32_t delay_days;
+    double   penalty_aed;
+    uint64_t created_utc;
+} taryaq_working_session_t;
+
+static taryaq_working_session_t g_session;
+
+/* ========================================================================= */
+/* 8. Tool 3: claim_scrub                                                    */
 /* ========================================================================= */
 
 typedef struct {
@@ -482,6 +654,10 @@ typedef struct {
 } taryaq_claim_scrub_result_t;
 
 static taryaq_claim_scrub_result_t taryaq_claim_scrub(
+    const char *primary_drug,
+    const char *concurrent_drug,
+    double      patient_egfr,
+    bool        has_override,
     double      net_claim_aed,
     uint32_t    delay_days,
     const char *icd10_code,
@@ -508,8 +684,15 @@ static taryaq_claim_scrub_result_t taryaq_claim_scrub(
 
     taryaq_rx_context_t rx;
     memset(&rx, 0, sizeof(rx));
-    rx.primary_drug = "Metformin";
-    rx.patient_egfr_ml_min = 90.0;
+    rx.primary_drug = (primary_drug && primary_drug[0] != '\0') ? primary_drug :
+                      (g_session.primary_drug[0] != '\0' ? g_session.primary_drug : "Metformin");
+    rx.concurrent_drug = (concurrent_drug && concurrent_drug[0] != '\0') ? concurrent_drug :
+                         (g_session.concurrent_drug[0] != '\0' ? g_session.concurrent_drug : NULL);
+    rx.patient_egfr_ml_min = (patient_egfr > 0.0) ? patient_egfr :
+                             (g_session.patient_egfr > 0.0 ? g_session.patient_egfr : 90.0);
+    rx.has_clinician_override = has_override;
+    rx.is_controlled_substance = g_session.is_controlled;
+    rx.has_controlled_id_verified = g_session.has_id_verified;
     rx.icd10_code = icd10_code ? icd10_code : "E11.9";
     rx.submission_delay_days = delay_days;
     rx.has_ejadah_lab_justification = true;
@@ -591,52 +774,66 @@ static taryaq_override_result_t taryaq_human_override(
 }
 
 /* ========================================================================= */
-/* 9. Tool 5: commit_audit & Rollback Engine                                 */
+/* 10. Tool 5: commit_audit & Rollback Engine                                */
 /* ========================================================================= */
-
-typedef enum {
-    SESSION_EMPTY       = 0,
-    SESSION_DRAFT       = 1,
-    SESSION_SAFE        = 2,
-    SESSION_BLOCKED     = 3,
-    SESSION_OVERRIDDEN  = 4,
-    SESSION_COMMITTED   = 5,
-    SESSION_ROLLED_BACK = 6
-} taryaq_session_state_t;
-
-typedef struct {
-    taryaq_session_state_t state;
-    char     primary_drug[64];
-    char     concurrent_drug[64];
-    double   patient_egfr;
-    bool     is_controlled;
-    bool     has_id_verified;
-    char     alert_code[64];
-    char     clinical_rationale[256];
-    bool     override_approved;
-    char     override_token[64];
-    char     override_rationale[256];
-    double   net_claim_aed;
-    uint32_t delay_days;
-    double   penalty_aed;
-    uint64_t created_utc;
-} taryaq_working_session_t;
-
-static taryaq_working_session_t g_session;
 
 static void taryaq_rollback_state(const char *reason, const char *audit_path, bool enable_telemetry) {
     uint64_t now_utc = taryaq_now_utc();
     if (g_session.state != SESSION_EMPTY && g_session.state != SESSION_ROLLED_BACK) {
         if (audit_path) {
-            FILE *fp = fopen(audit_path, "a");
-            if (fp) {
-                char esc_reason[256];
-                taryaq_json_escape(reason ? reason : "Operator abort or unapproved block", esc_reason, sizeof(esc_reason));
-                fprintf(fp,
-                    "{\"timestamp_utc\":%llu,\"reporting_tz\":\"Asia/Dubai\",\"agent\":\"Taryaq v0\","
-                    "\"action\":\"PRESCRIPTION_ROLLED_BACK\",\"reason\":\"%s\",\"state\":\"ROLLED_BACK\"}\n",
-                    (unsigned long long)now_utc, esc_reason);
-                fclose(fp);
+            const char *key = getenv("TARYAQ_AUDIT_KEY");
+            if (!key || strlen(key) < 32) {
+                fprintf(stderr, "[-] Audit key missing: export TARYAQ_AUDIT_KEY=<32+ bytes>\n");
+            } else {
+                int fd = open(audit_path, O_RDWR | O_CREAT, 0600);
+                if (fd >= 0) {
+                    if (flock(fd, LOCK_EX) == 0) {
+                        char prev_mac[65];
+                        if (taryaq_get_prev_mac(fd, prev_mac)) {
+                            char canonical[1024];
+                            snprintf(canonical, sizeof(canonical),
+                                "%llu|Asia/Dubai|Taryaq v0|PRESCRIPTION_ROLLED_BACK|%s|%s|%.1f|%s",
+                                (unsigned long long)now_utc,
+                                g_session.primary_drug[0] ? g_session.primary_drug : "NONE",
+                                g_session.concurrent_drug[0] ? g_session.concurrent_drug : "NONE",
+                                g_session.patient_egfr,
+                                reason ? reason : "Operator abort or unapproved block");
+
+                            char hmac_msg[2048];
+                            snprintf(hmac_msg, sizeof(hmac_msg), "%s\n%s", prev_mac, canonical);
+                            char mac[65];
+                            hmac_sha256_hex(key, strlen(key), hmac_msg, strlen(hmac_msg), mac);
+
+                            char sha256_sig[65];
+                            sha256_hex(canonical, strlen(canonical), sha256_sig);
+
+                            char esc_primary[128], esc_concurrent[128], esc_reason[256], esc_canon[1024];
+                            taryaq_json_escape(g_session.primary_drug[0] ? g_session.primary_drug : "NONE", esc_primary, sizeof(esc_primary));
+                            taryaq_json_escape(g_session.concurrent_drug[0] ? g_session.concurrent_drug : "NONE", esc_concurrent, sizeof(esc_concurrent));
+                            taryaq_json_escape(reason ? reason : "Operator abort or unapproved block", esc_reason, sizeof(esc_reason));
+                            taryaq_json_escape(canonical, esc_canon, sizeof(esc_canon));
+
+                            char line[4096];
+                            snprintf(line, sizeof(line),
+                                "{\"timestamp_utc\":%llu,\"reporting_tz\":\"Asia/Dubai\",\"agent\":\"Taryaq v0\","
+                                "\"action\":\"PRESCRIPTION_ROLLED_BACK\",\"primary_drug\":\"%s\",\"concurrent_drug\":\"%s\","
+                                "\"patient_egfr\":%.1f,\"reason\":\"%s\","
+                                "\"canonical\":\"%s\",\"prev_sha256\":\"%s\",\"mac\":\"%s\","
+                                "\"sha256_signature\":\"%s\",\"state\":\"ROLLED_BACK\"}\n",
+                                (unsigned long long)now_utc,
+                                esc_primary, esc_concurrent, g_session.patient_egfr, esc_reason,
+                                esc_canon, prev_mac, mac, sha256_sig);
+
+                            if (lseek(fd, 0, SEEK_END) >= 0) {
+                                ssize_t w = write(fd, line, strlen(line));
+                                (void)w;
+                                fsync(fd);
+                            }
+                        }
+                        flock(fd, LOCK_UN);
+                    }
+                    close(fd);
+                }
             }
         }
     }
@@ -664,10 +861,16 @@ static bool taryaq_commit_audit(const char *audit_path, bool enable_telemetry) {
         return false;
     }
 
+    const char *key = getenv("TARYAQ_AUDIT_KEY");
+    if (!key || strlen(key) < 32) {
+        fprintf(stderr, "[-] Audit key missing: export TARYAQ_AUDIT_KEY=<32+ bytes>\n");
+        return false;
+    }
+
     uint64_t now_utc = taryaq_now_utc();
 
-    char payload_to_hash[1024];
-    snprintf(payload_to_hash, sizeof(payload_to_hash),
+    char canonical[1024];
+    snprintf(canonical, sizeof(canonical),
         "%llu|Asia/Dubai|Taryaq v0|PRESCRIPTION_COMMITTED|%s|%s|%.1f|%s|%s|%s|%.2f|%u|%.2f",
         (unsigned long long)now_utc,
         g_session.primary_drug,
@@ -680,29 +883,53 @@ static bool taryaq_commit_audit(const char *audit_path, bool enable_telemetry) {
         g_session.delay_days,
         g_session.penalty_aed);
 
-    char sha256_sig[65];
-    sha256_hex(payload_to_hash, strlen(payload_to_hash), sha256_sig);
+    /* Compute legacy SHA-256 for backward-compatibility */
+    char legacy_sig[65];
+    sha256_hex(canonical, strlen(canonical), legacy_sig);
 
-    FILE *fp = fopen(audit_path ? audit_path : DEFAULT_AUDIT_LOG, "a");
-    if (!fp) {
+    const char *path = audit_path ? audit_path : DEFAULT_AUDIT_LOG;
+    int fd = open(path, O_RDWR | O_CREAT, 0600);
+    if (fd < 0) {
         perror("[-] Error opening audit log file");
         return false;
     }
 
+    if (flock(fd, LOCK_EX) != 0) {
+        perror("[-] Error locking audit log file");
+        close(fd);
+        return false;
+    }
+
+    char prev_mac[65];
+    if (!taryaq_get_prev_mac(fd, prev_mac)) {
+        fprintf(stderr, "[-] Fatal: Audit chain corruption detected in '%s' (malformed or missing previous mac)\n", path);
+        flock(fd, LOCK_UN);
+        close(fd);
+        return false;
+    }
+
+    char hmac_msg[2048];
+    snprintf(hmac_msg, sizeof(hmac_msg), "%s\n%s", prev_mac, canonical);
+    char mac[65];
+    hmac_sha256_hex(key, strlen(key), hmac_msg, strlen(hmac_msg), mac);
+
     char esc_primary[128], esc_concurrent[128], esc_alert[128];
-    char esc_token[128], esc_rationale[256];
+    char esc_token[128], esc_rationale[256], esc_canon[1024];
     taryaq_json_escape(g_session.primary_drug, esc_primary, sizeof(esc_primary));
     taryaq_json_escape(g_session.concurrent_drug, esc_concurrent, sizeof(esc_concurrent));
     taryaq_json_escape(g_session.alert_code, esc_alert, sizeof(esc_alert));
     taryaq_json_escape(g_session.override_token, esc_token, sizeof(esc_token));
     taryaq_json_escape(g_session.override_rationale, esc_rationale, sizeof(esc_rationale));
+    taryaq_json_escape(canonical, esc_canon, sizeof(esc_canon));
 
-    fprintf(fp,
+    char line[4096];
+    snprintf(line, sizeof(line),
         "{\"timestamp_utc\":%llu,\"reporting_tz\":\"Asia/Dubai\",\"agent\":\"Taryaq v0\","
         "\"action\":\"PRESCRIPTION_COMMITTED\",\"primary_drug\":\"%s\",\"concurrent_drug\":\"%s\","
         "\"patient_egfr\":%.1f,\"verdict\":\"%s\",\"alert_code\":\"%s\","
         "\"override_status\":\"%s\",\"override_token\":\"%s\",\"override_rationale\":\"%s\","
         "\"claim_net_aed\":%.2f,\"claim_delay_days\":%u,\"penalty_aed\":%.2f,"
+        "\"canonical\":\"%s\",\"prev_sha256\":\"%s\",\"mac\":\"%s\","
         "\"sha256_signature\":\"%s\",\"state\":\"COMMITTED\"}\n",
         (unsigned long long)now_utc,
         esc_primary,
@@ -716,9 +943,29 @@ static bool taryaq_commit_audit(const char *audit_path, bool enable_telemetry) {
         g_session.net_claim_aed,
         g_session.delay_days,
         g_session.penalty_aed,
-        sha256_sig);
-    fflush(fp);
-    fclose(fp);
+        esc_canon,
+        prev_mac,
+        mac,
+        legacy_sig);
+
+    if (lseek(fd, 0, SEEK_END) < 0) {
+        perror("[-] Error seeking to end of audit log file");
+        flock(fd, LOCK_UN);
+        close(fd);
+        return false;
+    }
+
+    ssize_t wlen = write(fd, line, strlen(line));
+    if (wlen < 0 || (size_t)wlen != strlen(line)) {
+        perror("[-] Error writing audit record");
+        flock(fd, LOCK_UN);
+        close(fd);
+        return false;
+    }
+
+    fsync(fd);
+    flock(fd, LOCK_UN);
+    close(fd);
 
     g_session.state = SESSION_COMMITTED;
 
@@ -728,7 +975,7 @@ static bool taryaq_commit_audit(const char *audit_path, bool enable_telemetry) {
             "{\"event_type\":\"state_committed\",\"agent\":\"Taryaq v0\",\"verdict\":\"%s\","
             "\"primary_drug\":\"%s\",\"sha256\":\"%s\",\"status\":\"COMMITTED\"}",
             (g_session.override_approved ? "OVERRIDDEN" : "SAFE"),
-            esc_primary, sha256_sig);
+            esc_primary, mac);
         taryaq_emit_telemetry(true, "state_committed", tele);
     }
 
@@ -740,7 +987,30 @@ static bool taryaq_commit_audit(const char *audit_path, bool enable_telemetry) {
 /* ========================================================================= */
 
 static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
+    /* Self-test only: isolate the single-use ledger so reruns are idempotent
+     * and the production ledger is never touched. */
+    qala_set_token_store_path("build/taryaq_test_tokens.jsonl");
+    (void)remove("build/taryaq_test_tokens.jsonl");
+
     double t_start = taryaq_get_monotonic_ms();
+
+    /* Ensure test key is active if not set in environment */
+    if (!getenv("TARYAQ_AUDIT_KEY")) {
+        setenv("TARYAQ_AUDIT_KEY", "test-key-32-bytes-minimum-000000", 0);
+    }
+
+    /* Cryptographic self-test: RFC 4231 HMAC-SHA256 test vectors */
+    char hmac_test[65];
+    hmac_sha256_hex("Jefe", 4, "what do ya want for nothing?", 28, hmac_test);
+    if (strcmp(hmac_test, "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843") != 0) {
+        fprintf(stderr, "[-] Fatal: HMAC-SHA256 failed RFC 4231 test vector 2! Got: %s\n", hmac_test);
+        return 1;
+    }
+    hmac_sha256_hex("test-key-32-bytes-minimum-000000", 32, "Taryaq Sovereign Clinical Audit HMAC Verification", 49, hmac_test);
+    if (strcmp(hmac_test, "835a20214031ba6b95982d35e1fbd96acf0abcdabda4cbcd3913ce1f9c83979b") != 0) {
+        fprintf(stderr, "[-] Fatal: HMAC-SHA256 failed test key vector! Got: %s\n", hmac_test);
+        return 1;
+    }
 
     printf("================================================================================\n");
     printf("  TARYAQ v0 CLI DAEMON: DETERMINISTIC ACCEPTANCE SUITE (-Wall -Werror -O2)\n");
@@ -873,13 +1143,17 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
         taryaq_emit_telemetry(true, "gate_verdict", tele);
     }
 
-    /* Milestone 7: Tool 3 - claim_scrub (DHA SN 03/2019 Claim Cycle & Late Penalty) */
-    taryaq_claim_scrub_result_t scrub_ok = taryaq_claim_scrub(450.00, 0, "M10.0", "Patient prescription claim");
+    /* Milestone 7: Tool 3 - claim_scrub (DHA SN 03/2019 Claim Cycle & Late Penalty with Dynamic Context) */
+    taryaq_claim_scrub_result_t scrub_ok = taryaq_claim_scrub(
+        g_session.primary_drug, g_session.concurrent_drug, g_session.patient_egfr,
+        g_session.override_approved, 450.00, 0, "M10.0", "Patient prescription claim");
     if (scrub_ok.verdict != CLINICAL_SAFE || scrub_ok.penalty_aed != 0.0) {
         fprintf(stderr, "[-] Fatal: Normal claim failed scrub!\n");
         return 1;
     }
-    taryaq_claim_scrub_result_t scrub_late = taryaq_claim_scrub(450.00, 12, "M10.0", "Delayed claim submission");
+    taryaq_claim_scrub_result_t scrub_late = taryaq_claim_scrub(
+        g_session.primary_drug, g_session.concurrent_drug, g_session.patient_egfr,
+        g_session.override_approved, 450.00, 12, "M10.0", "Delayed claim submission");
     if (scrub_late.verdict != CLINICAL_CLAIM_CYCLE_WARN || scrub_late.penalty_aed < 1.61 || scrub_late.penalty_aed > 1.63) {
         fprintf(stderr, "[-] Fatal: DHA SN 03/2019 12-day penalty incorrect (expected 1.62 AED, got %.2f AED)!\n",
                 scrub_late.penalty_aed);
@@ -917,6 +1191,9 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
     if (strstr(last_line, "PRESCRIPTION_COMMITTED") == NULL ||
         strstr(last_line, "Colchicine") == NULL ||
         strstr(last_line, "TARYAQ-OVERRIDE-8842-CLIN") == NULL ||
+        strstr(last_line, "\"canonical\":") == NULL ||
+        strstr(last_line, "\"prev_sha256\":") == NULL ||
+        strstr(last_line, "\"mac\":") == NULL ||
         strstr(last_line, "sha256_signature") == NULL) {
         fprintf(stderr, "[-] Fatal: Audit line on disk is missing required signature or fields: %s\n", last_line);
         return 1;
@@ -930,8 +1207,27 @@ static int run_test_scenario(const char *audit_path, bool enable_telemetry) {
         return 1;
     }
 
-    double t_total = taryaq_get_monotonic_ms() - t_start;
     printf("[MILESTONE 8/8] Tool 5 (commit_audit): Signed JSONL on disk & single-use replay blocked -> PASS\n");
+
+    /* Patient Care Companion: Emergency Red-Flag Triage Verification */
+    taryaq_triage_result_t tr_ar = taryaq_triage_patient_symptoms("أشعر بألم في الصدر وضيق تنفس");
+    if (!tr_ar.is_red_flag || tr_ar.level != TRIAGE_EMERGENCY || strcmp(tr_ar.triage_category, "CARDIOVASCULAR_ACUTE") != 0) {
+        fprintf(stderr, "[-] Fatal: Patient Arabic red-flag triage failed to trigger emergency interrupt!\n");
+        return 1;
+    }
+    taryaq_triage_result_t tr_en = taryaq_triage_patient_symptoms("Patient has sudden facial drooping and slurred speech");
+    if (!tr_en.is_red_flag || tr_en.level != TRIAGE_EMERGENCY || strcmp(tr_en.triage_category, "STROKE_NEUROLOGICAL") != 0) {
+        fprintf(stderr, "[-] Fatal: Patient English stroke red-flag triage failed!\n");
+        return 1;
+    }
+    taryaq_triage_result_t tr_safe = taryaq_triage_patient_symptoms("Routine refill inquiry for Metformin 500mg");
+    if (tr_safe.is_red_flag || tr_safe.level != TRIAGE_ROUTINE) {
+        fprintf(stderr, "[-] Fatal: Routine inquiry falsely triggered red flag!\n");
+        return 1;
+    }
+    printf("[TRIAGE GATE] Patient Emergency Red-Flag Triage verified (Arabic/English interrupts & routine) -> PASS\n");
+
+    double t_total = taryaq_get_monotonic_ms() - t_start;
 
     printf("================================================================================\n");
     printf(" [SUCCESS] Taryaq v0 Acceptance Workflow Passed in %.3f ms (< 180,000 ms)\n", t_total);
@@ -954,6 +1250,7 @@ static void print_cli_help(void) {
     printf("   check                               - Run contraindication & interaction engine\n");
     printf("   claim <net_aed> <delay_days> [note] - Run DHA SN 03/2019 claim cycle scrubber\n");
     printf("   override <token> <rationale...>     - Apply single-use cryptographic override\n");
+    printf("   triage <patient_symptoms...>        - Emergency red-flag triage (Arabic / English)\n");
     printf("   commit                              - Sign and write append-only audit line\n");
     printf("   rollback                            - Discard uncommitted prescription state\n");
     printf("   status                              - Display current session status\n");
@@ -1096,6 +1393,11 @@ static void run_cli_loop(const char *audit_path, bool enable_telemetry) {
                 g_session.state = SESSION_BLOCKED;
                 printf("[!] VERDICT: CONTROLLED MEDICATION GATE - %s\n", chk.alert_code);
                 printf("    %s\n", chk.clinical_rationale);
+            } else if (chk.verdict == CLINICAL_UNVERIFIED_REVIEW) {
+                g_session.state = SESSION_BLOCKED;
+                printf("[!] VERDICT: UNVERIFIED DRUG REVIEW REQUIRED - %s\n", chk.alert_code);
+                printf("    %s\n", chk.clinical_rationale);
+                printf("    To override, run: override <token> <clinical_rationale>\n");
             } else {
                 g_session.state = SESSION_SAFE;
                 printf("[+] VERDICT: SAFE - %s\n", chk.alert_code);
@@ -1121,7 +1423,9 @@ static void run_cli_loop(const char *audit_path, bool enable_telemetry) {
                 printf("Usage: claim <net_claim_aed> <delay_days> [claim_narrative]\n");
                 continue;
             }
-            taryaq_claim_scrub_result_t sc = taryaq_claim_scrub(aed, delay, "M10.0", narrative);
+            taryaq_claim_scrub_result_t sc = taryaq_claim_scrub(
+                g_session.primary_drug, g_session.concurrent_drug, g_session.patient_egfr,
+                g_session.override_approved, aed, delay, "M10.0", narrative);
             g_session.net_claim_aed = sc.net_claim_aed;
             g_session.delay_days = sc.delay_days;
             g_session.penalty_aed = sc.penalty_aed;
@@ -1158,6 +1462,22 @@ static void run_cli_loop(const char *audit_path, bool enable_telemetry) {
                 printf("    Ready to commit. Run: commit\n");
             } else {
                 printf("[-] OVERRIDE REJECTED: %s\n", ov.err_message);
+            }
+        } else if (strcmp(cmd, "triage") == 0 || strcmp(cmd, "فرز") == 0) {
+            if (parsed < 2 || rest[0] == '\0') {
+                printf("Usage: triage <patient_reported_symptoms_in_arabic_or_english>\n");
+                continue;
+            }
+            taryaq_triage_result_t tr = taryaq_triage_patient_symptoms(rest);
+            if (tr.is_red_flag) {
+                printf("[!] EMERGENCY RED-FLAG DETECTED: %s\n", tr.triage_category);
+                printf("    Trigger Word: %s\n", tr.matched_trigger);
+                printf("    Protocol:     %s\n", tr.action_protocol);
+                printf("    Guidance:     %s\n", tr.clinical_guidance);
+            } else {
+                printf("[+] TRIAGE ROUTINE: %s\n", tr.triage_category);
+                printf("    Protocol:     %s\n", tr.action_protocol);
+                printf("    Guidance:     %s\n", tr.clinical_guidance);
             }
         } else if (strcmp(cmd, "commit") == 0) {
             if (g_session.state == SESSION_BLOCKED && !g_session.override_approved) {

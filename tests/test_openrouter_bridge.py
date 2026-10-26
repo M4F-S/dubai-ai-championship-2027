@@ -48,6 +48,12 @@ from bridge.server import ChampionshipRequestHandler, ThreadingHTTPServer, DEFAU
 class TestOpenRouterBridge(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Ensure clean state for test run
+        if os.path.exists(AUDIT_LOG_FILE):
+            try:
+                os.remove(AUDIT_LOG_FILE)
+            except OSError:
+                pass
         # Start server on ephemeral port for endpoint tests
         cls.port = 8799
         cls.server = ThreadingHTTPServer((DEFAULT_HOST, cls.port), ChampionshipRequestHandler)
@@ -62,6 +68,11 @@ class TestOpenRouterBridge(unittest.TestCase):
         if hasattr(cls, "server"):
             cls.server.shutdown()
             cls.server.server_close()
+        if os.path.exists(AUDIT_LOG_FILE):
+            try:
+                os.remove(AUDIT_LOG_FILE)
+            except OSError:
+                pass
 
     def setUp(self):
         """Reset consumed tokens before each test."""

@@ -46,11 +46,12 @@ INTEROP_BIN = $(BUILD_DIR)/test_mcp_interop
 TARYAQ_AGENT_BIN = $(BUILD_DIR)/taryaq_agent
 QALA_AGENT_BIN = $(BUILD_DIR)/qala_agent
 NIBRAS_AGENT_BIN = $(BUILD_DIR)/nibras_agent
+NIBRAS_SUITE_BIN = $(BUILD_DIR)/test_nibras_suite
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
 .PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa taryaq_agent qala_agent nibras_agent clean
 
-all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(LIB_ADAPTERS)
+all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(LIB_ADAPTERS)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -84,6 +85,9 @@ $(QALA_AGENT_BIN): $(QALA_AGENT_SRC) $(QALA_SRC) $(GROUNDING_SRC) $(MCP_CURL_SRC
 $(NIBRAS_AGENT_BIN): $(NIBRAS_AGENT_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(NIBRAS_STORE_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 
+$(NIBRAS_SUITE_BIN): $(TESTS_DIR)/test_nibras_suite.c $(NIBRAS_SRC) $(GROUNDING_SRC) $(NIBRAS_STORE_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
+
 $(LIB_ADAPTERS): $(QALA_SRC) $(GROUNDING_SRC) $(NIBRAS_SRC) $(TARYAQ_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -fPIC -shared $^ $(LDFLAGS) -o $@
 
@@ -97,6 +101,7 @@ test: all test_interop test_hud test_bench test_laya test_golden test_pilot test
 	@echo "=================================================================="
 	@./$(QALA_BIN)
 	@./$(NIBRAS_BIN)
+	@./$(NIBRAS_SUITE_BIN)
 	@./$(TARYAQ_BIN)
 	@./$(GROUNDING_BIN)
 	@./$(MCP_CURL_BIN)
@@ -105,6 +110,7 @@ test: all test_interop test_hud test_bench test_laya test_golden test_pilot test
 	@echo "=================================================================="
 	@./$(TARYAQ_AGENT_BIN) --test
 	@python3 $(TARYAQ_ACCEPTANCE_TEST)
+	@python3 tests/test_audit_tamper.py
 	@./$(QALA_AGENT_BIN) --test
 	@./$(NIBRAS_AGENT_BIN) --demo
 	@echo "=================================================================="
@@ -218,4 +224,6 @@ test_mcp_curl: $(MCP_CURL_BIN)
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f taryaq_audit.jsonl qala-audit.jsonl *.audit.jsonl *.tokens.jsonl *.jsonl data/*.jsonl
+	rm -f taryaq_audit.jsonl qala-audit.jsonl
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
