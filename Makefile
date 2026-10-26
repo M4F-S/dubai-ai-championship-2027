@@ -48,7 +48,7 @@ QALA_AGENT_BIN = $(BUILD_DIR)/qala_agent
 NIBRAS_AGENT_BIN = $(BUILD_DIR)/nibras_agent
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge taryaq_agent qala_agent nibras_agent clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa taryaq_agent qala_agent nibras_agent clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(LIB_ADAPTERS)
 
@@ -91,7 +91,7 @@ taryaq_agent: $(TARYAQ_AGENT_BIN)
 qala_agent: $(QALA_AGENT_BIN)
 nibras_agent: $(NIBRAS_AGENT_BIN)
 
-test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge
+test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge test_gomaa
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -116,6 +116,20 @@ test_bridge: $(LIB_ADAPTERS)
 	@echo " RUNNING SOVEREIGN OPENROUTER AGENT BRIDGE VERIFICATION SUITE"
 	@echo "=================================================================="
 	@python3 $(BRIDGE_TEST)
+
+test_gomaa: $(LIB_ADAPTERS)
+	@echo "=================================================================="
+	@echo " RUNNING NIBRAS GOMAA 4-QUADRANT MEMORY OS TEST SUITE"
+	@echo "=================================================================="
+	@python3 tests/test_nibras_gomaa.py
+	@echo "=================================================================="
+	@echo " RUNNING TARYAQ GOMAA LONGITUDINAL PATIENT MEMORY SUITE"
+	@echo "=================================================================="
+	@python3 tests/test_taryaq_gomaa.py
+	@echo "=================================================================="
+	@echo " RUNNING QALA PROMPT INJECTION DEFENSE SUITE"
+	@echo "=================================================================="
+	@python3 tests/test_qala_injection_defense.py
 
 test_traceability:
 	@echo "=================================================================="
