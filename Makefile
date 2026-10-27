@@ -2,8 +2,8 @@
 # Systems: Qala (Business), Nibras Executive (Personal), Taryaq (Societal)
 
 CC ?= cc
-CFLAGS ?= -std=c99 -Wall -Wextra -Werror -O2 -Iadapters
-LDFLAGS ?= -lm
+CFLAGS ?= -std=c99 -Wall -Wextra -Werror -O2 -Iadapters -Isrc
+LDFLAGS ?= -lm -lsqlite3
 
 BUILD_DIR = build
 ADAPTERS_DIR = adapters
@@ -21,6 +21,7 @@ MOCK_SERVER = $(TESTS_DIR)/mcp_mock_server.py
 HUD_TEST = $(TESTS_DIR)/test_hud_telemetry.py
 TARYAQ_AGENT_SRC = $(SRC_DIR)/taryaq_agent.c
 QALA_AGENT_SRC = $(SRC_DIR)/qala_agent.c
+QALA_CASE_SRC = $(SRC_DIR)/qala_case_memory.c
 NIBRAS_AGENT_SRC = $(SRC_DIR)/nibras_agent.c
 NIBRAS_STORE_SRC = $(ADAPTERS_DIR)/nibras_memory_store.c
 TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
@@ -47,11 +48,12 @@ TARYAQ_AGENT_BIN = $(BUILD_DIR)/taryaq_agent
 QALA_AGENT_BIN = $(BUILD_DIR)/qala_agent
 NIBRAS_AGENT_BIN = $(BUILD_DIR)/nibras_agent
 NIBRAS_SUITE_BIN = $(BUILD_DIR)/test_nibras_suite
+CASE_MEMORY_TEST_BIN = $(BUILD_DIR)/test_case_memory
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa taryaq_agent qala_agent nibras_agent clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa taryaq_agent qala_agent nibras_agent timeline-demo clean
 
-all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(LIB_ADAPTERS)
+all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(CASE_MEMORY_TEST_BIN) $(LIB_ADAPTERS)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -79,7 +81,10 @@ $(TARYAQ_AGENT_BIN): $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING
                      $(ADAPTERS_DIR)/grounding_shield.h $(ADAPTERS_DIR)/qala_adapters.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) $(LDFLAGS) -lcurl -o $@
 
-$(QALA_AGENT_BIN): $(QALA_AGENT_SRC) $(QALA_SRC) $(GROUNDING_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) | $(BUILD_DIR)
+$(QALA_AGENT_BIN): $(QALA_AGENT_SRC) $(QALA_CASE_SRC) $(QALA_SRC) $(GROUNDING_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) -lcurl -o $@
+
+$(CASE_MEMORY_TEST_BIN): $(TESTS_DIR)/test_case_memory.c $(QALA_CASE_SRC) $(CJSON_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -lcurl -o $@
 
 $(NIBRAS_AGENT_BIN): $(NIBRAS_AGENT_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(NIBRAS_STORE_SRC) | $(BUILD_DIR)
@@ -95,11 +100,15 @@ taryaq_agent: $(TARYAQ_AGENT_BIN)
 qala_agent: $(QALA_AGENT_BIN)
 nibras_agent: $(NIBRAS_AGENT_BIN)
 
+timeline-demo: $(TARYAQ_AGENT_BIN)
+	@./$(TARYAQ_AGENT_BIN) --timeline-demo
+
 test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge test_gomaa
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
 	@./$(QALA_BIN)
+	@./$(CASE_MEMORY_TEST_BIN)
 	@./$(NIBRAS_BIN)
 	@./$(NIBRAS_SUITE_BIN)
 	@./$(TARYAQ_BIN)
@@ -111,6 +120,7 @@ test: all test_interop test_hud test_bench test_laya test_golden test_pilot test
 	@./$(TARYAQ_AGENT_BIN) --test
 	@python3 $(TARYAQ_ACCEPTANCE_TEST)
 	@python3 tests/test_audit_tamper.py
+	@python3 tests/test_patient_timeline.py
 	@./$(QALA_AGENT_BIN) --test
 	@./$(NIBRAS_AGENT_BIN) --demo
 	@echo "=================================================================="
@@ -224,6 +234,6 @@ test_mcp_curl: $(MCP_CURL_BIN)
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f taryaq_audit.jsonl qala-audit.jsonl
+	rm -f taryaq_audit.jsonl qala-audit.jsonl taryaq_encounters.jsonl build/qala_test_audit.jsonl build/qala_case_memory.db
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
