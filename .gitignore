@@ -25,6 +25,9 @@ taryaq_audit.jsonl
 *.audit.jsonl
 *-audit.jsonl
 qala-audit.jsonl
+taryaq_encounters.jsonl
+*.encounters.jsonl
+*.db
 
 # Node.js & Next.js
 node_modules/
