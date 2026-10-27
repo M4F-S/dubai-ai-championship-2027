@@ -103,11 +103,11 @@ class TestOpenRouterBridge(unittest.TestCase):
         self.assertFalse(res["is_blocked"])
 
     def test_03_c99_bindings_dha_late_claim_scrub(self):
-        """Verify DHA SN 03/2019 claims submission delay penalty calculation."""
+        """Verify DHA SN 03/2019 claims submission delay penalty calculation (42 days = 12 days past 30-day window)."""
         res = taryaq_verify_rx(
             primary_drug="Metformin",
             egfr=75.0,
-            submission_delay_days=12
+            submission_delay_days=42
         )
         self.assertEqual(res["verdict"], "CLINICAL_CLAIM_CYCLE_WARN")
         self.assertTrue(res["is_warning"])

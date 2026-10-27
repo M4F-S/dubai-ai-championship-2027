@@ -49,6 +49,7 @@ class TaryaqRxContext(ctypes.Structure):
         ("icd10_code", ctypes.c_char_p),
         ("submission_delay_days", ctypes.c_uint32),
         ("has_ejadah_lab_justification", ctypes.c_bool),
+        ("has_clinician_override", ctypes.c_bool),
     ]
 
 class TaryaqResult(ctypes.Structure):
@@ -56,6 +57,9 @@ class TaryaqResult(ctypes.Structure):
         ("verdict", ctypes.c_int),
         ("alert_code", ctypes.c_char * 64),
         ("clinical_rationale", ctypes.c_char * 256),
+        ("doc_id", ctypes.c_char * 64),
+        ("section", ctypes.c_char * 64),
+        ("passage_sha256", ctypes.c_char * 65),
     ]
 
 # Verdict enum mapping
@@ -67,9 +71,16 @@ TARYAQ_VERDICTS = {
     4: "CLINICAL_UNVERIFIED_REVIEW",
 }
 
-if _lib and hasattr(_lib, "taryaq_verify_prescription_and_claim"):
-    _lib.taryaq_verify_prescription_and_claim.argtypes = [ctypes.POINTER(TaryaqRxContext)]
-    _lib.taryaq_verify_prescription_and_claim.restype = TaryaqResult
+if _lib:
+    if hasattr(_lib, "taryaq_verify_prescription_and_claim_ptr"):
+        _lib.taryaq_verify_prescription_and_claim_ptr.argtypes = [
+            ctypes.POINTER(TaryaqRxContext),
+            ctypes.POINTER(TaryaqResult)
+        ]
+        _lib.taryaq_verify_prescription_and_claim_ptr.restype = ctypes.c_int
+    elif hasattr(_lib, "taryaq_verify_prescription_and_claim"):
+        _lib.taryaq_verify_prescription_and_claim.argtypes = [ctypes.POINTER(TaryaqRxContext)]
+        _lib.taryaq_verify_prescription_and_claim.restype = TaryaqResult
 
 
 def taryaq_verify_rx(
@@ -98,10 +109,15 @@ def taryaq_verify_rx(
         has_controlled_id_verified=bool(has_controlled_id),
         icd10_code=icd10.encode("utf-8") if icd10 else None,
         submission_delay_days=int(submission_delay_days),
-        has_ejadah_lab_justification=bool(has_ejadah_lab_justification)
+        has_ejadah_lab_justification=bool(has_ejadah_lab_justification),
+        has_clinician_override=False
     )
 
-    res = _lib.taryaq_verify_prescription_and_claim(ctypes.byref(ctx))
+    res = TaryaqResult()
+    if hasattr(_lib, "taryaq_verify_prescription_and_claim_ptr"):
+        _lib.taryaq_verify_prescription_and_claim_ptr(ctypes.byref(ctx), ctypes.byref(res))
+    else:
+        res = _lib.taryaq_verify_prescription_and_claim(ctypes.byref(ctx))
     t1 = time.perf_counter_ns()
     elapsed_ms = (t1 - t0) / 1_000_000.0
 
@@ -138,12 +154,13 @@ def _taryaq_fallback_verify(primary: str, concurrent: str, egfr: float, delay_da
                 "execution_time_ms": 0.05,
                 "engine": "PYTHON_FALLBACK"
             }
-    if delay_days > 0:
+    if delay_days > 30:
+        overdue = delay_days - 30
         return {
             "verdict_id": 1,
             "verdict": "CLINICAL_CLAIM_CYCLE_WARN",
             "alert_code": "DHA_SN_03_2019_DELAY_WARN",
-            "clinical_rationale": f"Warning: Claim submission delayed by {delay_days} days. Subject to 0.03%/day penalty.",
+            "clinical_rationale": f"Warning: Claim submission delayed by {delay_days} days ({overdue} days overdue). Subject to 0.03%/day penalty.",
             "is_safe": False,
             "is_blocked": False,
             "is_warning": True,
@@ -181,6 +198,10 @@ class GroundingSource(ctypes.Structure):
         ("source_title", ctypes.c_char_p),
         ("snippet_text", ctypes.c_char_p),
         ("source_numerical", ctypes.c_double),
+        ("doc_id", ctypes.c_char_p),
+        ("section", ctypes.c_char_p),
+        ("page", ctypes.c_int),
+        ("passage_sha256", ctypes.c_char * 65),
     ]
 
 class GroundingResult(ctypes.Structure):
@@ -189,6 +210,10 @@ class GroundingResult(ctypes.Structure):
         ("confidence", ctypes.c_double),
         ("citation", ctypes.c_char * 128),
         ("discrepancy_note", ctypes.c_char * 256),
+        ("doc_id", ctypes.c_char * 64),
+        ("section", ctypes.c_char * 64),
+        ("page", ctypes.c_int),
+        ("passage_sha256", ctypes.c_char * 65),
     ]
 
 class QalaApprovalSlot(ctypes.Structure):
@@ -211,6 +236,9 @@ class QalaToolCallCtx(ctypes.Structure):
         ("grounding_claim", ctypes.POINTER(GroundingClaim)),
         ("grounding_corpus", ctypes.POINTER(GroundingSource)),
         ("grounding_count", ctypes.c_size_t),
+        ("cited_doc_id", ctypes.c_char_p),
+        ("cited_section", ctypes.c_char_p),
+        ("cited_passage_sha256", ctypes.c_char_p),
     ]
 
 class QalaPolicyResult(ctypes.Structure):
@@ -218,6 +246,9 @@ class QalaPolicyResult(ctypes.Structure):
         ("verdict", ctypes.c_int),
         ("code", ctypes.c_char * 64),
         ("reason", ctypes.c_char * 256),
+        ("cited_doc_id", ctypes.c_char * 64),
+        ("cited_section", ctypes.c_char * 64),
+        ("passage_sha256", ctypes.c_char * 65),
     ]
 
 QALA_VERDICTS = {
@@ -230,15 +261,26 @@ QALA_VERDICTS = {
     6: "VERDICT_ERROR",
 }
 
-if _lib and hasattr(_lib, "policy_verify_call"):
-    _lib.policy_verify_call.argtypes = [
-        ctypes.POINTER(QalaToolCallCtx),
-        ctypes.POINTER(QalaApprovalSlot),
-        ctypes.c_size_t,
-        ctypes.c_uint64,
-        ctypes.c_char_p
-    ]
-    _lib.policy_verify_call.restype = QalaPolicyResult
+if _lib:
+    if hasattr(_lib, "policy_verify_call_ptr"):
+        _lib.policy_verify_call_ptr.argtypes = [
+            ctypes.POINTER(QalaToolCallCtx),
+            ctypes.POINTER(QalaApprovalSlot),
+            ctypes.c_size_t,
+            ctypes.c_uint64,
+            ctypes.c_char_p,
+            ctypes.POINTER(QalaPolicyResult)
+        ]
+        _lib.policy_verify_call_ptr.restype = ctypes.c_int
+    elif hasattr(_lib, "policy_verify_call"):
+        _lib.policy_verify_call.argtypes = [
+            ctypes.POINTER(QalaToolCallCtx),
+            ctypes.POINTER(QalaApprovalSlot),
+            ctypes.c_size_t,
+            ctypes.c_uint64,
+            ctypes.c_char_p
+        ]
+        _lib.policy_verify_call.restype = QalaPolicyResult
 
 
 def qala_verify_call(
@@ -286,17 +328,31 @@ def qala_verify_call(
         supplied_code=supplied_code.encode("utf-8") if supplied_code else None,
         grounding_claim=None,
         grounding_corpus=None,
-        grounding_count=0
+        grounding_count=0,
+        cited_doc_id=None,
+        cited_section=None,
+        cited_passage_sha256=None
     )
 
-    if _lib and hasattr(_lib, "policy_verify_call"):
-        res = _lib.policy_verify_call(
-            ctypes.byref(ctx),
-            slots_arr,
-            slot_count,
-            ctypes.c_uint64(now_utc),
-            audit_log_path.encode("utf-8")
-        )
+    if _lib:
+        res = QalaPolicyResult()
+        if hasattr(_lib, "policy_verify_call_ptr"):
+            _lib.policy_verify_call_ptr(
+                ctypes.byref(ctx),
+                slots_arr,
+                slot_count,
+                ctypes.c_uint64(now_utc),
+                audit_log_path.encode("utf-8") if audit_log_path else None,
+                ctypes.byref(res)
+            )
+        else:
+            res = _lib.policy_verify_call(
+                ctypes.byref(ctx),
+                slots_arr,
+                slot_count,
+                ctypes.c_uint64(now_utc),
+                audit_log_path.encode("utf-8") if audit_log_path else None
+            )
         t1 = time.perf_counter_ns()
         elapsed_ms = (t1 - t0) / 1_000_000.0
 

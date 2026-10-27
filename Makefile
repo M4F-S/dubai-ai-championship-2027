@@ -22,8 +22,11 @@ HUD_TEST = $(TESTS_DIR)/test_hud_telemetry.py
 TARYAQ_AGENT_SRC = $(SRC_DIR)/taryaq_agent.c
 QALA_AGENT_SRC = $(SRC_DIR)/qala_agent.c
 QALA_CASE_SRC = $(SRC_DIR)/qala_case_memory.c
+QALA_RAG_SRC = $(SRC_DIR)/qala_policy_rag.c
 NIBRAS_AGENT_SRC = $(SRC_DIR)/nibras_agent.c
 NIBRAS_STORE_SRC = $(ADAPTERS_DIR)/nibras_memory_store.c
+NIBRAS_RAG_SRC = $(ADAPTERS_DIR)/nibras_rag.c
+TARYAQ_RAG_SRC = $(ADAPTERS_DIR)/taryaq_rag_engine.c
 TARYAQ_ACCEPTANCE_TEST = $(TESTS_DIR)/test_taryaq_acceptance.py
 BENCH_RUNNER = bench/bench_runner.py
 LAYA_TEST = $(TESTS_DIR)/test_laya_triage.py
@@ -49,14 +52,16 @@ QALA_AGENT_BIN = $(BUILD_DIR)/qala_agent
 NIBRAS_AGENT_BIN = $(BUILD_DIR)/nibras_agent
 NIBRAS_SUITE_BIN = $(BUILD_DIR)/test_nibras_suite
 CASE_MEMORY_TEST_BIN = $(BUILD_DIR)/test_case_memory
+POLICY_RAG_BIN = $(BUILD_DIR)/test_policy_rag
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
 .PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa taryaq_agent qala_agent nibras_agent timeline-demo clean
 
-all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(CASE_MEMORY_TEST_BIN) $(LIB_ADAPTERS)
+all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(CASE_MEMORY_TEST_BIN) $(POLICY_RAG_BIN) $(LIB_ADAPTERS)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+	python3 tools/build_corpus_index.py
 
 $(QALA_BIN): $(QALA_SRC) $(GROUNDING_SRC) $(ADAPTERS_DIR)/qala_adapters.h $(ADAPTERS_DIR)/grounding_shield.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -DQALA_STANDALONE_TEST $(QALA_SRC) $(GROUNDING_SRC) $(LDFLAGS) -o $@
@@ -64,8 +69,8 @@ $(QALA_BIN): $(QALA_SRC) $(GROUNDING_SRC) $(ADAPTERS_DIR)/qala_adapters.h $(ADAP
 $(NIBRAS_BIN): $(NIBRAS_SRC) $(ADAPTERS_DIR)/nibras_adapters.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -DNIBRAS_STANDALONE_TEST $< $(LDFLAGS) -o $@
 
-$(TARYAQ_BIN): $(TARYAQ_SRC) $(ADAPTERS_DIR)/taryaq_adapters.h | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DTARYAQ_STANDALONE_TEST $< $(LDFLAGS) -o $@
+$(TARYAQ_BIN): $(TARYAQ_SRC) $(TARYAQ_RAG_SRC) $(ADAPTERS_DIR)/taryaq_adapters.h $(ADAPTERS_DIR)/taryaq_rag_engine.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -DTARYAQ_STANDALONE_TEST $(TARYAQ_SRC) $(TARYAQ_RAG_SRC) $(LDFLAGS) -o $@
 
 $(GROUNDING_BIN): $(GROUNDING_SRC) $(ADAPTERS_DIR)/grounding_shield.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -DGROUNDING_STANDALONE_TEST $< $(LDFLAGS) -o $@
@@ -76,24 +81,27 @@ $(MCP_CURL_BIN): $(MCP_CURL_SRC) $(CJSON_SRC) $(ADAPTERS_DIR)/mcp_curl_client.h 
 $(INTEROP_BIN): $(INTEROP_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) $(ADAPTERS_DIR)/mcp_curl_client.h $(ADAPTERS_DIR)/cJSON.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INTEROP_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) $(LDFLAGS) -lcurl -o $@
 
-$(TARYAQ_AGENT_BIN): $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) \
+$(TARYAQ_AGENT_BIN): $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(TARYAQ_RAG_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) \
                      $(ADAPTERS_DIR)/taryaq_adapters.h $(ADAPTERS_DIR)/nibras_adapters.h \
                      $(ADAPTERS_DIR)/grounding_shield.h $(ADAPTERS_DIR)/qala_adapters.h | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) $(LDFLAGS) -lcurl -o $@
+	$(CC) $(CFLAGS) $(TARYAQ_AGENT_SRC) $(TARYAQ_SRC) $(TARYAQ_RAG_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(QALA_SRC) $(LDFLAGS) -lcurl -o $@
 
-$(QALA_AGENT_BIN): $(QALA_AGENT_SRC) $(QALA_CASE_SRC) $(QALA_SRC) $(GROUNDING_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) | $(BUILD_DIR)
+$(QALA_AGENT_BIN): $(QALA_AGENT_SRC) $(QALA_CASE_SRC) $(QALA_RAG_SRC) $(QALA_SRC) $(GROUNDING_SRC) $(MCP_CURL_SRC) $(CJSON_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -lcurl -o $@
 
 $(CASE_MEMORY_TEST_BIN): $(TESTS_DIR)/test_case_memory.c $(QALA_CASE_SRC) $(CJSON_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -lcurl -o $@
 
-$(NIBRAS_AGENT_BIN): $(NIBRAS_AGENT_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(NIBRAS_STORE_SRC) | $(BUILD_DIR)
+$(POLICY_RAG_BIN): $(TESTS_DIR)/test_policy_rag.c $(QALA_RAG_SRC) $(QALA_SRC) $(GROUNDING_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) -lcurl -o $@
+
+$(NIBRAS_AGENT_BIN): $(NIBRAS_AGENT_SRC) $(NIBRAS_SRC) $(GROUNDING_SRC) $(NIBRAS_STORE_SRC) $(NIBRAS_RAG_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 
-$(NIBRAS_SUITE_BIN): $(TESTS_DIR)/test_nibras_suite.c $(NIBRAS_SRC) $(GROUNDING_SRC) $(NIBRAS_STORE_SRC) | $(BUILD_DIR)
+$(NIBRAS_SUITE_BIN): $(TESTS_DIR)/test_nibras_suite.c $(NIBRAS_SRC) $(GROUNDING_SRC) $(NIBRAS_STORE_SRC) $(NIBRAS_RAG_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 
-$(LIB_ADAPTERS): $(QALA_SRC) $(GROUNDING_SRC) $(NIBRAS_SRC) $(TARYAQ_SRC) | $(BUILD_DIR)
+$(LIB_ADAPTERS): $(QALA_SRC) $(GROUNDING_SRC) $(NIBRAS_SRC) $(TARYAQ_SRC) $(TARYAQ_RAG_SRC) $(NIBRAS_RAG_SRC) $(NIBRAS_STORE_SRC) $(QALA_CASE_SRC) $(QALA_RAG_SRC) $(CJSON_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -fPIC -shared $^ $(LDFLAGS) -o $@
 
 taryaq_agent: $(TARYAQ_AGENT_BIN)
@@ -109,6 +117,7 @@ test: all test_interop test_hud test_bench test_laya test_golden test_pilot test
 	@echo "=================================================================="
 	@./$(QALA_BIN)
 	@./$(CASE_MEMORY_TEST_BIN)
+	@./$(POLICY_RAG_BIN)
 	@./$(NIBRAS_BIN)
 	@./$(NIBRAS_SUITE_BIN)
 	@./$(TARYAQ_BIN)
@@ -121,6 +130,7 @@ test: all test_interop test_hud test_bench test_laya test_golden test_pilot test
 	@python3 $(TARYAQ_ACCEPTANCE_TEST)
 	@python3 tests/test_audit_tamper.py
 	@python3 tests/test_patient_timeline.py
+	@python3 tests/test_clinical_rag.py
 	@./$(QALA_AGENT_BIN) --test
 	@./$(NIBRAS_AGENT_BIN) --demo
 	@echo "=================================================================="
