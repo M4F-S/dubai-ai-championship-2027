@@ -129,6 +129,7 @@ test: all test_interop test_hud test_bench test_laya test_golden test_pilot test
 	@./$(TARYAQ_AGENT_BIN) --test
 	@python3 $(TARYAQ_ACCEPTANCE_TEST)
 	@python3 tests/test_audit_tamper.py
+	@python3 tests/test_audit_verify_endpoint.py
 	@python3 tests/test_patient_timeline.py
 	@python3 tests/test_clinical_rag.py
 	@./$(QALA_AGENT_BIN) --test

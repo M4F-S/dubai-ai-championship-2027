@@ -27,6 +27,7 @@ if PROJECT_ROOT not in sys.path:
 import time
 import json
 import hashlib
+import hmac
 import urllib.request
 import urllib.error
 from typing import Dict, Any, List, Optional, Generator, Callable
@@ -183,16 +184,53 @@ def _get_last_audit_sha() -> str:
     return "0000000000000000000000000000000000000000000000000000000000000000"
 
 
+def _get_last_mac() -> str:
+    """Return the MAC of the last ledger record, or 64 zeros for genesis."""
+    if os.path.exists(AUDIT_LOG_FILE):
+        try:
+            with open(AUDIT_LOG_FILE, "r", encoding="utf-8") as f:
+                for l in reversed([line.strip() for line in f if line.strip()]):
+                    r = json.loads(l)
+                    if r.get("mac"):
+                        return r["mac"]
+        except Exception:
+            pass
+    return "0" * 64
+
+
 def append_audit_log(entry: Dict[str, Any]) -> str:
-    """Cryptographically sign and append entry to audit log with SHA-256 hash chaining (AF-11)."""
+    """Sign and append an entry to the HMAC-chained audit ledger.
+
+    Emits the same contract the C writer uses — `canonical`, `prev_sha256`, and
+    `mac = HMAC-SHA256(key, prev_sha256 || "\\n" || canonical)` — so one verifier
+    (tools/verify_audit.py) covers records from both writers. Without a key the
+    record is written with an empty `mac`, which the verifier rejects rather
+    than skips.
+    """
     with _audit_log_lock:
         entry["timestamp_utc"] = int(time.time())
         entry["reporting_tz"] = "Asia/Dubai"
-        entry["prev_sha256"] = _get_last_audit_sha()
-        
-        # Compute deterministic SHA-256
-        serialized = json.dumps(entry, sort_keys=True).encode("utf-8")
-        sha = hashlib.sha256(serialized).hexdigest()
+        entry["prev_sha256"] = _get_last_mac()
+
+        # Deterministic canonical payload, excluding the signature fields themselves.
+        canonical = json.dumps(
+            {k: v for k, v in sorted(entry.items())
+             if k not in ("canonical", "mac", "sha256_signature", "prev_sha256")},
+            separators=(",", ":"), ensure_ascii=False, default=str
+        )
+        entry["canonical"] = canonical
+
+        key = os.environ.get("TARYAQ_AUDIT_KEY", "")
+        if len(key.encode("utf-8")) >= 32:
+            entry["mac"] = hmac.new(
+                key.encode("utf-8"),
+                f"{entry['prev_sha256']}\n{canonical}".encode("utf-8"),
+                hashlib.sha256,
+            ).hexdigest()
+        else:
+            entry["mac"] = ""
+
+        sha = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
         entry["sha256_signature"] = sha
 
         try:
@@ -451,7 +489,7 @@ class OpenRouterAgentEngine:
                     }
 
         elif tool_name == "commit_audit":
-            action = args.get("action", "PRESCRIPTION_COMMITTED")
+            action = args.get("action", "BRIDGE_PRESCRIPTION_COMMITTED")
             sha = append_audit_log({"action": action, "status": "COMMITTED"})
             t1 = time.perf_counter_ns()
             return {
@@ -548,14 +586,14 @@ class OpenRouterAgentEngine:
                     yield {
                         "type": "tool_call",
                         "tool": "commit_audit",
-                        "args": {"action": "PRESCRIPTION_COMMITTED"}
+                        "args": {"action": "BRIDGE_PRESCRIPTION_COMMITTED"}
                     }
-                    commit_res = self._execute_c99_tool("commit_audit", {"action": "PRESCRIPTION_COMMITTED"})
+                    commit_res = self._execute_c99_tool("commit_audit", {"action": "BRIDGE_PRESCRIPTION_COMMITTED"})
                     yield {"type": "c99_execution", "tool": "commit_audit", "result": commit_res}
 
                     audit_entry = {
                         "agent": "Taryaq v0",
-                        "action": "PRESCRIPTION_COMMITTED",
+                        "action": "BRIDGE_PRESCRIPTION_COMMITTED",
                         "primary_drug": "Colchicine",
                         "concurrent_drug": "Clarithromycin",
                         "patient_egfr": 22.0,
@@ -598,7 +636,7 @@ class OpenRouterAgentEngine:
                     }
                     block_entry = {
                         "agent": "Taryaq v0",
-                        "action": "PRESCRIPTION_ROLLED_BACK",
+                        "action": "BRIDGE_PRESCRIPTION_ROLLED_BACK",
                         "reason": "Override token rejected or replayed",
                         "state": "ROLLED_BACK"
                     }
@@ -623,7 +661,7 @@ class OpenRouterAgentEngine:
                 }
                 block_entry = {
                     "agent": "Taryaq v0",
-                    "action": "PRESCRIPTION_ROLLED_BACK",
+                    "action": "BRIDGE_PRESCRIPTION_ROLLED_BACK",
                     "reason": "Blocked prescription without override",
                     "state": "ROLLED_BACK"
                 }
