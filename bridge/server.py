@@ -23,6 +23,7 @@ if PROJECT_ROOT not in sys.path:
 import json
 import time
 import argparse
+import subprocess
 from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 from typing import Dict, Any, List
 
@@ -37,6 +38,8 @@ from bridge.openrouter_client import (
 
 DEFAULT_PORT = 8080
 DEFAULT_HOST = "127.0.0.1"
+# Canonical HMAC ledger verifier (vendored byte-identical from taryaq-agent).
+VERIFY_SCRIPT = os.path.join(PROJECT_ROOT, "tools", "verify_audit.py")
 
 # Predefined judge demonstration scenarios
 DEMO_SCENARIOS = [
@@ -238,63 +241,86 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             pass
         self.close_connection = True
 
-    def _serve_audit_verify(self):
-        """Cryptographically verify the SHA-256 hash chain from genesis (AF-11)."""
-        import hashlib
-        records = []
-        is_valid = True
-        error_msg = ""
-        prev_sha = None
-
-        if os.path.exists(AUDIT_LOG_FILE):
-            try:
-                with open(AUDIT_LOG_FILE, "r", encoding="utf-8") as f:
-                    for line_idx, line in enumerate(f):
-                        line = line.strip()
-                        if not line:
-                            continue
-                        record = json.loads(line)
-                        records.append(record)
-
-                        expected_sig = record.get("sha256_signature")
-                        recorded_prev = record.get("prev_sha256")
-
-                        if expected_sig and recorded_prev is not None:
-                            # Verify signature matches entry payload
-                            rec_copy = dict(record)
-                            rec_copy.pop("sha256_signature", None)
-                            recomputed = hashlib.sha256(json.dumps(rec_copy, sort_keys=True).encode("utf-8")).hexdigest()
-                            if expected_sig != recomputed:
-                                is_valid = False
-                                error_msg = f"Signature mismatch at record {line_idx}"
-                                break
-
-                            # If chained to a known previous hash, check continuity
-                            if prev_sha is not None and recorded_prev != prev_sha and recorded_prev != "0000000000000000000000000000000000000000000000000000000000000000":
-                                is_valid = False
-                                error_msg = f"Chain break at record {line_idx}: expected prev {prev_sha}, found {recorded_prev}"
-                                break
-
-                        if expected_sig:
-                            prev_sha = expected_sig
-            except Exception as e:
-                is_valid = False
-                error_msg = str(e)
-
-        res = {
-            "chain_intact": is_valid,
-            "total_records": len(records),
-            "latest_sha256": prev_sha or "GENESIS",
-            "status": "VERIFIED_TAMPER_EVIDENT" if is_valid else "CHAIN_INTEGRITY_COMPROMISED",
-            "error": error_msg or None
-        }
-        body = json.dumps(res, indent=2).encode("utf-8")
-        self.send_response(200 if is_valid else 400)
+    def _send_json(self, payload: Dict[str, Any], code: int = 200):
+        """Emit a JSON response with the CORS header the cockpit expects."""
+        body = json.dumps(payload, indent=2).encode("utf-8")
+        self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(body)
+
+    def _serve_audit_verify(self):
+        """Verify the HMAC-chained audit ledger via tools/verify_audit.py.
+
+        The C writer signs HMAC-SHA256(key, prev_sha256 || "\\n" || canonical). This
+        endpoint delegates to the same verifier the CLI uses, so "verified" has exactly
+        one definition. Fail-closed: a missing key is a 503 (never a success), and a
+        record without canonical/prev_sha256/mac is a failure — there is no
+        "skip unsigned records" path, which is the bug this replaces.
+        """
+        total = 0
+        latest_mac = "GENESIS"
+
+        if os.path.exists(AUDIT_LOG_FILE):
+            try:
+                with open(AUDIT_LOG_FILE, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if not line.strip():
+                            continue
+                        total += 1
+                        rec = json.loads(line)
+                        if rec.get("mac"):
+                            latest_mac = rec["mac"]
+            except Exception as e:
+                self._send_json({
+                    "chain_intact": False, "total_records": total,
+                    "latest_sha256": latest_mac,
+                    "status": "LEDGER_UNREADABLE", "error": str(e)
+                }, 400)
+                return
+
+        key = os.environ.get("TARYAQ_AUDIT_KEY", "")
+        if len(key.encode("utf-8")) < 32:
+            self._send_json({
+                "chain_intact": False, "total_records": total,
+                "latest_sha256": latest_mac,
+                "status": "AUDIT_KEY_MISSING",
+                "error": "TARYAQ_AUDIT_KEY missing or shorter than 32 bytes; refusing to verify."
+            }, 503)
+            return
+
+        if total == 0:
+            self._send_json({
+                "chain_intact": True, "total_records": 0,
+                "latest_sha256": "GENESIS",
+                "status": "EMPTY_LEDGER", "error": None
+            }, 200)
+            return
+
+        try:
+            proc = subprocess.run(
+                [sys.executable, VERIFY_SCRIPT, "--ledger", AUDIT_LOG_FILE, "--key", key],
+                capture_output=True, text=True, timeout=30
+            )
+        except Exception as e:
+            self._send_json({
+                "chain_intact": False, "total_records": total,
+                "latest_sha256": latest_mac,
+                "status": "VERIFIER_ERROR", "error": str(e)
+            }, 500)
+            return
+
+        ok = proc.returncode == 0
+        detail = (proc.stderr or proc.stdout or "").strip()
+        self._send_json({
+            "chain_intact": ok,
+            "total_records": total,
+            "latest_sha256": latest_mac,
+            "status": "VERIFIED" if ok else "CHAIN_INTEGRITY_COMPROMISED",
+            "error": None if ok else (detail or "verification failed")
+        }, 200 if ok else 400)
 
     def _handle_override(self):
         """AF-04 Fix: Validate and consume clinician override token under lock with replay check."""

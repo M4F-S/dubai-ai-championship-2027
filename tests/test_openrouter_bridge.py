@@ -54,6 +54,10 @@ class TestOpenRouterBridge(unittest.TestCase):
                 os.remove(AUDIT_LOG_FILE)
             except OSError:
                 pass
+        # The bridge signs its own ledger records with this key; /api/audit/verify
+        # fails closed (503) without one, so set it before any record is written.
+        cls._orig_audit_key = os.environ.get("TARYAQ_AUDIT_KEY")
+        os.environ["TARYAQ_AUDIT_KEY"] = "test-key-32-bytes-minimum-000000"
         # Start server on ephemeral port for endpoint tests
         cls.port = 8799
         cls.server = ThreadingHTTPServer((DEFAULT_HOST, cls.port), ChampionshipRequestHandler)
@@ -73,6 +77,10 @@ class TestOpenRouterBridge(unittest.TestCase):
                 os.remove(AUDIT_LOG_FILE)
             except OSError:
                 pass
+        if getattr(cls, "_orig_audit_key", None) is None:
+            os.environ.pop("TARYAQ_AUDIT_KEY", None)
+        else:
+            os.environ["TARYAQ_AUDIT_KEY"] = cls._orig_audit_key
 
     def setUp(self):
         """Reset consumed tokens before each test."""
@@ -236,15 +244,15 @@ class TestOpenRouterBridge(unittest.TestCase):
             self.assertIn("NIBRAS", html)
 
     def test_14_api_audit_verify_endpoint(self):
-        """Verify HTTP GET /api/audit/verify validates SHA-256 hash chaining from genesis."""
+        """Verify GET /api/audit/verify validates the HMAC chain via tools/verify_audit.py."""
         url = f"http://{DEFAULT_HOST}:{self.port}/api/audit/verify"
         req = urllib.request.Request(url)
         with urllib.request.urlopen(req, timeout=5) as resp:
             self.assertEqual(resp.status, 200)
             self.assertIn("application/json", resp.headers.get("Content-Type", ""))
             data = json.loads(resp.read().decode("utf-8"))
-            self.assertTrue(data["chain_intact"])
-            self.assertEqual(data["status"], "VERIFIED_TAMPER_EVIDENT")
+            self.assertTrue(data["chain_intact"], data)
+            self.assertEqual(data["status"], "VERIFIED")
             self.assertGreater(data["total_records"], 0)
 
 
