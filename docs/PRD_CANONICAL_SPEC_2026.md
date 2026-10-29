@@ -67,20 +67,78 @@ This PRD supersedes all intermediate micro-refactoring rounds. We officially fre
 
 ## 3. Agent 1 Specification: TARYAQ (ترياق)
 **Track:** Best Societal AI Agent  
-**Domain:** Clinical Pharmacovigilance, Prescription Safety & Healthcare Economics  
+**Domain:** End-to-End Clinical Intelligence, Diagnostic Support, Pharmacotherapy & Claim Firewall  
 **Founder & Clinical Lead:** Mohamed Fathy, BPharm  
 
-### 3.1 The Three Stakeholder Modes
+### 3.1 The Full Clinical Journey: From Diagnosis to Care Plan
+Taryaq is an end-to-end clinical intelligence partner that assists clinicians throughout the complete patient clinical lifecycle:
 
-#### Mode A: For Doctors (The Clinical Copilot)
-1. **Ambient & Chart Regimen Review:** Analyzes multi-drug patient regimens for complex adverse drug events (ADEs), drug-disease contraindications, and narrow therapeutic index hazards.
-2. **Renal Posology Engine (eGFR & CKD Staging):**
-   - Automatically stages chronic kidney disease (CKD Stages 1 through 5, dialyzed vs non-dialyzed).
-   - Enforces statutory renal cutoffs and calculates required posology reductions (e.g. Metformin in eGFR < 30, Enoxaparin in eGFR < 30, Colchicine in eGFR < 60 with CYP3A4 inhibitors).
-3. **Longitudinal Trajectory Tracking:** Visualizes historical eGFR decline, flagged overrides, and prior adverse reactions across multiple visits.
-4. **Physician Override Workflow:** Requires documented clinical rationale and consumes single-use signed approval codes to override severe contraindications.
+```
+[1. DIAGNOSIS ASSISTANCE]  Chief Complaint & Labs ──> Ranked Differential Diagnosis (DDx)
+            │
+            ▼
+[2. CLINICAL RESEARCH]     Authoritative Medical RAG ──> Guidelines & Clinical Trials (KDIGO, ADA, ACC/AHA)
+            │
+            ▼
+[3. WRITING MEDICINE]      Phenotype-Matched Rx ──> Class-Based Pharmacology, Posology & Renal Titration
+            │
+            ▼
+[4. COMPLETE CARE PLAN]    Diagnostic Follow-up, Lifestyle Interventions, Monitoring & Clinical Targets
+            │
+            ▼
+[5. PHARMACY & CLAIMS]     Formulary Verification, Law 30 Controlled Checks & DHA SN 03/2019 Claim Scrub
+```
 
-#### Mode B: For Pharmacists (The Formulary & Claims Gatekeeper)
+#### Step 1: Diagnostic Assistance & Differential Diagnosis (DDx)
+- **Clinical Intake & Synthesis:** Ingests Chief Complaint (CC), History of Present Illness (HPI), Review of Systems (ROS), Vitals, Physical Exam, and Lab panels. Formats structured clinical SOAP notes (Subjective, Objective, Assessment, Plan).
+- **Ranked Differential Diagnosis (DDx):** Synthesizes symptoms, signs, and biomarkers to generate a prioritized differential diagnosis:
+  - *Primary Suspected Etiology* with probability rationale.
+  - *Secondary Differentials* to consider.
+  - *"Must-Not-Miss" Red Flags* (e.g., Atypical Acute Coronary Syndrome, Sepsis, Pulmonary Embolism, Acute Mesenteric Ischemia).
+- **Diagnostic Workup Recommendations:** Suggests high-yield, cost-effective confirmatory lab tests, imaging modalities, and biomarker panels (e.g. Troponin-I, BNP, eGFR, LFTs, D-dimer, HbA1c, urine albumin-to-creatinine ratio).
+
+#### Step 2: Clinical Research & Evidence Retrieval (Deep Medical RAG)
+- **Authoritative Practice Guidelines:** Direct, section-chunked indexing of gold-standard clinical guidelines:
+  - *Nephrology:* KDIGO (Kidney Disease: Improving Global Outcomes) 2024 Clinical Practice Guidelines.
+  - *Endocrinology:* ADA (American Diabetes Association) Standards of Care in Diabetes.
+  - *Cardiology:* ACC/AHA Heart Failure and Hypertension Guidelines.
+  - *Pulmonology:* GOLD (COPD) and GINA (Asthma) Management Strategies.
+  - *Statutory Dubai/UAE Pathways:* DHA Clinical Practice Guidelines and MoHAP Therapeutic Protocols.
+- **Evidence-Based Rationale:** Every clinical diagnostic and therapeutic recommendation provides graded evidence (Class I/II/III, Level of Evidence A/B/C) with exact document citations (`doc_id`, `section`, `passage_sha256`).
+
+#### Step 3: Precision Pharmacotherapy & Posology ("Writing Medicine")
+- **Phenotype-Matched Drug Selection:** Tailors first-line, second-line, and add-on medications based on patient-specific parameters:
+  - Renal function: Exact eGFR calculation (CKD-EPI formula) and stage-dependent dosing.
+  - Hepatic reserve: Child-Pugh and MELD classification.
+  - Age, weight/BMI, pregnancy/lactation safety categories.
+  - Documented allergies and pharmacogenomic/CYP metabolic phenotype.
+- **Precise Posology Formulation:**
+  - Initial therapeutic dose, titration schedule, and maximum safe ceiling.
+  - Administration directions in medical English and culturally fluent Arabic.
+  - Dynamic renal/hepatic dose reductions (e.g. 50% dose reduction, extending dosing interval from q12h to q24h).
+- **Multidimensional Interaction Shield:** Deterministically intercepts:
+  - Drug-Drug Interactions (CYP3A4, CYP2D6, CYP2C9, P-glycoprotein, QT prolongation).
+  - Drug-Disease Contraindications (e.g., NSAIDs in Stage 4 CKD, Beta-blockers in severe active bronchospasm).
+  - Drug-Food & Timing Interactions (grapefruit CYP3A4 inhibition, calcium/iron chelation with tetracyclines/quinolones).
+
+#### Step 4: Comprehensive Diagnostic & Therapeutic Care Plan
+Taryaq generates a structured, holistic patient management plan encompassing both medical and operational tracks:
+1. **Pharmacological Prescriptions:** Complete electronic prescription orders with active ingredient, brand name, strength, dosage form, route, frequency, and duration.
+2. **Diagnostic Monitoring & Re-Testing Schedule:**
+   - Pre-scheduled laboratory follow-up (e.g., repeat serum creatinine and potassium 7–14 days after initiating ACEi/ARB or spironolactone; regular INR tracking for warfarin; therapeutic drug monitoring for vancomycin/tacrolimus).
+   - Surveillance imaging and specialist referrals.
+3. **Non-Pharmacological & Lifestyle Interventions:**
+   - Specific dietary recommendations (e.g., sodium restriction < 2 g/day, potassium management, renal protein goals).
+   - Hydration rules, physical activity guidelines, and smoking cessation support.
+4. **Explicit Clinical Targets & Milestones:**
+   - Target blood pressure (e.g. < 130/80 mmHg in proteinuric CKD).
+   - Target HbA1c (< 7.0% or individualized for frail elderly).
+   - Target LDL-C (< 55 mg/dL in very high cardiovascular risk).
+5. **Patient Safety & Escalation Rules:**
+   - Warning symptoms requiring immediate emergency hospital presentation.
+   - Self-monitoring instructions (home blood glucose logs, daily morning weights for heart failure).
+
+#### Step 5: Pharmacy Scrubbing, Controlled Drugs & DHA Claims
 1. **DHA SN 03/2019 Claim Cycle Scrubber:**
    - Evaluates Dubai `eClaimLink` initial submission and remittance advice resubmission windows.
    - Enforces statutory 30-day grace rule and computes exact daily delay penalties:  
@@ -89,11 +147,6 @@ This PRD supersedes all intermediate micro-refactoring rounds. We officially fre
    - Classifies medications against MoHAP Schedule 1 (Narcotics), Schedule 2 (Psychotropics), and Semi-Controlled Lists.
    - Validates prescription duration limits (maximum 30 days for narcotics, 3-day emergency prescriptions) and mandatory Emirates ID logging.
 3. **Therapeutic Alternative Recommender:** Suggests non-interacting therapeutic alternatives within the same pharmacological class when a severe contraindication is detected.
-
-#### Mode C: For Patients (The Intelligent Medication Companion)
-1. **Bilingual Lay-Language Translation:** Translates dense medical Latin/English directions into clear, culturally fluent Arabic and English (e.g. *"Take 1 tablet with food at bedtime"* $\rightarrow$ *"قرص واحد مع وجبة العشاء قبل النوم"*).
-2. **Administration & Food Interaction Guidance:** Warns against taking medications with grapefruit juice, dairy products, or antacids, and coordinates administration timing.
-3. **Emergency Red-Flag Symptom Triage:** Detects acute anaphylaxis, severe dyspnea, acute chest pain, or bleeding signs; immediately triggers emergency protocol and displays nearest emergency hospital contact.
 
 ### 3.2 Real Class-Based Pharmacological Knowledge Base
 Taryaq strictly rejects hardcoded 8-drug lists. It is powered by a structured SQLite formulary database:
