@@ -83,7 +83,12 @@ DEMO_SCENARIOS = [
 
 
 class ChampionshipRequestHandler(BaseHTTPRequestHandler):
-    engine = OpenRouterAgentEngine()
+    engine = None
+
+    def __init__(self, *args, **kwargs):
+        if ChampionshipRequestHandler.engine is None:
+            ChampionshipRequestHandler.engine = OpenRouterAgentEngine()
+        super().__init__(*args, **kwargs)
 
     def do_OPTIONS(self):
         """Handle CORS preflight requests."""
@@ -145,11 +150,23 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
     def _serve_health(self):
         """Return diagnostic health and hardware status."""
         status = get_engine_status()
+        status["c99_loaded"] = status.get("c99_library_loaded", True)
         status["server_time_utc"] = int(time.time())
-        status["active_model"] = self.engine.model
+        status["provider"] = self.engine.provider
+        status["active_model"] = (
+            self.engine.ollama_model if self.engine.provider == "ollama"
+            else (self.engine.model if self.engine.provider == "openrouter" else "deterministic_c99")
+        )
+        status["ollama_base_url"] = self.engine.ollama_base_url
+        status["ollama_model"] = self.engine.ollama_model
         status["api_key_configured"] = bool(self.engine.api_key)
         status["active_agent"] = self.engine.active_agent
-        status["mode"] = "HYBRID_CLOUD_C99_SHIELD" if self.engine.api_key else "SOVEREIGN_AIRGAP_C99_ONLY"
+        if self.engine.provider == "ollama":
+            status["mode"] = "LOCAL_OLLAMA_AIRGAP_C99_SHIELD"
+        elif self.engine.provider == "openrouter":
+            status["mode"] = "HYBRID_CLOUD_C99_SHIELD"
+        else:
+            status["mode"] = "SOVEREIGN_AIRGAP_C99_ONLY"
 
         body = json.dumps(status, indent=2).encode("utf-8")
         self.send_response(200)
@@ -369,8 +386,9 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(resp_bytes)
 
 
-def run_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT):
+def run_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, provider: str = "auto"):
     """Start the multi-threaded HTTP/SSE server."""
+    ChampionshipRequestHandler.engine = OpenRouterAgentEngine(provider=provider)
     server_address = (host, port)
     httpd = ThreadingHTTPServer(server_address, ChampionshipRequestHandler)
     print(f"==================================================================")
@@ -380,6 +398,7 @@ def run_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT):
     print(f"[*] SSE Chat endpoint:   http://{host}:{port}/api/chat")
     print(f"[*] Health endpoint:     http://{host}:{port}/api/health")
     print(f"[*] Audit ledger:        http://{host}:{port}/api/audit")
+    print(f"[*] Active Provider:     {ChampionshipRequestHandler.engine.provider.upper()}")
     print(f"[*] Target Architecture: Bare-Metal C99 Shield + 7B/8B Open Model")
     print(f"==================================================================")
     try:
@@ -393,5 +412,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Championship Agent Bridge Server")
     parser.add_argument("--host", default=DEFAULT_HOST, help="Host address to bind")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Port to bind")
+    parser.add_argument(
+        "--provider",
+        choices=["auto", "ollama", "openrouter", "deterministic"],
+        default="auto",
+        help="Inference provider: auto (detect Ollama -> OpenRouter -> C99), ollama, openrouter, or deterministic"
+    )
     args = parser.parse_args()
-    run_server(args.host, args.port)
+    run_server(args.host, args.port, args.provider)

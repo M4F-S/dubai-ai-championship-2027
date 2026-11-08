@@ -42,8 +42,29 @@ from bridge.c99_bindings import (
 
 DEFAULT_OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "qwen/qwen-2.5-7b-instruct")
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434/v1")
+DEFAULT_OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b-instruct-q4_K_M")
+DEFAULT_PROVIDER = os.environ.get("PROVIDER", "auto").lower()
 AUDIT_LOG_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "taryaq_audit.jsonl")
 HUD_EMIT_URL = "http://127.0.0.1:8787/emit"
+
+def is_ollama_reachable(base_url: str) -> bool:
+    """Check if local Ollama OpenAI-compatible endpoint is reachable with a tight timeout."""
+    endpoint = base_url.rstrip("/") + "/models"
+    try:
+        req = urllib.request.Request(endpoint, headers={"User-Agent": "Dubai-Agent-Bridge/1.0"}, method="GET")
+        with urllib.request.urlopen(req, timeout=0.6) as resp:
+            return resp.status in (200, 204)
+    except Exception:
+        try:
+            from urllib.parse import urlparse
+            p = urlparse(base_url)
+            root_url = f"{p.scheme}://{p.netloc}/"
+            req = urllib.request.Request(root_url, headers={"User-Agent": "Dubai-Agent-Bridge/1.0"}, method="GET")
+            with urllib.request.urlopen(req, timeout=0.6) as resp:
+                return resp.status in (200, 204)
+        except Exception:
+            return False
 
 # Single-use clinical override token & synchronization locks
 VALID_OVERRIDE_TOKEN = "TARYAQ-OVERRIDE-8842-CLIN"
@@ -243,10 +264,56 @@ def append_audit_log(entry: Dict[str, Any]) -> str:
 
 
 class OpenRouterAgentEngine:
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        provider: Optional[str] = None,
+        ollama_base_url: Optional[str] = None,
+        ollama_model: Optional[str] = None
+    ):
         self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "")
         self.model = model or DEFAULT_OPENROUTER_MODEL
+        self.ollama_base_url = ollama_base_url or DEFAULT_OLLAMA_BASE_URL
+        self.ollama_model = ollama_model or DEFAULT_OLLAMA_MODEL
         self.active_agent = "taryaq"  # 'taryaq', 'qala', 'nibras'
+
+        req_provider = (provider or os.environ.get("PROVIDER", "auto")).lower()
+        self.provider = self._resolve_provider(req_provider)
+        self._log_provider_status()
+
+    def _resolve_provider(self, req_provider: str) -> str:
+        """Resolve active provider based on CLI/env priority chain:
+        1) If provider == 'ollama' or (req_provider == 'auto' and is_ollama_reachable):
+           use 'ollama'
+        2) Else if provider == 'openrouter' or (req_provider == 'auto' and OPENROUTER_API_KEY is set):
+           use 'openrouter'
+        3) Else:
+           use 'deterministic'
+        """
+        if req_provider == "ollama":
+            return "ollama"
+        elif req_provider == "openrouter":
+            return "openrouter"
+        elif req_provider == "deterministic":
+            return "deterministic"
+        elif req_provider == "auto":
+            if is_ollama_reachable(self.ollama_base_url):
+                return "ollama"
+            elif self.api_key:
+                return "openrouter"
+            else:
+                return "deterministic"
+        else:
+            return "deterministic"
+
+    def _log_provider_status(self):
+        if self.provider == "ollama":
+            print(f"[PROVIDER] Connected to Local Ollama ({self.ollama_model})")
+        elif self.provider == "openrouter":
+            print(f"[PROVIDER] Connected to OpenRouter Cloud ({self.model})")
+        else:
+            print("[PROVIDER] Running Native Deterministic C99 Engine (Offline Bare-Metal)")
 
     def set_agent(self, agent_name: str):
         if agent_name.lower() in ("taryaq", "qala", "nibras"):
@@ -282,14 +349,27 @@ class OpenRouterAgentEngine:
             "c99_latency_ms": scrub_result["execution_time_ms"]
         }
 
-        # Check if an API key is available
-        if not self.api_key:
-            # Deterministic local simulation mode (matches 7B model output + C99 shield)
+        # Check if provider is deterministic
+        if self.provider == "deterministic":
             yield from self._run_deterministic_local_engine(clean_prompt, override_token, override_rationale)
             return
 
-        # STEP 2: Call OpenRouter API with 7B/8B model
-        yield {"type": "status", "message": f"Calling {self.model} via OpenRouter..."}
+        # Prepare OpenAI-compatible endpoint parameters
+        if self.provider == "ollama":
+            target_url = f"{self.ollama_base_url.rstrip('/')}/chat/completions"
+            active_model = self.ollama_model
+            headers = {"Content-Type": "application/json"}
+            yield {"type": "status", "message": f"Calling Local Ollama ({active_model}) at {self.ollama_base_url}..."}
+        else:
+            target_url = OPENROUTER_API_URL
+            active_model = self.model
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}",
+                "HTTP-Referer": "https://dubai-ai-championship.ae",
+                "X-Title": "Dubai AI Agents Championship 2027"
+            }
+            yield {"type": "status", "message": f"Calling {active_model} via OpenRouter..."}
 
         system_prompt = self._build_system_prompt()
         messages = [{"role": "system", "content": system_prompt}]
@@ -300,7 +380,7 @@ class OpenRouterAgentEngine:
 
         try:
             req_data = {
-                "model": self.model,
+                "model": active_model,
                 "messages": messages,
                 "tools": AGENT_TOOLS,
                 "tool_choice": "auto",
@@ -309,14 +389,9 @@ class OpenRouterAgentEngine:
             }
             req_body = json.dumps(req_data).encode("utf-8")
             req = urllib.request.Request(
-                OPENROUTER_API_URL,
+                target_url,
                 data=req_body,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self.api_key}",
-                    "HTTP-Referer": "https://dubai-ai-championship.ae",
-                    "X-Title": "Dubai AI Agents Championship 2027"
-                },
+                headers=headers,
                 method="POST"
             )
 
@@ -329,7 +404,8 @@ class OpenRouterAgentEngine:
             if tool_calls:
                 for tc in tool_calls:
                     fn_name = tc["function"]["name"]
-                    args = json.loads(tc["function"].get("arguments", "{}"))
+                    raw_args = tc["function"].get("arguments", "{}")
+                    args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
                     yield {
                         "type": "tool_call",
                         "tool": fn_name,
@@ -368,13 +444,14 @@ class OpenRouterAgentEngine:
             yield {
                 "type": "completed",
                 "total_time_ms": round((t_end - t_start) / 1_000_000.0, 2),
-                "model": self.model,
+                "model": active_model,
+                "provider": self.provider,
                 "air_gap_leakage": "0 Bytes"
             }
 
         except Exception as e:
             # Fall back gracefully to deterministic local engine if API fails
-            yield {"type": "status", "message": f"Cloud API unavailable ({str(e)}). Engaging Sovereign Bare-Metal Engine."}
+            yield {"type": "status", "message": f"Endpoint unavailable ({str(e)}). Engaging Sovereign Bare-Metal Engine."}
             yield from self._run_deterministic_local_engine(clean_prompt, override_token, override_rationale)
 
     def _execute_c99_tool(
