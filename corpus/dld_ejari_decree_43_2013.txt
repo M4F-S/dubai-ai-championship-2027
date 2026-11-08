@@ -1,0 +1,30 @@
+# DOCUMENT: DLD-EJARI-DECREE-43-2013
+# TITLE: Decree No. 43 of 2013 Determining Rent Increases for Real Property in Dubai
+# AUTHORITY: Dubai Land Department (DLD) / Real Estate Regulatory Agency (RERA)
+# DOMAIN: CIVIC
+# EFFECTIVE_DATE: 2013-12-18
+# SOURCE_URL: https://dubailand.gov.ae/en/eservices/rental-index/
+
+[SECTION: Article 1(a)]
+[TITLE: Tier 1 Zero Percent Increase for Rent up to 10 Percent Below Market]
+Under Article 1(a) of Decree No. 43 of 2013, no rent increase is permissible if the current rental value of the real property is up to 10.0 percent below the average market rental benchmark established by the RERA Smart Rental Index.
+
+[SECTION: Article 1(b)]
+[TITLE: Tier 2 Maximum 5 Percent Rent Increase for Gap 11 to 20 Percent]
+Under Article 1(b) of Decree No. 43 of 2013, a maximum permissible rent increase of 5 percent is applicable if the contractual rent is between 11.0 percent and 20.0 percent below the average market rental benchmark established by the RERA Smart Rental Index.
+
+[SECTION: Article 1(c)]
+[TITLE: Tier 3 Maximum 10 Percent Rent Increase for Gap 21 to 30 Percent]
+Under Article 1(c) of Decree No. 43 of 2013, a maximum permissible rent increase of 10 percent is applicable if the contractual rent is between 21.0 percent and 30.0 percent below the average market rental benchmark established by the RERA Smart Rental Index.
+
+[SECTION: Article 1(d)]
+[TITLE: Tier 4 Maximum 15 Percent Rent Increase for Gap 31 to 40 Percent]
+Under Article 1(d) of Decree No. 43 of 2013, a maximum permissible rent increase of 15 percent is applicable if the contractual rent is between 31.0 percent and 40.0 percent below the average market rental benchmark established by the RERA Smart Rental Index.
+
+[SECTION: Article 1(e)]
+[TITLE: Tier 5 Maximum 20 Percent Rent Increase for Gap Exceeding 40 Percent]
+Under Article 1(e) of Decree No. 43 of 2013, the maximum statutory rent increase is 20 percent if the contractual rent under the registered Ejari tenancy contract is more than 40.0 percent below the average market rental benchmark established by the RERA Smart Rental Index. An Ejari rent increase exceeding 20 percent is strictly prohibited under Dubai Land Department regulations.
+
+[SECTION: Law 33/2008 Art 14]
+[TITLE: Statutory 90-Day Written Notice Requirement for Lease Alterations]
+Pursuant to Article 14 of Law No. 33 of 2008 amending Law No. 26 of 2007 Regulating the Relationship Between Landlords and Tenants in Dubai, any landlord seeking to amend tenancy terms or apply a statutory Ejari rent increase must provide formal written notice to the tenant at least 90 calendar days prior to lease expiry. Failure to serve 90 days prior written notice invalidates any proposed rent increase.

@@ -55,7 +55,7 @@ CASE_MEMORY_TEST_BIN = $(BUILD_DIR)/test_case_memory
 POLICY_RAG_BIN = $(BUILD_DIR)/test_policy_rag
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa test_phase1 taryaq_agent qala_agent nibras_agent timeline-demo clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa test_phase1 ingest_rag test_rag_ingest taryaq_agent qala_agent nibras_agent timeline-demo clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(CASE_MEMORY_TEST_BIN) $(POLICY_RAG_BIN) $(LIB_ADAPTERS)
 
@@ -163,6 +163,18 @@ test_phase1:
 	@echo " RUNNING PHASE 1-A UNIFIED SQLITE SCHEMAS & MIGRATIONS SUITE"
 	@echo "=================================================================="
 	@python3 tests/test_phase1_schemas.py
+
+ingest_rag:
+	@echo "=================================================================="
+	@echo " INGESTING AUTHORITATIVE RAG CORPUS INTO RAG MASTER DB (M-11-B)"
+	@echo "=================================================================="
+	@python3 scripts/ingest_rag_corpus.py --reingest --verify-integrity
+
+test_rag_ingest:
+	@echo "=================================================================="
+	@echo " RUNNING RAG INGESTION & BM25 VERIFICATION SUITE (M-11-B)"
+	@echo "=================================================================="
+	@python3 tests/test_rag_ingestion.py
 
 test_traceability:
 	@echo "=================================================================="

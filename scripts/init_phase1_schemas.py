@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sqlite3
 import sys
 import uuid
@@ -400,13 +401,39 @@ def insert_chunk(
     return chunk_id
 
 
+def prepare_fts5_query(query_text: str) -> str:
+    """Prepares an arbitrary natural language or keyword query for SQLite FTS5 BM25 search.
+    Preserves explicit boolean expressions (AND, OR, NOT, quotes, column filters).
+    Converts plain space-separated keywords into OR prefix terms for resilient BM25 scoring."""
+    trimmed = query_text.strip()
+    if not trimmed:
+        return ""
+    if any(tok in trimmed for tok in [" AND ", " OR ", " NOT ", '"', "*", ":"]):
+        return trimmed
+
+    tokens = re.findall(r"[\w]+", trimmed, flags=re.UNICODE)
+    if not tokens:
+        return trimmed
+
+    if len(tokens) == 1:
+        return f"{tokens[0]}*"
+
+    return " OR ".join(f"{t}*" for t in tokens)
+
+
 def search_rag(
     conn: sqlite3.Connection,
     query_text: str,
     domain: Optional[str] = None,
     limit: int = 10,
+    raw_match: bool = False,
 ) -> List[sqlite3.Row]:
-    """Performs BM25 ranked full-text search against rag_chunks_fts."""
+    """Performs BM25 ranked full-text search against rag_chunks_fts.
+    Uses prepare_fts5_query by default unless raw_match is True or explicit FTS syntax is present."""
+    fts_query = query_text if raw_match else prepare_fts5_query(query_text)
+    if not fts_query:
+        return []
+
     if domain:
         sql = """
         SELECT c.chunk_id, c.doc_id, c.domain, c.section_code, c.title, c.passage,
@@ -417,7 +444,10 @@ def search_rag(
         ORDER BY fts.rank
         LIMIT ?;
         """
-        return conn.execute(sql, (query_text, domain, limit)).fetchall()
+        try:
+            return conn.execute(sql, (fts_query, domain, limit)).fetchall()
+        except sqlite3.OperationalError:
+            return conn.execute(sql, (f'"{query_text}"', domain, limit)).fetchall()
     else:
         sql = """
         SELECT c.chunk_id, c.doc_id, c.domain, c.section_code, c.title, c.passage,
@@ -428,7 +458,10 @@ def search_rag(
         ORDER BY fts.rank
         LIMIT ?;
         """
-        return conn.execute(sql, (query_text, limit)).fetchall()
+        try:
+            return conn.execute(sql, (fts_query, limit)).fetchall()
+        except sqlite3.OperationalError:
+            return conn.execute(sql, (f'"{query_text}"', limit)).fetchall()
 
 
 def log_airlock_request(

@@ -1,0 +1,18 @@
+# DOCUMENT: DEWA-SLAB-TARIFFS-2026
+# TITLE: DEWA Slab Tariffs and Residential Utility Billing Regulations
+# AUTHORITY: Dubai Electricity and Water Authority (DEWA) / Dubai Supreme Council of Energy
+# DOMAIN: CIVIC
+# EFFECTIVE_DATE: 2026-01-01
+# SOURCE_URL: https://www.dewa.gov.ae/en/consumer/billing/slab-tariff
+
+[SECTION: Electricity Slabs]
+[TITLE: Expatriate Residential Electricity Slab Tariffs and Fuel Surcharge]
+Dubai Electricity and Water Authority (DEWA) expatriate residential electricity consumption is billed under a four-tier slab tariff structure: Green Slab (1 to 2,000 kWh per month) at 23 fils per kWh; Yellow Slab (2,001 to 4,000 kWh per month) at 28 fils per kWh; Orange Slab (4,001 to 6,000 kWh per month) at 32 fils per kWh; Red Slab (exceeding 6,000 kWh per month) at 38 fils per kWh. An additional fuel surcharge of 5.0 fils per kWh is levied across all electricity consumption.
+
+[SECTION: Water Slabs]
+[TITLE: Expatriate Residential Potable Water Slab Tariffs and Fuel Surcharge]
+DEWA expatriate residential potable water consumption is billed under a three-tier slab tariff structure: Green Slab (1 to 6,000 Imperial Gallons per month) at 3.5 fils per IG; Yellow Slab (6,001 to 12,000 IG per month) at 4.0 fils per IG; Red Slab (exceeding 12,000 IG per month) at 4.6 fils per IG. A fuel surcharge of 0.6 fils per IG is applied across all metered water consumption.
+
+[SECTION: Security Deposits and Housing Fee]
+[TITLE: DEWA Security Deposit Ceilings and Dubai Municipality Housing Fee]
+DEWA mandates refundable residential security deposits of AED 2,000.00 for apartments and AED 4,000.00 for residential villas prior to utility service connection. Dubai Municipality Housing Fee is charged at 5.0% of the annual Ejari contract value, distributed equally across twelve (12) monthly DEWA utility invoices.
