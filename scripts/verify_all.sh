@@ -32,6 +32,25 @@ else
     NIBRAS_DIR="$(dirname "$DUBAI_DIR")/nibras-agent"
 fi
 
+# SPRINT-10: Deliverable A (Advisory A-1 Remediation - Harness Idempotency & Clean Working Tree)
+TMP_DB=$(mktemp /tmp/taryaq_clinical_XXXXXX.db)
+if [ -f "${DUBAI_DIR}/corpus/taryaq_clinical.db" ]; then
+    cp "${DUBAI_DIR}/corpus/taryaq_clinical.db" "${TMP_DB}"
+elif [ -f "${TARYAQ_DIR}/corpus/taryaq_clinical.db" ]; then
+    cp "${TARYAQ_DIR}/corpus/taryaq_clinical.db" "${TMP_DB}"
+fi
+export TARYAQ_CLINICAL_DB="${TMP_DB}"
+
+cleanup() {
+    rm -f "${TMP_DB}" "${TMP_DB}-shm" "${TMP_DB}-wal" 2>/dev/null || true
+    git -C "${DUBAI_DIR}" checkout -- "${DUBAI_DIR}/corpus/taryaq_clinical.db" 2>/dev/null || true
+    git -C "${DUBAI_DIR}" checkout -- "${DUBAI_DIR}/bench/RESULTS.md" "${DUBAI_DIR}/bench/results.json" 2>/dev/null || true
+    if [ -d "${TARYAQ_DIR}" ]; then
+        git -C "${TARYAQ_DIR}" checkout -- corpus/taryaq_clinical.db 2>/dev/null || true
+    fi
+}
+trap cleanup EXIT INT TERM
+
 echo "=============================================================================="
 echo " DUBAI CREATE AI AGENTS CHAMPIONSHIP 2026-2027: MASTER SUITE VERIFICATION"
 echo " Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
@@ -66,7 +85,7 @@ if [ ! -d "${NIBRAS_DIR}" ]; then
     exit 1
 fi
 (cd "${NIBRAS_DIR}" && cargo test --all-targets)
-echo "[PASS] NIBRAS Verified: 27/27 Rust tests passing."
+echo "[PASS] NIBRAS Verified: 28/28 Rust tests passing."
 
 # 4. Verify Master Dubai C99 Adapters, Golden Benchmarks, and Interop Suites
 echo ""
@@ -79,7 +98,7 @@ echo "==========================================================================
 echo " [MASTER VERIFICATION SUCCESS] ALL 4 SOVEREIGN REPOSITORIES GREEN"
 echo " - TARYAQ: 88 Rust unit & integration tests (Clinical matrix, tri-modal, airlock)"
 echo " - QALA:   21 Rust unit & integration tests (Agency mesh, Mirsal II, Labor Art. 51)"
-echo " - NIBRAS: 27 Rust unit & integration tests (Civic navigator, FadeMem, Sovereign Vault)"
+echo " - NIBRAS: 28 Rust unit & integration tests (Civic navigator, FadeMem, Sovereign Vault AES-256)"
 echo " - DUBAI:  Master C99 adapters, MCP interop, HUD telemetry, and Golden benchmarks"
-echo " Total Rust Tests: 136/136 PASSED | Zero Failures | Zero Warnings"
+echo " Total Rust Tests: 137/137 PASSED | Zero Failures | Zero Warnings"
 echo "=============================================================================="

@@ -255,6 +255,43 @@ class TestOpenRouterBridge(unittest.TestCase):
             self.assertEqual(data["status"], "VERIFIED")
             self.assertGreater(data["total_records"], 0)
 
+    def test_15_provider_routing_options(self):
+        """Verify provider resolution hierarchy (ollama, openrouter, deterministic, auto)."""
+        engine_det = OpenRouterAgentEngine(provider="deterministic")
+        self.assertEqual(engine_det.provider, "deterministic")
+
+        engine_ollama = OpenRouterAgentEngine(provider="ollama")
+        self.assertEqual(engine_ollama.provider, "ollama")
+        self.assertEqual(engine_ollama.ollama_model, "qwen2.5:7b-instruct-q4_K_M")
+        self.assertEqual(engine_ollama.ollama_base_url, "http://127.0.0.1:11434/v1")
+
+        # In absence of reachable Ollama and without API key, auto must fall back to deterministic
+        engine_auto = OpenRouterAgentEngine(api_key="", provider="auto", ollama_base_url="http://127.0.0.1:59999/v1")
+        self.assertEqual(engine_auto.provider, "deterministic")
+
+    def test_16_health_endpoint_c99_loaded_contract(self):
+        """Verify GET /api/health exposes c99_loaded boolean and provider telemetry."""
+        url = f"http://{DEFAULT_HOST}:{self.port}/api/health"
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            self.assertEqual(resp.status, 200)
+            data = json.loads(resp.read().decode("utf-8"))
+            self.assertIn("c99_loaded", data)
+            self.assertTrue(data["c99_loaded"])
+            self.assertIn("provider", data)
+            self.assertIn("ollama_base_url", data)
+            self.assertIn("ollama_model", data)
+
+    def test_17_local_ollama_chat_stream_fallback(self):
+        """Verify chat stream with local Ollama provider gracefully handles offline endpoint."""
+        engine = OpenRouterAgentEngine(provider="ollama", ollama_base_url="http://127.0.0.1:59999/v1")
+        events = list(engine.process_chat("Check interaction Colchicine and Clarithromycin eGFR 20"))
+        # Must execute PII scrub and fall back to local C99 bare-metal engine without crashing
+        event_types = [e["type"] for e in events]
+        self.assertIn("pii_scrubbed", event_types)
+        self.assertIn("c99_execution", event_types)
+        self.assertIn("security_block", event_types)
+
 
 if __name__ == "__main__":
     unittest.main()
