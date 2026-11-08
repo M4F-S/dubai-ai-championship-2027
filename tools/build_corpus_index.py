@@ -200,9 +200,20 @@ def build_index():
     conn.commit()
     conn.close()
 
-    # Write manifest.json
-    with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
+    # Write manifest.json if not already holding master corpus manifest
+    should_write_manifest = True
+    if os.path.exists(MANIFEST_PATH):
+        try:
+            with open(MANIFEST_PATH, "r", encoding="utf-8") as mf:
+                existing_m = json.load(mf)
+                if existing_m.get("total_documents", 0) >= 9:
+                    should_write_manifest = False
+        except Exception:
+            pass
+
+    if should_write_manifest:
+        with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
 
     # Write manifest.sha256
     with open(MANIFEST_SHA_PATH, "w", encoding="utf-8") as f:
