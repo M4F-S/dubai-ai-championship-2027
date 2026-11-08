@@ -1,0 +1,22 @@
+# DOCUMENT: UAE-LABOR-LAW-33-2021
+# TITLE: UAE Federal Decree-Law No. 33 of 2021 on the Regulation of Labour Relations
+# AUTHORITY: Ministry of Human Resources and Emiratisation (MoHRE)
+# DOMAIN: LABOR
+# EFFECTIVE_DATE: 2022-02-02
+# SOURCE_URL: https://www.mohre.gov.ae/en/laws-and-regulations/labour-law.aspx
+
+[SECTION: Article 51]
+[TITLE: End-of-Service Gratuity Entitlement and Basic Wage Calculation]
+Under Article 51 of UAE Federal Decree-Law No. 33 of 2021 on the Regulation of Labour Relations, a full-time worker who completes at least one year of continuous service is entitled to an End-of-Service Gratuity (EOSG) calculated on the basis of basic wage. For the first five years of service, the worker is entitled to 21 days basic wage for each year of service. For service exceeding five years, the worker is entitled to 30 days basic wage for each additional year of service. The total end-of-service gratuity payout shall not exceed two years' basic wage (24 times monthly basic wage). Days of unpaid absence from work shall not be included in the calculation of service period.
+
+[SECTION: Article 53]
+[TITLE: Settlement and Payment of Worker Entitlements Deadline]
+Under Article 53 of UAE Federal Decree-Law No. 33 of 2021, the employer must pay the worker, within a maximum statutory period of fourteen (14) calendar days from the date of the employment contract termination, all end-of-service gratuity and other financial entitlements. Permissible employer deductions from final settlements are legally capped at a maximum of 25% of the total terminal package.
+
+[SECTION: Resolution 1/2022 Art 30]
+[TITLE: Part-Time Worker End-of-Service Gratuity Proration Formula]
+Pursuant to Article 30 of Cabinet Resolution No. 1 of 2022, the end-of-service gratuity for workers on part-time contracts or job-sharing arrangements is calculated by prorating full-time gratuity according to actual contracted hours: Part-Time Gratuity equals (Actual Contracted Annual Working Hours divided by 2080 full-time annual hours) multiplied by Full-Time Gratuity entitlement under Article 51.
+
+[SECTION: Ministerial Resolution Nafis 2026]
+[TITLE: MoHRE Skilled Emiratisation Quotas and Non-Compliance Penalties]
+Under MoHRE executive resolutions on the Nafis Emiratisation program, private sector commercial establishments employing 50 or more skilled workers must achieve a 2% annual increase in skilled UAE nationals (evaluated 1% semi-annually on June 30 and December 31), achieving a 10% skilled Emiratisation target by end of 2026. A non-negotiable statutory non-compliance financial penalty of AED 8,000 per month (AED 96,000 annually) applies for every unfilled UAE national position.

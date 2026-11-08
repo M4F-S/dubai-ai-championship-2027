@@ -103,11 +103,19 @@ def parse_corpus_file(filepath: str):
 def build_index():
     os.makedirs(CORPUS_DIR, exist_ok=True)
     manifest = {
-        "version": "1.0",
-        "description": "Taryaq Sovereign Clinical & DHA Statutory Corpus Manifest",
+        "version": "2.0",
+        "description": "Dubai Sovereign Statutory & Clinical Master Corpus Manifest (Taryaq, Qala, Nibras)",
         "documents": {},
         "chunks": {},
     }
+    if os.path.isfile(MANIFEST_PATH):
+        try:
+            with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                manifest["documents"] = loaded.get("documents", {})
+                manifest["chunks"] = loaded.get("chunks", {})
+        except Exception:
+            pass
 
     # Reset SQLite DB
     if os.path.exists(DB_PATH):
