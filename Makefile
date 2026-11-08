@@ -55,7 +55,7 @@ CASE_MEMORY_TEST_BIN = $(BUILD_DIR)/test_case_memory
 POLICY_RAG_BIN = $(BUILD_DIR)/test_policy_rag
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa taryaq_agent qala_agent nibras_agent timeline-demo clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_gomaa test_phase1 taryaq_agent qala_agent nibras_agent timeline-demo clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(CASE_MEMORY_TEST_BIN) $(POLICY_RAG_BIN) $(LIB_ADAPTERS)
 
@@ -111,7 +111,7 @@ nibras_agent: $(NIBRAS_AGENT_BIN)
 timeline-demo: $(TARYAQ_AGENT_BIN)
 	@./$(TARYAQ_AGENT_BIN) --timeline-demo
 
-test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge test_gomaa
+test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge test_gomaa test_phase1
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -157,6 +157,12 @@ test_gomaa: $(LIB_ADAPTERS)
 	@echo " RUNNING QALA PROMPT INJECTION DEFENSE SUITE"
 	@echo "=================================================================="
 	@python3 tests/test_qala_injection_defense.py
+
+test_phase1:
+	@echo "=================================================================="
+	@echo " RUNNING PHASE 1-A UNIFIED SQLITE SCHEMAS & MIGRATIONS SUITE"
+	@echo "=================================================================="
+	@python3 tests/test_phase1_schemas.py
 
 test_traceability:
 	@echo "=================================================================="
