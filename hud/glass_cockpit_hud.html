@@ -61,6 +61,73 @@
   </div>
 </header>
 
+<!-- Tri-Modal Segment Switcher Header (Sprint-15 M-15) -->
+<div class="tri-modal-bar" style="display:flex; justify-content:space-between; align-items:center; background:#0c1220; border:1px solid #1e293b; padding:8px 16px; border-radius:8px;">
+  <div style="display:flex; gap:8px;">
+    <button id="btn-hud-clinician" onclick="switchHudClinicalMode('clinician')" style="background:var(--panel); border:1px solid var(--gold); color:var(--gold); padding:6px 12px; font-weight:700;">🩺 [Clinician Scribe]</button>
+    <button id="btn-hud-pharmacist" onclick="switchHudClinicalMode('pharmacist')" style="background:var(--panel); border:1px solid #334155; color:var(--muted); padding:6px 12px; font-weight:700;">🛡️ [Pharmacist Gate]</button>
+    <button id="btn-hud-patient" onclick="switchHudClinicalMode('patient')" style="background:var(--panel); border:1px solid #334155; color:var(--muted); padding:6px 12px; font-weight:700;">💚 [Patient Companion]</button>
+  </div>
+  <div id="hud-mode-pill" style="font-size:11px; font-weight:700; color:var(--emerald); font-family:monospace;">
+    TRI-MODAL STATE: CLINICIAN AMBIENT SCRIBING (SOAP + ICD-10 + DHA SN 03/2019)
+  </div>
+</div>
+
+<!-- Tri-Modal Dynamic Views -->
+<div id="hud-view-clinician" style="display:block; background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:12px; margin-bottom:4px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <strong style="color:var(--gold); font-size:13px;">MODE 1: CLINICIAN AMBIENT SCRIBE &amp; STATUTORY CODING</strong>
+    <button id="btn-hud-signoff" onclick="signHudSoapNote()" style="background:var(--emerald); border:none; color:#000; font-weight:700; padding:4px 10px; border-radius:4px; cursor:pointer;">✍️ Attest &amp; Sign Note</button>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; font-size:11px;">
+    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+      <strong style="color:var(--cyan);">[S] Subjective:</strong><br>
+      Chief Complaint: Severe acute gout flare right big toe. Known CKD Stage 4 (eGFR 22).
+    </div>
+    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+      <strong style="color:var(--emerald);">[O] Objective:</strong><br>
+      BP 145/92 mmHg, HR 88 bpm. eGFR 22 mL/min, Creatinine 2.4 mg/dL, Uric acid 9.2 mg/dL.
+    </div>
+    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+      <strong style="color:var(--crimson);">[A] Assessment:</strong><br>
+      M10.9 (Gout), N18.4 (CKD 4). <span style="color:#fca5a5;">C99 Fatal DDI Block: Colchicine+Clarithromycin.</span>
+    </div>
+    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+      <strong style="color:var(--gold);">[P] Plan:</strong><br>
+      Hold Colchicine. CMP (80053), Uric Acid (84550). <span style="color:var(--emerald);">DHA §3.7.1 14-day window active.</span>
+    </div>
+  </div>
+  <div style="margin-top:6px; display:flex; gap:6px; font-size:10px;">
+    <span class="badge" style="background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid var(--cyan);">ICD-10: M10.9</span>
+    <span class="badge" style="background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid var(--cyan);">ICD-10: N18.4</span>
+    <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 99214 (E&amp;M)</span>
+    <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 80053 (CMP)</span>
+    <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 84550 (Uric Acid)</span>
+  </div>
+</div>
+
+<div id="hud-view-pharmacist" style="display:none; background:#0f172a; border:1px solid var(--crimson); border-radius:8px; padding:12px; margin-bottom:4px;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <strong style="color:var(--crimson); font-size:13px;">MODE 2: PHARMACIST GATE &amp; C99 SAFETY INTERCEPT (&lt;0.02ms)</strong>
+    <span style="font-size:10px; color:#fca5a5; font-family:monospace;">BOXED WARNING ACTIVE</span>
+  </div>
+  <div style="font-size:12px; color:#f8fafc; margin-top:6px; line-height:1.4;">
+    <strong>FATAL CONTRAINDICATION:</strong> Colchicine + Clarithromycin co-administration in renal impairment (eGFR 22 mL/min). Airlock Quarantine: 2 items staged. Single-use token: <code>TARYAQ-OVERRIDE-8842-CLIN</code>.
+  </div>
+</div>
+
+<div id="hud-view-patient" style="display:none; background:#0f172a; border:1px solid var(--emerald); border-radius:8px; padding:12px; margin-bottom:4px;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <strong style="color:var(--emerald); font-size:13px;">MODE 3: PATIENT COMPANION (BILINGUAL AR/EN GUIDANCE)</strong>
+    <button onclick="playHudPatientAudio()" style="background:var(--cyan); border:none; color:#000; font-weight:700; padding:4px 10px; border-radius:4px; cursor:pointer;">🔊 استمع للإرشادات (Piper TTS)</button>
+  </div>
+  <div style="font-size:13px; color:#f8fafc; margin-top:6px; line-height:1.5;">
+    <strong>جدول الجرعات:</strong> تناول بريدنيزولون ٢٠ ملغ حبة واحدة يومياً بعد الإفطار. توقف فوراً عن كولشيسين وكلاريثروميسين.<br>
+    <strong>حمية النقرس:</strong> اشرب ٢.٥ لتر ماء وتجنب اللحوم الحمراء والمأكولات البحرية.<br>
+    <span style="color:#fca5a5;">🚨 علامات الطوارئ: توجه للطوارئ فوراً عند حدوث إسهال شديد أو وهن عضلي أو ضيق تنفس.</span>
+  </div>
+</div>
+
 <div class="grid">
   <!-- LEFT PANEL: BRAIN -->
   <div class="panel">
@@ -499,6 +566,59 @@ async function toggleHudLiveMic() {
       setTimeout(() => { btn.textContent = '🎙️ Live Mic (Voice Engine)'; }, 2000);
     }
   }
+}
+
+function switchHudClinicalMode(mode) {
+  ['clinician', 'pharmacist', 'patient'].forEach(m => {
+    const btn = document.getElementById(`btn-hud-${m}`);
+    const view = document.getElementById(`hud-view-${m}`);
+    if (m === mode) {
+      if (btn) {
+        btn.style.borderColor = 'var(--gold)';
+        btn.style.color = 'var(--gold)';
+      }
+      if (view) view.style.display = 'block';
+    } else {
+      if (btn) {
+        btn.style.borderColor = '#334155';
+        btn.style.color = 'var(--muted)';
+      }
+      if (view) view.style.display = 'none';
+    }
+  });
+
+  const pill = document.getElementById('hud-mode-pill');
+  if (pill) {
+    if (mode === 'clinician') pill.textContent = 'TRI-MODAL STATE: CLINICIAN AMBIENT SCRIBING (SOAP + ICD-10 + DHA SN 03/2019)';
+    else if (mode === 'pharmacist') pill.textContent = 'TRI-MODAL STATE: PHARMACIST SAFETY GATE (C99 <0.02ms + AIRLOCK)';
+    else pill.textContent = 'TRI-MODAL STATE: PATIENT COMPANION (BILINGUAL GUIDANCE + PIPER TTS)';
+  }
+
+  fetch('/api/clinical/mode', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode: mode })
+  }).catch(() => {});
+}
+
+function signHudSoapNote() {
+  const btn = document.getElementById('btn-hud-signoff');
+  if (btn) {
+    btn.textContent = '🔒 Attested & Locked';
+    btn.style.background = '#334155';
+    btn.style.color = 'var(--emerald)';
+  }
+}
+
+function playHudPatientAudio() {
+  const text = 'عزيزي المريض، يرجى التوقف فوراً عن تناول أقراص كولشيسين وكلاريثروميسين لحماية الكلى والالتزام ببديل بريدنيزولون.';
+  fetch('/api/voice/synthesize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: text, lang: 'ar' })
+  }).then(r => r.blob()).then(blob => {
+    new Audio(URL.createObjectURL(blob)).play().catch(() => {});
+  }).catch(() => {});
 }
 </script>
 </body>
