@@ -515,6 +515,8 @@ def stage_airlock_quarantine(
     target_table: str,
     extracted_data: Union[str, Dict[str, Any], List[Any]],
     quarantine_id: Optional[str] = None,
+    reviewer_role: Optional[str] = "LICENSED_CLINICAL_PHARMACIST",
+    reviewer_notes: Optional[str] = None,
 ) -> str:
     """Stages extracted data into the HITL quarantine queue."""
     q_id = quarantine_id or str(uuid.uuid4())
@@ -522,11 +524,34 @@ def stage_airlock_quarantine(
 
     sql = """
     INSERT INTO airlock_quarantine (
-        quarantine_id, response_id, target_table, extracted_data_json, status
-    ) VALUES (?, ?, ?, ?, 'STAGED');
+        quarantine_id, response_id, target_table, extracted_data_json, status, reviewer_role, reviewer_notes
+    ) VALUES (?, ?, ?, ?, 'STAGED', ?, ?);
     """
-    conn.execute(sql, (q_id, response_id, target_table, data_str))
+    conn.execute(sql, (q_id, response_id, target_table, data_str, reviewer_role, reviewer_notes))
     return q_id
+
+
+def update_airlock_quarantine_status(
+    conn: sqlite3.Connection,
+    quarantine_id: str,
+    status: str,
+    reviewer_notes: Optional[str] = None,
+    reviewer_role: Optional[str] = None,
+) -> bool:
+    """Updates review status and notes for a staged quarantine candidate."""
+    status_clean = status.strip().upper()
+    if status_clean not in ("STAGED", "APPROVED", "REJECTED"):
+        raise ValueError(f"Invalid quarantine status: {status}")
+    sql = """
+    UPDATE airlock_quarantine
+    SET status = ?,
+        reviewer_notes = COALESCE(?, reviewer_notes),
+        reviewer_role = COALESCE(?, reviewer_role),
+        reviewed_at = datetime('now', 'utc')
+    WHERE quarantine_id = ?;
+    """
+    cur = conn.execute(sql, (status_clean, reviewer_notes, reviewer_role, quarantine_id))
+    return cur.rowcount > 0
 
 
 def record_soap_note(
