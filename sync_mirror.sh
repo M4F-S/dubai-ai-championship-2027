@@ -68,7 +68,7 @@ echo "[3/3] Checking Git status and pushing to GitHub..."
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 git add -u
-git add src/ adapters/ bridge/ tests/ tools/ Makefile sync_mirror.sh scripts/ docs/ corpus/ 2>/dev/null || true
+git add src/ adapters/ bridge/ tests/ tools/ hud/ Makefile sync_mirror.sh scripts/ docs/ corpus/ 2>/dev/null || true
 if [[ -d .github ]]; then
     git add .github/
 fi

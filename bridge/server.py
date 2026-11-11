@@ -36,6 +36,8 @@ from bridge.openrouter_client import (
     _consumed_override_tokens,
     _override_lock
 )
+from bridge.voice_stt import transcribe_audio, validate_wav_pcm
+from bridge.voice_tts import synthesize_speech, validate_tts_wav, VOICE_CACHE_DIR
 
 DEFAULT_PORT = 8080
 DEFAULT_HOST = "127.0.0.1"
@@ -124,6 +126,8 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self._serve_scenarios()
         elif url_path == "/api/airlock/quarantine":
             self._serve_airlock_quarantine()
+        elif url_path == "/api/voice/synthesize":
+            self._handle_voice_synthesize()
         else:
             self.send_error(404, "Endpoint not found")
 
@@ -137,6 +141,10 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self._handle_override()
         elif url_path == "/api/airlock/review":
             self._handle_airlock_review()
+        elif url_path == "/api/voice/transcribe":
+            self._handle_voice_transcribe()
+        elif url_path == "/api/voice/synthesize":
+            self._handle_voice_synthesize()
         else:
             self.send_error(404, "Endpoint not found")
 
@@ -175,6 +183,11 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
         status["ollama_model"] = self.engine.ollama_model
         status["api_key_configured"] = bool(self.engine.api_key)
         status["active_agent"] = self.engine.active_agent
+        status["voice_engine"] = {
+            "stt": "whisper.cpp (large-v3-turbo 16kHz PCM)",
+            "tts": "piper-tts (bilingual ar/en 22.05 kHz WAV)",
+            "cache_dir": VOICE_CACHE_DIR
+        }
         if self.engine.provider == "ollama":
             status["mode"] = "LOCAL_OLLAMA_AIRGAP_C99_SHIELD"
         elif self.engine.provider == "openrouter":
@@ -471,6 +484,133 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"status": "ERROR", "message": f"Quarantine ID '{quarantine_id}' not found."}, 404)
         except Exception as e:
             self._send_json({"status": "ERROR", "message": str(e)}, 500)
+
+    def _handle_voice_transcribe(self):
+        """POST /api/voice/transcribe: Transcribes audio bytes to normalized text.
+        
+        Accepts:
+        - Content-Type: audio/wav, audio/x-wav, audio/wave, application/octet-stream
+        - Content-Type: multipart/form-data with audio chunk
+        - Content-Type: application/json with {"audio_base64": "..."}
+        
+        Returns:
+            JSON: {"transcript": "...", "normalized": "...", "language": "..."}
+        """
+        content_length = int(self.headers.get("Content-Length", 0))
+        if content_length <= 0:
+            self._send_json({"status": "ERROR", "message": "Empty audio payload in request body"}, 400)
+            return
+
+        raw_body = self.rfile.read(content_length)
+        content_type = self.headers.get("Content-Type", "")
+
+        audio_bytes: bytes = b""
+
+        if "multipart/form-data" in content_type:
+            boundary = ""
+            for part in content_type.split(";"):
+                part = part.strip()
+                if part.startswith("boundary="):
+                    boundary = part[len("boundary="):].strip('"')
+            if boundary:
+                b_boundary = f"--{boundary}".encode("utf-8")
+                parts = raw_body.split(b_boundary)
+                for p in parts:
+                    if b"\r\n\r\n" in p:
+                        header_part, body_part = p.split(b"\r\n\r\n", 1)
+                        if body_part.endswith(b"\r\n"):
+                            body_part = body_part[:-2]
+                        if b"RIFF" in body_part:
+                            riff_idx = body_part.find(b"RIFF")
+                            audio_bytes = body_part[riff_idx:]
+                            break
+                        elif b"filename=" in header_part or b"name=" in header_part:
+                            audio_bytes = body_part
+                            break
+            if not audio_bytes:
+                riff_idx = raw_body.find(b"RIFF")
+                if riff_idx >= 0:
+                    audio_bytes = raw_body[riff_idx:]
+                else:
+                    audio_bytes = raw_body
+
+        elif "application/json" in content_type:
+            try:
+                import base64
+                req_json = json.loads(raw_body.decode("utf-8"))
+                b64_audio = req_json.get("audio_base64") or req_json.get("audio") or req_json.get("audio_hex")
+                if b64_audio:
+                    if req_json.get("audio_hex"):
+                        audio_bytes = bytes.fromhex(b64_audio)
+                    else:
+                        audio_bytes = base64.b64decode(b64_audio)
+                else:
+                    self._send_json({"status": "ERROR", "message": "Missing audio_base64 in JSON body"}, 400)
+                    return
+            except Exception as e:
+                self._send_json({"status": "ERROR", "message": f"Invalid JSON payload: {e}"}, 400)
+                return
+        else:
+            audio_bytes = raw_body
+
+        try:
+            res = transcribe_audio(audio_bytes)
+            self._send_json({
+                "status": "SUCCESS",
+                "transcript": res["transcript"],
+                "normalized": res["normalized"],
+                "language": res["language"],
+                "engine": res["engine"],
+                "latency_ms": res["latency_ms"]
+            }, 200)
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"Transcription error: {str(e)}"}, 400)
+
+    def _handle_voice_synthesize(self):
+        """POST or GET /api/voice/synthesize: Synthesizes text into clean 22.05 kHz WAV audio stream.
+        
+        Accepts:
+        - POST JSON: {"text": "...", "lang": "ar|en"}
+        - GET Query: ?text=...&lang=ar|en
+        
+        Returns:
+            audio/wav binary stream
+        """
+        text = ""
+        lang = "ar"
+
+        if self.command == "GET":
+            parsed_url = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed_url.query)
+            text = qs.get("text", [""])[0]
+            lang = qs.get("lang", [qs.get("language", ["ar"])[0]])[0]
+        else:
+            content_length = int(self.headers.get("Content-Length", 0))
+            if content_length > 0:
+                raw_body = self.rfile.read(content_length).decode("utf-8")
+                try:
+                    req_json = json.loads(raw_body)
+                    text = req_json.get("text", "")
+                    lang = req_json.get("lang") or req_json.get("language") or "ar"
+                except Exception:
+                    self._send_json({"status": "ERROR", "message": "Invalid JSON body"}, 400)
+                    return
+
+        if not text:
+            self._send_json({"status": "ERROR", "message": "Missing text parameter for speech synthesis"}, 400)
+            return
+
+        try:
+            wav_bytes = synthesize_speech(text, language=lang)
+            self.send_response(200)
+            self.send_header("Content-Type", "audio/wav")
+            self.send_header("Content-Length", str(len(wav_bytes)))
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Cache-Control", "public, max-age=86400")
+            self.end_headers()
+            self.wfile.write(wav_bytes)
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"Synthesis error: {str(e)}"}, 500)
 
 
 def run_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, provider: str = "auto"):
