@@ -9,19 +9,15 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check out repository
       uses: actions/checkout@v4
 
     - name: Install dependencies
-      env:
-        DEBIAN_FRONTEND: noninteractive
       run: |
-        APT_OPTS="-o Acquire::ForceIPv4=true -o Acquire::Retries=3 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15"
-        sudo apt-get $APT_OPTS update -qq
-        sudo NEEDRESTART_MODE=a apt-get $APT_OPTS install -y -qq --no-install-recommends libcurl4-openssl-dev libsqlite3-dev
+        sudo apt-get install -y --no-install-recommends libcurl4-openssl-dev libsqlite3-dev || (sudo apt-get update && sudo apt-get install -y --no-install-recommends libcurl4-openssl-dev libsqlite3-dev)
 
     - name: Run C99 Adapter Test Battery (-Wall -Wextra -Werror)
       run: |
