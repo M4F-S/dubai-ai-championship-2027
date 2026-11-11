@@ -14,12 +14,10 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v4
 
-    - name: Verify build environment
+    - name: Install dependencies
       run: |
-        gcc --version
-        make --version
-        python3 --version
-        dpkg -l | grep -E "libsqlite3-dev|libcurl4" || (export DEBIAN_FRONTEND=noninteractive && sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libcurl4-openssl-dev libsqlite3-dev)
+        sudo apt-get update -qq
+        sudo NEEDRESTART_MODE=a DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends libcurl4-openssl-dev libsqlite3-dev
 
     - name: Run C99 Adapter Test Battery (-Wall -Wextra -Werror)
       run: |
