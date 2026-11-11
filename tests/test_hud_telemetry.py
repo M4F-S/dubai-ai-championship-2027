@@ -28,6 +28,9 @@ MAGIC_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 TEST_PORT = int(os.environ.get("HUD_TEST_PORT", 8787))
 TEST_HOST = "127.0.0.1"
 
+# Bypass any runner environment proxies for 127.0.0.1
+urllib.request.install_opener(urllib.request.build_opener(urllib.request.ProxyHandler({})))
+
 
 class SimpleWebSocketClient:
     """Pure Python standard library RFC 6455 test client."""
@@ -158,7 +161,7 @@ class TestHUDTelemetryBridge(unittest.TestCase):
 
         ready = False
         health_url = f"http://{TEST_HOST}:{TEST_PORT}/health"
-        for _ in range(30):
+        for _ in range(60):
             try:
                 req = urllib.request.Request(health_url)
                 with urllib.request.urlopen(req, timeout=0.5) as resp:
@@ -170,7 +173,9 @@ class TestHUDTelemetryBridge(unittest.TestCase):
 
         if not ready:
             cls.bridge_proc.kill()
-            raise RuntimeError(f"HUD Telemetry Bridge failed to start on port {TEST_PORT}")
+            out, err = cls.bridge_proc.communicate()
+            err_msg = err.decode('utf-8', errors='replace') if err else "none"
+            raise RuntimeError(f"HUD Telemetry Bridge failed to start on port {TEST_PORT}. stderr: {err_msg}")
 
     @classmethod
     def tearDownClass(cls):
@@ -313,7 +318,7 @@ class TestHUDTelemetryBridge(unittest.TestCase):
             os.path.dirname(os.path.abspath(__file__)), "..", "hud", "telemetry_bridge.py"
         )
         proc = subprocess.Popen(
-            [sys.executable, bridge_path, "--port", str(demo_port), "--demo", "--interval", "0.2"],
+            [sys.executable, bridge_path, "--host", TEST_HOST, "--port", str(demo_port), "--demo", "--interval", "0.2"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
@@ -321,7 +326,7 @@ class TestHUDTelemetryBridge(unittest.TestCase):
         try:
             # Wait for demo bridge ready
             ready = False
-            for _ in range(30):
+            for _ in range(60):
                 try:
                     with urllib.request.urlopen(f"http://{TEST_HOST}:{demo_port}/health", timeout=0.5) as r:
                         if r.status == 200:
@@ -329,7 +334,11 @@ class TestHUDTelemetryBridge(unittest.TestCase):
                             break
                 except Exception:
                     time.sleep(0.1)
-            self.assertTrue(ready, "Demo bridge failed to bind")
+            if not ready:
+                proc.kill()
+                out, err = proc.communicate()
+                err_msg = err.decode('utf-8', errors='replace') if err else "none"
+                self.fail(f"Demo bridge failed to bind on port {demo_port}. stderr: {err_msg}")
 
             # Connect client
             client = SimpleWebSocketClient(TEST_HOST, demo_port)

@@ -78,6 +78,15 @@ DEMO_SCENARIOS = [
         "prompt": "قم بتلخيص وتنظيم جدول مواعيد الرئيس التنفيذي في دبي ٢٠٢٧، وتفريغ الذاكرة المؤقتة للضوضاء التشغيلية مع استخلاص القواعد الدائمة.",
         "expected": "C99 Arabic Normalizer + FadeMem episodic decay (> 85% token reduction)",
         "override_code": ""
+    },
+    {
+        "id": "scenario_nibras_civic",
+        "agent": "nibras",
+        "title_en": "5. Nibras: DLD Ejari Decree 43/2013 Rent Dispute RAG",
+        "title_ar": "٥. النبراس: التحقق من نزاعات زيادة الإيجار وفق مرسوم إيجاري ٤٣/٢٠١٣",
+        "prompt": "صاحب الشقة رفع عليا الايجار 20%، هل هذا قانوني وفق مرسوم إيجاري رقم 43 لسنة 2013 الصادر عن دائرة الأراضي والأملاك؟",
+        "expected": "Dynamic RAG retrieval of DLD-EJARI-DECREE-43-2013:Article 1 tiers with cryptographic SHA-256 proof",
+        "override_code": ""
     }
 ]
 
