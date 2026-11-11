@@ -328,6 +328,20 @@ def sanitize_tool_arguments(tool_name: str, args: Dict[str, Any]) -> Dict[str, A
         if "has_verified_id" in sanitized:
             sanitized["has_verified_id"] = bool(sanitized["has_verified_id"])
 
+    elif tool_name == "rag_search":
+        if "query" in sanitized:
+            sanitized["query"] = strip_unauthorized_scripts(str(sanitized["query"]))
+        if "limit" in sanitized:
+            try:
+                sanitized["limit"] = max(1, min(50, int(sanitized["limit"])))
+            except (ValueError, TypeError):
+                sanitized["limit"] = 3
+        else:
+            sanitized["limit"] = 3
+        if "domain" in sanitized and sanitized["domain"]:
+            d = str(sanitized["domain"]).strip().upper()
+            sanitized["domain"] = None if d in ("ALL", "") else d
+
     elif tool_name == "claim_scrub":
         if "net_claim_aed" in sanitized:
             try:
