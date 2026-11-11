@@ -16,8 +16,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc make libcurl4-openssl-dev libsqlite3-dev
+        sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=15 || true
+        sudo apt-get install -y --no-install-recommends gcc make libcurl4-openssl-dev libsqlite3-dev
 
     - name: Run C99 Adapter Test Battery (-Wall -Wextra -Werror)
       run: |
