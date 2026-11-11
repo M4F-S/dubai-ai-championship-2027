@@ -24,6 +24,7 @@ import json
 import time
 import argparse
 import subprocess
+import urllib.parse
 from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 from typing import Dict, Any, List
 
@@ -121,6 +122,8 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self._serve_audit_verify()
         elif url_path == "/api/scenarios":
             self._serve_scenarios()
+        elif url_path == "/api/airlock/quarantine":
+            self._serve_airlock_quarantine()
         else:
             self.send_error(404, "Endpoint not found")
 
@@ -132,6 +135,8 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self._handle_chat_stream()
         elif url_path == "/api/override":
             self._handle_override()
+        elif url_path == "/api/airlock/review":
+            self._handle_airlock_review()
         else:
             self.send_error(404, "Endpoint not found")
 
@@ -393,6 +398,79 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(resp_bytes)
+
+    def _serve_airlock_quarantine(self):
+        """List staged HITL quarantine candidates from corpus/airlock_ledger.db."""
+        from bridge.airlock import list_quarantine_items
+
+        parsed_url = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed_url.query)
+        status_filter = qs.get("status", [None])[0]
+        limit_val = 50
+        if "limit" in qs:
+            try:
+                limit_val = int(qs["limit"][0])
+            except (ValueError, TypeError):
+                limit_val = 50
+
+        try:
+            items = list_quarantine_items(status=status_filter, limit=limit_val)
+            self._send_json({
+                "status": "SUCCESS",
+                "count": len(items),
+                "quarantine": items
+            }, 200)
+        except Exception as e:
+            self._send_json({
+                "status": "ERROR",
+                "error": str(e)
+            }, 500)
+
+    def _handle_airlock_review(self):
+        """Review endpoint for licensed clinicians to approve or reject quarantine candidates."""
+        from bridge.airlock import review_quarantine_item
+
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8")
+
+        try:
+            req_data = json.loads(body)
+        except Exception:
+            self._send_json({"status": "ERROR", "message": "Invalid JSON body"}, 400)
+            return
+
+        quarantine_id = req_data.get("quarantine_id", "").strip()
+        status = req_data.get("status", "").strip().upper()
+        notes = req_data.get("notes") or req_data.get("reviewer_notes")
+        reviewer_role = req_data.get("reviewer_role", "LICENSED_CLINICAL_PHARMACIST")
+
+        if not quarantine_id:
+            self._send_json({"status": "ERROR", "message": "Missing quarantine_id parameter"}, 400)
+            return
+
+        if status not in ("APPROVED", "REJECTED"):
+            self._send_json({
+                "status": "ERROR",
+                "message": f"Invalid review status '{status}'. Must be 'APPROVED' or 'REJECTED'."
+            }, 400)
+            return
+
+        try:
+            res = review_quarantine_item(
+                quarantine_id=quarantine_id,
+                status=status,
+                notes=notes,
+                reviewer_role=reviewer_role
+            )
+            self._send_json({
+                "status": "SUCCESS",
+                "message": f"Quarantine item {quarantine_id} reviewed successfully.",
+                "review": res
+            }, 200)
+        except KeyError:
+            self._send_json({"status": "ERROR", "message": f"Quarantine ID '{quarantine_id}' not found."}, 404)
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": str(e)}, 500)
 
 
 def run_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, provider: str = "auto"):

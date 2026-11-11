@@ -328,6 +328,14 @@ def sanitize_tool_arguments(tool_name: str, args: Dict[str, Any]) -> Dict[str, A
         if "has_verified_id" in sanitized:
             sanitized["has_verified_id"] = bool(sanitized["has_verified_id"])
 
+    elif tool_name == "airlock_research":
+        if "authority" in sanitized:
+            sanitized["authority"] = str(sanitized["authority"]).strip().upper()
+        if "query" in sanitized:
+            sanitized["query"] = strip_unauthorized_scripts(str(sanitized["query"])).strip()
+        if "trigger_reason" in sanitized:
+            sanitized["trigger_reason"] = strip_unauthorized_scripts(str(sanitized["trigger_reason"])).strip()
+
     elif tool_name == "rag_search":
         if "query" in sanitized:
             sanitized["query"] = strip_unauthorized_scripts(str(sanitized["query"]))
