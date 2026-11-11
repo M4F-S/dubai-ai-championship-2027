@@ -152,7 +152,7 @@ test_multi_turn: $(LIB_ADAPTERS)
 	@echo "=================================================================="
 	@python3 $(MULTI_TURN_TEST)
 
-test_rag_runtime: $(LIB_ADAPTERS)
+test_rag_runtime: $(LIB_ADAPTERS) ingest_rag
 	@echo "=================================================================="
 	@echo " RUNNING PHASE 2 DYNAMIC RAG RUNTIME INTEGRATION SUITE (M-12)"
 	@echo "=================================================================="

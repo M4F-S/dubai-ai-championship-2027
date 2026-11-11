@@ -56,9 +56,10 @@ class TestRAGRuntimeIntegration(unittest.TestCase):
         cls._orig_audit_key = os.environ.get("TARYAQ_AUDIT_KEY")
         os.environ["TARYAQ_AUDIT_KEY"] = "test-key-32-bytes-minimum-phase2-rag-00"
 
-        # Verify RAG Master DB exists
+        # Verify RAG Master DB exists; auto-ingest if running in clean/CI environment
         if not os.path.exists(RAG_MASTER_DB_PATH):
-            raise RuntimeError(f"Required RAG Master DB not found at: {RAG_MASTER_DB_PATH}")
+            from scripts.ingest_rag_corpus import ingest_corpus
+            ingest_corpus(reingest=True)
 
         # Start ephemeral HTTP/SSE server on dedicated port for endpoint validation
         cls.port = 8833
