@@ -36,6 +36,7 @@ BRIDGE_TEST = $(TESTS_DIR)/test_openrouter_bridge.py
 MULTI_TURN_TEST = $(TESTS_DIR)/test_multi_turn_bridge.py
 RAG_RUNTIME_TEST = $(TESTS_DIR)/test_rag_runtime_integration.py
 AIRLOCK_TEST = $(TESTS_DIR)/test_airlock_engine.py
+VOICE_TEST = $(TESTS_DIR)/test_voice_engine.py
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -58,7 +59,7 @@ CASE_MEMORY_TEST_BIN = $(BUILD_DIR)/test_case_memory
 POLICY_RAG_BIN = $(BUILD_DIR)/test_policy_rag
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_gomaa test_phase1 ingest_rag test_rag_ingest taryaq_agent qala_agent nibras_agent timeline-demo clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_voice test_gomaa test_phase1 ingest_rag test_rag_ingest taryaq_agent qala_agent nibras_agent timeline-demo clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(CASE_MEMORY_TEST_BIN) $(POLICY_RAG_BIN) $(LIB_ADAPTERS)
 
@@ -114,7 +115,7 @@ nibras_agent: $(NIBRAS_AGENT_BIN)
 timeline-demo: $(TARYAQ_AGENT_BIN)
 	@./$(TARYAQ_AGENT_BIN) --timeline-demo
 
-test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_gomaa test_phase1 test_rag_ingest
+test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_voice test_gomaa test_phase1 test_rag_ingest
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -164,6 +165,12 @@ test_airlock: $(LIB_ADAPTERS)
 	@echo " RUNNING PHASE 3 CURATED WEB RESEARCH AIRLOCK SUITE (M-13)"
 	@echo "=================================================================="
 	@python3 $(AIRLOCK_TEST)
+
+test_voice: $(LIB_ADAPTERS)
+	@echo "=================================================================="
+	@echo " RUNNING PHASE 4 BI-DIRECTIONAL VOICE ENGINE SUITE (M-14)"
+	@echo "=================================================================="
+	@python3 $(VOICE_TEST)
 
 test_gomaa: $(LIB_ADAPTERS)
 	@echo "=================================================================="

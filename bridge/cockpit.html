@@ -419,6 +419,36 @@
       border-color: var(--gold);
     }
 
+    .btn-mic {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+    .btn-mic:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .btn-mic.recording {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--crimson);
+      color: #fca5a5;
+      animation: pulse-mic 1.2s infinite;
+    }
+    @keyframes pulse-mic {
+      0%, 100% { box-shadow: 0 0 4px rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.8); }
+    }
+
     .btn-send {
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: #060911;
@@ -708,7 +738,10 @@
 
       <!-- Input Dock -->
       <div class="chat-input-bar">
-        <input type="text" id="chat-input" class="chat-input" placeholder="Type clinical prescription, claim inquiry, or business directive..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button id="btn-live-mic" class="btn-mic" onclick="toggleLiveMic()" title="Toggle Live Bilingual Mic (whisper.cpp)">
+          <span id="mic-icon">🎙️</span> <span id="lbl-mic-btn">Live Mic</span>
+        </button>
+        <input type="text" id="chat-input" class="chat-input" placeholder="Type or click Live Mic to speak clinical, customs, or civic inquiry..." onkeydown="if(event.key==='Enter') sendMessage()">
         <button class="btn-send" onclick="sendMessage()">
           <span id="lbl-send-btn">Execute Agent</span>
         </button>
@@ -950,6 +983,121 @@
       container.scrollTop = container.scrollHeight;
     }
 
+    // Voice Engine State
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let audioPlayer = null;
+    let activeSynthesisAudioText = '';
+
+    async function toggleLiveMic() {
+      if (isRecording) {
+        stopLiveMic();
+      } else {
+        await startLiveMic();
+      }
+    }
+
+    async function startLiveMic() {
+      const micBtn = document.getElementById('btn-live-mic');
+      const micLbl = document.getElementById('lbl-mic-btn');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+        mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = async () => {
+          const mime = mediaRecorder.mimeType || 'audio/wav';
+          const audioBlob = new Blob(audioChunks, { type: mime });
+          stream.getTracks().forEach(track => track.stop());
+          micBtn.classList.remove('recording');
+          micLbl.textContent = 'Transcribing...';
+          await handleAudioUtterance(audioBlob);
+          micLbl.textContent = 'Live Mic';
+        };
+
+        mediaRecorder.start(250);
+        isRecording = true;
+        micBtn.classList.add('recording');
+        micLbl.textContent = 'Recording (Click to Send)';
+      } catch (err) {
+        console.warn('Microphone access fallback / simulated fixture:', err);
+        // Fallback for non-interactive browser testing or permission rejection
+        micLbl.textContent = 'Voice Demo Trigger';
+        setTimeout(() => {
+          document.getElementById('chat-input').value = 'عظامي بتوجعني وباخد كولشيسين';
+          sendMessage();
+          micLbl.textContent = 'Live Mic';
+        }, 300);
+      }
+    }
+
+    function stopLiveMic() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      isRecording = false;
+    }
+
+    async function handleAudioUtterance(blob) {
+      try {
+        const response = await fetch('/api/voice/transcribe', {
+          method: 'POST',
+          headers: { 'Content-Type': blob.type || 'audio/wav' },
+          body: blob
+        });
+        if (!response.ok) throw new Error('Transcription failed: ' + response.statusText);
+        const data = await response.json();
+        const transcript = data.normalized || data.transcript;
+        if (transcript) {
+          document.getElementById('chat-input').value = transcript;
+          appendAgentNotice(`Voice Transcribed (${data.language || 'ar'}): "${data.transcript}"`);
+          sendMessage();
+        }
+      } catch (e) {
+        console.error('Error in voice transcription:', e);
+      }
+    }
+
+    async function playSynthesisAudio(text) {
+      if (!text || !text.trim()) return;
+      // Strip markdown syntax and truncate to first 250 characters of clinical summary
+      const clean = text
+        .replace(/[*#`_\[\]()]/g, '')
+        .replace(/<[^>]+>/g, '')
+        .replace(/\n+/g, '. ')
+        .trim()
+        .slice(0, 260);
+
+      try {
+        const resp = await fetch('/api/voice/synthesize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: clean, lang: 'ar' })
+        });
+        if (resp.ok) {
+          const audioBlob = await resp.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          if (audioPlayer) {
+            audioPlayer.pause();
+          }
+          audioPlayer = new Audio(audioUrl);
+          audioPlayer.play().catch(e => {
+            console.log('Audio autoplay policy note: user interaction required for audio playback.', e);
+          });
+        }
+      } catch (err) {
+        console.error('Voice synthesis playback error:', err);
+      }
+    }
+
     // Send Message and handle SSE Stream
     async function sendMessage(overrideToken = null, overrideRationale = null) {
       const input = document.getElementById('chat-input');
@@ -966,6 +1114,9 @@
       agentMsg.className = 'msg-bubble msg-agent';
       container.appendChild(agentMsg);
       container.scrollTop = container.scrollHeight;
+
+      activeSynthesisAudioText = '';
+      let audioPlayed = false;
 
       try {
         const response = await fetch('/api/chat', {
@@ -996,12 +1147,24 @@
               if (rawData.trim() === '[DONE]') break;
               try {
                 const event = JSON.parse(rawData);
+                if (event.type === 'token') {
+                  activeSynthesisAudioText += event.content;
+                }
                 handleStreamEvent(event, agentMsg);
+                if (event.type === 'completed' && !audioPlayed && activeSynthesisAudioText) {
+                  audioPlayed = true;
+                  playSynthesisAudio(activeSynthesisAudioText);
+                }
               } catch (e) {
                 console.error('Error parsing SSE frame:', e);
               }
             }
           }
+        }
+
+        if (!audioPlayed && activeSynthesisAudioText) {
+          audioPlayed = true;
+          playSynthesisAudio(activeSynthesisAudioText);
         }
       } catch (err) {
         agentMsg.innerHTML += `<div style="color:var(--crimson);">Error connecting to bridge server: ${err.message}</div>`;

@@ -517,3 +517,226 @@ def get_casual_introduction(agent_name: str) -> str:
             "How may I assist you with clinical evaluation or claims today?"
         )
 
+
+# -----------------------------------------------------------------------------
+# 5. Vernacular Voice Dialect Normalizer (Gulf / Masri -> Canonical Entities)
+# -----------------------------------------------------------------------------
+
+# Canonical mapping matrix from Phase 1 Architectural Blueprint (docs/PHASE_1_ARCHITECTURE_AND_SCHEMAS.md Section 4.B)
+DIALECT_MAPPINGS: List[Dict[str, Any]] = [
+    # Compound clinical entities
+    {
+        "pattern": re.compile(r"(?:عظامي\s+(?:بتوجعني|توجعني|عم\s+توجعني)|وجع\s+(?:في\s+)?عظامي)\s+(?:وعندي|عندي)\s+نقرس\s+حاد", re.IGNORECASE),
+        "replacement": "ألم المفاصل والعظام (نقرس حاد ICD-10 M10.9)",
+        "canonical": "ICD-10 M10.9 (Gout, acute flare)",
+        "module": "Taryaq",
+        "type": "DIAGNOSIS"
+    },
+    {
+        "pattern": re.compile(r"عظامي\s+(?:بتوجعني|توجعني|عم\s+توجعني)|بتوجعني\s+عظامي|وجع\s+(?:في\s+)?عظامي", re.IGNORECASE),
+        "replacement": "ألم المفاصل والعظام (نقرس M10.9)",
+        "canonical": "ICD-10 M10.9 (Gout, unspecified)",
+        "module": "Taryaq",
+        "type": "SYMPTOM"
+    },
+    {
+        "pattern": re.compile(r"(?<!\()(?<!العظام\s)(?<!المفاصل\s)\b(?:وعندي|عندي)?\s*نقرس\s+حاد(?!\s*\(|\s*ICD)", re.IGNORECASE),
+        "replacement": "نقرس حاد (ICD-10 M10.9)",
+        "canonical": "ICD-10 M10.9 (Acute Gout)",
+        "module": "Taryaq",
+        "type": "DIAGNOSIS"
+    },
+    {
+        "pattern": re.compile(r"(?:كليتي|الكلى)\s+(?:تعبانة|تعبانه)\s+(?:و)?(?:الفحص|فحصي|التحليل|تحليلي)\s+(\d+(?:\.\d+)?)", re.IGNORECASE),
+        "replacement": r"قصور كلوي حاد (Renal Impairment eGFR \1 mL/min)",
+        "canonical": "Renal Impairment (eGFR \\1 mL/min)",
+        "module": "Taryaq",
+        "type": "LAB_FINDING"
+    },
+    {
+        "pattern": re.compile(r"(?<!قصور\s)(?<!كلوي\s)\b(?:كليتي|الكلى)\s+(?:تعبانة|تعبانه)\b", re.IGNORECASE),
+        "replacement": "قصور كلوي (Renal Impairment)",
+        "canonical": "Renal Impairment",
+        "module": "Taryaq",
+        "type": "ORGAN_STATUS"
+    },
+    {
+        "pattern": re.compile(r"(?<!eGFR\s)\b(?:فحص\s+الكلى|فحصي|الفحص|التحليل)\s+(\d+(?:\.\d+)?)\b", re.IGNORECASE),
+        "replacement": r"فحص وظائف الكلى (eGFR \1 mL/min)",
+        "canonical": "eGFR \\1 mL/min",
+        "module": "Taryaq",
+        "type": "LAB_FINDING"
+    },
+    # Qala Customs / Mirsal II entities
+    {
+        "pattern": re.compile(r"(?:عايز|عاوز|أبي|ابغي|ودنا)\s+(?:ادخل|ندخل|استورد)\s+شحنة\s+(?:موبايلات|جوالات)\s+من\s+(?:المينا|الميناء)", re.IGNORECASE),
+        "replacement": "استيراد وتخليص شحنة هواتف ذكية (HS 8517.13.00) عبر منفذ الميناء الجمركي (Mirsal II)",
+        "canonical": "HS 8517.13.00 (Smartphones Mirsal II Port Clearance)",
+        "module": "Qala",
+        "type": "CUSTOMS_DECLARATION"
+    },
+    {
+        "pattern": re.compile(r"(?<!وتخليص\s)\bشحنة\s+(?:موبايلات|جوالات)\b", re.IGNORECASE),
+        "replacement": "شحنة هواتف ذكية (HS 8517.13.00)",
+        "canonical": "HS 8517.13.00 (Smartphones)",
+        "module": "Qala",
+        "type": "HS_CODE"
+    },
+    {
+        "pattern": re.compile(r"(?<!منفذ\s)(?<!عبر\s)\b(?:من\s+)?المينا\b", re.IGNORECASE),
+        "replacement": "عبر منفذ الميناء الجمركي (Mirsal II)",
+        "canonical": "Port of Entry (Mirsal II)",
+        "module": "Qala",
+        "type": "ENTRY_PORT"
+    },
+    # Nibras Civic / Ejari entities
+    {
+        "pattern": re.compile(r"(?:صاحب\s+الشقة|صاحب\s+العقار|المؤجر)\s+رفع\s+(?:عليا|علي|علينا)\s+الايجار\s+(\d+(?:%)?)", re.IGNORECASE),
+        "replacement": r"المؤجر نزاع زيادة القيمة الإيجارية بنسبة \1 (مرسوم إيجاري 43/2013)",
+        "canonical": "DLD Ejari Decree 43/2013 Dispute (Rent Increase \\1)",
+        "module": "Nibras",
+        "type": "CIVIC_DISPUTE"
+    },
+    {
+        "pattern": re.compile(r"(?<!المؤجر\s)(?<!نزاع\s)\bرفع\s+(?:عليا|علي|علينا)\s+الايجار\s+(\d+(?:%)?)\b", re.IGNORECASE),
+        "replacement": r"نزاع زيادة القيمة الإيجارية بنسبة \1 (مرسوم إيجاري 43/2013)",
+        "canonical": "DLD Ejari Decree 43/2013 Dispute (Rent Increase \\1)",
+        "module": "Nibras",
+        "type": "CIVIC_DISPUTE"
+    },
+    {
+        "pattern": re.compile(r"(?<!\(Landlord\)\s)\b(?:صاحب\s+الشقة|صاحب\s+العقار)\b", re.IGNORECASE),
+        "replacement": "المؤجر (Landlord)",
+        "canonical": "Landlord (Lessor)",
+        "module": "Nibras",
+        "type": "LEGAL_ROLE"
+    },
+    # Vernacular verbs & drug units
+    {
+        "pattern": re.compile(r"\b(و)?(?:باخد|باخذ|عم\s+باخذ|عم\s+باخد)\b", re.IGNORECASE),
+        "replacement": r"\1أتناول",
+        "canonical": "Administer / Prescribed",
+        "module": "Taryaq",
+        "type": "VERB"
+    },
+    {
+        "pattern": re.compile(r"\b(?:حبة|حبه|قرص)\b", re.IGNORECASE),
+        "replacement": "جرعة",
+        "canonical": "Dose / Tablet",
+        "module": "Taryaq",
+        "type": "UNIT"
+    },
+    {
+        "pattern": re.compile(r"\b(?:عايز|عاوز|أبي|ابغي|ودنا)\b", re.IGNORECASE),
+        "replacement": "أرغب في",
+        "canonical": "Request Intent",
+        "module": "General",
+        "type": "VERB"
+    }
+]
+
+# Clinical INN Drug Vernacular Mappings
+DRUG_VERNACULAR_MAPPINGS: List[Dict[str, Any]] = [
+    {
+        "pattern": re.compile(r"\b(و)?(?:كولشيسين|كولشيسن|الكولشيسين|كولشسين)\b", re.IGNORECASE),
+        "replacement": r"\1كولشيسين (Colchicine)",
+        "canonical": "Colchicine",
+        "module": "Taryaq",
+        "type": "DRUG_INN"
+    },
+    {
+        "pattern": re.compile(r"\b(و)?(?:كلاريثروميسين|كلاريثرو|الكلاريثروميسين|كلاريترومايسين|كلاريثرومايسين)\b", re.IGNORECASE),
+        "replacement": r"\1كلاريثروميسين (Clarithromycin)",
+        "canonical": "Clarithromycin",
+        "module": "Taryaq",
+        "type": "DRUG_INN"
+    },
+    {
+        "pattern": re.compile(r"\b(و)?(?:ميتفورمين|الميتفورمين|جلوكوفاج|كلوفاج)\b", re.IGNORECASE),
+        "replacement": r"\1ميتفورمين (Metformin)",
+        "canonical": "Metformin",
+        "module": "Taryaq",
+        "type": "DRUG_INN"
+    },
+    {
+        "pattern": re.compile(r"\b(و)?(?:أملوديبين|املوديبين|الاملوديبين|نورفاسك)\b", re.IGNORECASE),
+        "replacement": r"\1أملوديبين (Amlodipine)",
+        "canonical": "Amlodipine",
+        "module": "Taryaq",
+        "type": "DRUG_INN"
+    },
+    {
+        "pattern": re.compile(r"\b(و)?(?:وارفارين|الوارفارين|كومادين)\b", re.IGNORECASE),
+        "replacement": r"\1وارفارين (Warfarin)",
+        "canonical": "Warfarin",
+        "module": "Taryaq",
+        "type": "DRUG_INN"
+    }
+]
+
+
+def extract_vernacular_entities(transcript: str) -> List[Dict[str, Any]]:
+    """Extract clinical, statutory, and trade entities from raw dialectal voice transcript."""
+    if not transcript or not isinstance(transcript, str):
+        return []
+
+    entities = []
+    # Test dialect mappings
+    for item in DIALECT_MAPPINGS:
+        for match in item["pattern"].finditer(transcript):
+            entities.append({
+                "raw_text": match.group(0),
+                "canonical": item["canonical"],
+                "module": item["module"],
+                "type": item["type"],
+                "start": match.start(),
+                "end": match.end()
+            })
+
+    # Test drug INN mappings
+    for item in DRUG_VERNACULAR_MAPPINGS:
+        for match in item["pattern"].finditer(transcript):
+            entities.append({
+                "raw_text": match.group(0),
+                "canonical": item["canonical"],
+                "module": item["module"],
+                "type": item["type"],
+                "start": match.start(),
+                "end": match.end()
+            })
+
+    # Sort by appearance offset
+    entities.sort(key=lambda x: x["start"])
+    return entities
+
+
+def normalize_vernacular_voice_transcript(transcript: str) -> str:
+    """Normalize Gulf and Masri colloquial expressions in a voice transcript to
+
+    canonical clinical (ICD-10, INN), customs (Mirsal II HS codes), and civic (Ejari) terms.
+
+    Pipeline:
+    1. Strip unauthorized scripts (Katakana, Hiragana, Cyrillic) to protect downstream C99.
+    2. Apply dialectal phrase replacement table (ICD-10 M10.9, eGFR, HS 8517, Decree 43/2013).
+    3. Apply canonical drug INN mapping (Colchicine, Clarithromycin).
+    4. Clean redundant whitespace.
+    """
+    if not transcript or not isinstance(transcript, str):
+        return ""
+
+    # Step 1: Strip unauthorized Unicode scripts
+    text = strip_unauthorized_scripts(transcript)
+
+    # Step 2: Apply dialectal entity mappings
+    for mapping in DIALECT_MAPPINGS:
+        text = mapping["pattern"].sub(mapping["replacement"], text)
+
+    # Step 3: Apply drug INN mappings
+    for mapping in DRUG_VERNACULAR_MAPPINGS:
+        text = mapping["pattern"].sub(mapping["replacement"], text)
+
+    # Step 4: Clean up repeated whitespace
+    normalized = re.sub(r"\s+", " ", text).strip()
+    return normalized
+
+

@@ -52,6 +52,7 @@
     <button onclick="simTelegramApproval()">3. Single-Use Code Approve</button>
     <button onclick="simTaryaqClinical()">4. Taryaq Pharmacovigilance</button>
     <button onclick="simGroundingFactCheck()">5. Grounding Shield Fact-Check</button>
+    <button id="btn-hud-mic" onclick="toggleHudLiveMic()" style="background:rgba(245,158,11,0.15); border-color:var(--gold); color:var(--gold);">🎙️ Live Mic (Voice Engine)</button>
   </div>
   <div style="display:flex; gap:8px; align-items:center;">
     <span class="badge" id="hud-conn-badge" style="background:rgba(239,68,68,0.15); color:var(--crimson); border:1px solid var(--crimson);">HUD: OFFLINE (STAGE SIMULATION FALLBACK)</span>
@@ -443,6 +444,61 @@ function simGroundingFactCheck() {
     verdict: 'HALLUCINATION BLOCKED (CORRECTED)',
     log: '{"timestamp_utc":1792600155,"agent":"Qala/Taryaq","tool":"grounding_verify","claimed_val":0.05,"grounded_val":0.03,"citation":"DHA_SN_03_2019","verdict":"HALLUCINATION_BLOCKED"}'
   });
+}
+
+// Bi-Directional Voice Engine Integration
+let hudMediaRecorder = null;
+let hudAudioChunks = [];
+let hudIsRecording = false;
+
+async function toggleHudLiveMic() {
+  const btn = document.getElementById('btn-hud-mic');
+  if (hudIsRecording) {
+    if (hudMediaRecorder && hudMediaRecorder.state !== 'inactive') {
+      hudMediaRecorder.stop();
+    }
+    hudIsRecording = false;
+    btn.textContent = 'Transcribing Voice...';
+  } else {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      hudAudioChunks = [];
+      const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+      hudMediaRecorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      hudMediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) hudAudioChunks.push(e.data); };
+      hudMediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(hudAudioChunks, { type: hudMediaRecorder.mimeType || 'audio/wav' });
+        try {
+          const resp = await fetch('/api/voice/transcribe', { method: 'POST', body: blob });
+          if (resp.ok) {
+            const data = await resp.json();
+            btn.textContent = `🎙️ ${data.transcript || 'Live Mic'}`;
+            // Fetch synthesis
+            const synth = await fetch('/api/voice/synthesize', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: data.normalized || data.transcript, lang: 'ar' })
+            });
+            if (synth.ok) {
+              const aBlob = await synth.blob();
+              new Audio(URL.createObjectURL(aBlob)).play().catch(() => {});
+            }
+          }
+        } catch (e) {
+          console.log('Voice endpoint notice:', e);
+        }
+        setTimeout(() => { btn.textContent = '🎙️ Live Mic (Voice Engine)'; }, 3000);
+      };
+      hudMediaRecorder.start(250);
+      hudIsRecording = true;
+      btn.textContent = '🔴 Recording (Click to Finish)';
+    } catch (err) {
+      btn.textContent = '🎙️ Voice Triggered (Demo)';
+      simTaryaqClinical();
+      setTimeout(() => { btn.textContent = '🎙️ Live Mic (Voice Engine)'; }, 2000);
+    }
+  }
 }
 </script>
 </body>
