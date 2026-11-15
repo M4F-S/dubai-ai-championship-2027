@@ -233,8 +233,78 @@ AGENT_TOOLS = [
                 "required": ["tool_name"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "dewa_calculate_bill",
+            "description": "Calculates residential DEWA utility invoice with exact progressive slab breakdown, fuel surcharges, and housing fee in AED.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "electricity_kwh": {"type": "number", "description": "Monthly electricity consumption in kWh"},
+                    "water_gallons": {"type": "number", "description": "Monthly potable water consumption in Imperial Gallons"},
+                    "housing_fee_aed": {"type": "number", "description": "Optional monthly Dubai Municipality Housing Fee in AED"}
+                },
+                "required": ["electricity_kwh", "water_gallons"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "golden_visa_evaluate",
+            "description": "Evaluates GDRFA UAE 10-Year Golden Visa eligibility under Cabinet Resolution No. 65 of 2022 (Real Estate Investor & Skilled Professional).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "description": "Golden Visa Category",
+                        "enum": ["REAL_ESTATE", "SKILLED_PROFESSIONAL"]
+                    },
+                    "real_estate_value_aed": {"type": "number", "description": "Total property value / paid equity in AED"},
+                    "monthly_salary_aed": {"type": "number", "description": "Monthly basic/gross salary in AED"},
+                    "has_bachelor_degree": {"type": "boolean", "description": "Whether applicant holds attested Bachelor's degree or higher"}
+                },
+                "required": ["category"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "uae_labor_gratuity",
+            "description": "Computes Article 51 End-of-Service Gratuity under UAE Federal Decree-Law No. 33 of 2021 (21 days/yr first 5 yrs, 30 days/yr thereafter, capped at 2 years' salary).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "basic_salary_aed": {"type": "number", "description": "Monthly basic salary in AED"},
+                    "tenure_years": {"type": "number", "description": "Completed continuous years of employment service"},
+                    "is_limited_contract": {"type": "boolean", "description": "Whether employee is under limited employment contract (unified regime)"}
+                },
+                "required": ["basic_salary_aed", "tenure_years", "is_limited_contract"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "qala_route_department",
+            "description": "Evaluates corporate executive mandate and decomposes into tasks assigned to specific departments (FINANCE, LEGAL, TRADE, HR, PROCUREMENT, OPERATIONS).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "mandate_text": {"type": "string", "description": "Corporate executive directive or operational mandate text"}
+                },
+                "required": ["mandate_text"]
+            }
+        }
     }
 ]
+
+# Canonical alias for bridge tools
+TOOLS = AGENT_TOOLS
 
 
 def emit_hud_event(event_type: str, payload: Dict[str, Any]):
@@ -442,6 +512,333 @@ def _execute_airlock_tool(
     )
     emit_hud_event("airlock_retrieval", res)
     return res
+
+
+# ==============================================================================
+# CIVIC & CORPORATE REGULATORY ENGINES (DEWA, GOLDEN VISA, GRATUITY, QALA MESH)
+# ==============================================================================
+
+def dewa_calculate_bill(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculates progressive DEWA electricity and potable water bill per 2026 tariffs.
+    
+    Electricity Residential Slabs:
+      Slab 1: 0 - 2,000 kWh @ 23 fils (0.23 AED)
+      Slab 2: 2,001 - 4,000 kWh @ 28 fils (0.28 AED)
+      Slab 3: 4,001 - 6,000 kWh @ 32 fils (0.32 AED)
+      Slab 4: > 6,000 kWh @ 38 fils (0.38 AED)
+      Fuel Surcharge: 5 fils/kWh (0.05 AED/kWh) across all consumption
+    
+    Water Residential Slabs (Imperial Gallons):
+      Slab 1: 0 - 6,000 IG @ 3.5 fils (0.035 AED)
+      Slab 2: 6,001 - 12,000 IG @ 4.0 fils (0.040 AED)
+      Slab 3: > 12,000 IG @ 4.6 fils (0.046 AED)
+      Fuel Surcharge: 0.6 fils/IG (0.006 AED/IG) across all consumption
+    """
+    t0 = time.perf_counter_ns()
+    try:
+        ele_kwh = max(0.0, float(args.get("electricity_kwh") if args.get("electricity_kwh") is not None else args.get("kwh", 0.0)))
+    except (ValueError, TypeError):
+        ele_kwh = 0.0
+
+    try:
+        water_ig = max(0.0, float(args.get("water_gallons") if args.get("water_gallons") is not None else args.get("water_ig", 0.0)))
+    except (ValueError, TypeError):
+        water_ig = 0.0
+
+    try:
+        if args.get("housing_fee_aed") is not None:
+            housing_fee = max(0.0, float(args["housing_fee_aed"]))
+        elif args.get("annual_ejari_aed") is not None:
+            housing_fee = round((float(args["annual_ejari_aed"]) * 0.05) / 12.0, 2)
+        else:
+            housing_fee = 0.0
+    except (ValueError, TypeError):
+        housing_fee = 0.0
+
+    # Electricity progressive slabs
+    ele_slabs = []
+    rem_ele = ele_kwh
+    ele_subtotal = 0.0
+
+    # Slab 1: 0 - 2000 kWh @ 23 fils (0.23 AED)
+    u1 = min(rem_ele, 2000.0)
+    c1 = round(u1 * 0.23, 2)
+    ele_slabs.append({"slab": "Slab 1 (0-2000 kWh)", "units": u1, "rate_fils": 23.0, "amount_aed": c1})
+    ele_subtotal += c1
+    rem_ele = max(0.0, rem_ele - u1)
+
+    # Slab 2: 2001 - 4000 kWh @ 28 fils (0.28 AED)
+    u2 = min(rem_ele, 2000.0)
+    c2 = round(u2 * 0.28, 2)
+    ele_slabs.append({"slab": "Slab 2 (2001-4000 kWh)", "units": u2, "rate_fils": 28.0, "amount_aed": c2})
+    ele_subtotal += c2
+    rem_ele = max(0.0, rem_ele - u2)
+
+    # Slab 3: 4001 - 6000 kWh @ 32 fils (0.32 AED)
+    u3 = min(rem_ele, 2000.0)
+    c3 = round(u3 * 0.32, 2)
+    ele_slabs.append({"slab": "Slab 3 (4001-6000 kWh)", "units": u3, "rate_fils": 32.0, "amount_aed": c3})
+    ele_subtotal += c3
+    rem_ele = max(0.0, rem_ele - u3)
+
+    # Slab 4: > 6000 kWh @ 38 fils (0.38 AED)
+    u4 = rem_ele
+    c4 = round(u4 * 0.38, 2)
+    ele_slabs.append({"slab": "Slab 4 (>6000 kWh)", "units": u4, "rate_fils": 38.0, "amount_aed": c4})
+    ele_subtotal += c4
+
+    ele_tariff_aed = round(ele_subtotal, 2)
+    ele_fuel_surcharge = round(ele_kwh * 0.05, 2)
+    ele_total = round(ele_tariff_aed + ele_fuel_surcharge, 2)
+
+    # Water progressive slabs
+    water_slabs = []
+    rem_w = water_ig
+    w_subtotal = 0.0
+
+    # Slab 1: 0 - 6000 IG @ 3.5 fils (0.035 AED)
+    wu1 = min(rem_w, 6000.0)
+    wc1 = round(wu1 * 0.035, 2)
+    water_slabs.append({"slab": "Slab 1 (0-6000 IG)", "units": wu1, "rate_fils": 3.5, "amount_aed": wc1})
+    w_subtotal += wc1
+    rem_w = max(0.0, rem_w - wu1)
+
+    # Slab 2: 6001 - 12000 IG @ 4.0 fils (0.040 AED)
+    wu2 = min(rem_w, 6000.0)
+    wc2 = round(wu2 * 0.040, 2)
+    water_slabs.append({"slab": "Slab 2 (6001-12000 IG)", "units": wu2, "rate_fils": 4.0, "amount_aed": wc2})
+    w_subtotal += wc2
+    rem_w = max(0.0, rem_w - wu2)
+
+    # Slab 3: > 12000 IG @ 4.6 fils (0.046 AED)
+    wu3 = rem_w
+    wc3 = round(wu3 * 0.046, 2)
+    water_slabs.append({"slab": "Slab 3 (>12000 IG)", "units": wu3, "rate_fils": 4.6, "amount_aed": wc3})
+    w_subtotal += wc3
+
+    w_tariff_aed = round(w_subtotal, 2)
+    w_fuel_surcharge = round(water_ig * 0.006, 2)
+    w_total = round(w_tariff_aed + w_fuel_surcharge, 2)
+
+    total_bill = round(ele_total + w_total + housing_fee, 2)
+    t1 = time.perf_counter_ns()
+
+    return {
+        "tool": "dewa_calculate_bill",
+        "electricity_kwh": ele_kwh,
+        "electricity_tariff_aed": ele_tariff_aed,
+        "electricity_tariff_subtotal_aed": ele_tariff_aed,
+        "electricity_fuel_surcharge_aed": ele_fuel_surcharge,
+        "electricity_total_aed": ele_total,
+        "electricity_slabs": ele_slabs,
+        "water_gallons": water_ig,
+        "water_ig": water_ig,
+        "water_tariff_aed": w_tariff_aed,
+        "water_tariff_subtotal_aed": w_tariff_aed,
+        "water_fuel_surcharge_aed": w_fuel_surcharge,
+        "water_total_aed": w_total,
+        "water_slabs": water_slabs,
+        "housing_fee_aed": housing_fee,
+        "total_bill_aed": total_bill,
+        "total_monthly_bill_aed": total_bill,
+        "status": "SUCCESS",
+        "execution_time_ms": round((t1 - t0) / 1_000_000.0, 4)
+    }
+
+
+def golden_visa_evaluate(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Evaluates GDRFA UAE 10-Year Golden Visa eligibility under Cabinet Resolution No. 65 of 2022."""
+    t0 = time.perf_counter_ns()
+    category = str(args.get("category", "")).strip().upper()
+    val_aed = float(args.get("real_estate_value_aed") if args.get("real_estate_value_aed") is not None else args.get("property_valuation_aed", 0.0) or 0.0)
+    salary_aed = float(args.get("monthly_salary_aed") if args.get("monthly_salary_aed") is not None else args.get("basic_salary_aed", 0.0) or 0.0)
+    has_bachelor = bool(args.get("has_bachelor_degree") if args.get("has_bachelor_degree") is not None else args.get("degree_attested", False))
+
+    statutory_ref = "Cabinet Resolution No. 65 of 2022 (Executive Regulations of Federal Decree-Law No. 29 of 2021)"
+    checks = []
+    is_eligible = False
+
+    if category in ("REAL_ESTATE", "REAL_ESTATE_INVESTOR"):
+        category_name = "REAL_ESTATE"
+        threshold = 2_000_000.0
+        val_passed = val_aed >= threshold
+        checks.append({
+            "rule": "Minimum Property Investment Value",
+            "requirement": ">= AED 2,000,000.00",
+            "provided": f"AED {val_aed:,.2f}",
+            "passed": val_passed,
+            "statutory_reference": "Cabinet Resolution No. 65 of 2022, Art. 17(1)"
+        })
+        is_eligible = val_passed
+        verdict = "QUALIFIED" if is_eligible else "REJECTED"
+        if is_eligible:
+            rationale = (
+                f"Applicant qualifies for 10-year Real Estate Investor Golden Visa under {statutory_ref}. "
+                f"Property investment value of AED {val_aed:,.2f} meets or exceeds statutory threshold of AED 2,000,000."
+            )
+        else:
+            rationale = (
+                f"Applicant does not qualify under {statutory_ref}. "
+                f"Property value AED {val_aed:,.2f} is below statutory minimum threshold of AED 2,000,000."
+            )
+
+    elif category in ("SKILLED_PROFESSIONAL", "PROFESSIONAL"):
+        category_name = "SKILLED_PROFESSIONAL"
+        salary_passed = salary_aed >= 30_000.0
+        checks.append({
+            "rule": "Minimum Monthly Salary (MOHRE Level 1/2)",
+            "requirement": ">= AED 30,000.00 / month",
+            "provided": f"AED {salary_aed:,.2f}",
+            "passed": salary_passed,
+            "statutory_reference": "Cabinet Resolution No. 65 of 2022, Art. 17(2)"
+        })
+        checks.append({
+            "rule": "Educational Qualification",
+            "requirement": "Bachelor's degree or equivalent (attested)",
+            "provided": "Verified Bachelor's Degree" if has_bachelor else "Missing / Incomplete Degree",
+            "passed": has_bachelor,
+            "statutory_reference": "Cabinet Resolution No. 65 of 2022, Art. 17(2)"
+        })
+        is_eligible = salary_passed and has_bachelor
+        verdict = "QUALIFIED" if is_eligible else "REJECTED"
+        if is_eligible:
+            rationale = (
+                f"Applicant qualifies for 10-year Skilled Professional Golden Visa under {statutory_ref}. "
+                f"Monthly salary of AED {salary_aed:,.2f} meets the AED 30,000 statutory threshold and Bachelor's degree is verified."
+            )
+        elif not salary_passed and not has_bachelor:
+            rationale = (
+                f"Applicant rejected under {statutory_ref}: Monthly salary AED {salary_aed:,.2f} is below AED 30,000 threshold "
+                f"and Bachelor's degree is missing."
+            )
+        elif not salary_passed:
+            rationale = (
+                f"Applicant rejected under {statutory_ref}: Monthly salary AED {salary_aed:,.2f} is below the AED 30,000 threshold."
+            )
+        else:
+            rationale = (
+                f"Applicant rejected under {statutory_ref}: Attested Bachelor's degree or equivalent is required."
+            )
+    else:
+        category_name = category
+        verdict = "REJECTED"
+        rationale = f"Unknown Golden Visa category '{category}'. Valid categories: REAL_ESTATE, SKILLED_PROFESSIONAL."
+
+    t1 = time.perf_counter_ns()
+    return {
+        "tool": "golden_visa_evaluate",
+        "category": category_name,
+        "is_eligible": is_eligible,
+        "verdict": verdict,
+        "statutory_reference": statutory_ref,
+        "checks": checks,
+        "rationale": rationale,
+        "status": "SUCCESS",
+        "execution_time_ms": round((t1 - t0) / 1_000_000.0, 4)
+    }
+
+
+def uae_labor_gratuity(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Computes Article 51 End-of-Service Gratuity under UAE Federal Decree-Law No. 33 of 2021."""
+    t0 = time.perf_counter_ns()
+    try:
+        basic_salary = max(0.0, float(args.get("basic_salary_aed") if args.get("basic_salary_aed") is not None else args.get("basic_salary", 0.0)))
+    except (ValueError, TypeError):
+        basic_salary = 0.0
+
+    try:
+        tenure = max(0.0, float(args.get("tenure_years") if args.get("tenure_years") is not None else args.get("years", 0.0)))
+    except (ValueError, TypeError):
+        tenure = 0.0
+
+    is_limited = bool(args.get("is_limited_contract", True))
+
+    daily_wage = basic_salary / 30.0
+    statutory_cap = basic_salary * 24.0  # 2 years' salary cap (24 months)
+
+    if tenure < 1.0:
+        entitlement_days = 0.0
+        uncapped_gratuity = 0.0
+    elif tenure <= 5.0:
+        entitlement_days = tenure * 21.0
+        uncapped_gratuity = entitlement_days * daily_wage
+    else:
+        entitlement_days = (5.0 * 21.0) + ((tenure - 5.0) * 30.0)
+        uncapped_gratuity = entitlement_days * daily_wage
+
+    is_capped = uncapped_gratuity > statutory_cap
+    final_gratuity = min(uncapped_gratuity, statutory_cap)
+    t1 = time.perf_counter_ns()
+
+    return {
+        "tool": "uae_labor_gratuity",
+        "basic_salary_aed": round(basic_salary, 2),
+        "tenure_years": tenure,
+        "is_limited_contract": is_limited,
+        "daily_basic_wage_aed": round(daily_wage, 2),
+        "entitlement_days": round(entitlement_days, 2),
+        "uncapped_gratuity_aed": round(uncapped_gratuity, 2),
+        "statutory_cap_aed": round(statutory_cap, 2),
+        "is_capped": is_capped,
+        "final_gratuity_aed": round(final_gratuity, 2),
+        "statutory_reference": "UAE Federal Decree-Law No. 33 of 2021, Article 51",
+        "status": "SUCCESS",
+        "execution_time_ms": round((t1 - t0) / 1_000_000.0, 4)
+    }
+
+
+def qala_route_department(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Evaluates corporate executive mandate and decomposes into tasks assigned to specific departments."""
+    t0 = time.perf_counter_ns()
+    text = str(args.get("mandate_text") if args.get("mandate_text") is not None else args.get("text", "")).strip()
+    lower = text.lower()
+
+    dept_patterns = {
+        "FINANCE": ["finance", "tax", "corporate tax", "vat", "invoice", "accounting", "budget", "ledger", "fiscal", "audit", "revenue", "financial", "payment", "aed"],
+        "LEGAL": ["legal", "contract", "compliance", "decree", "resolution", "law", "statutory", "nda", "dispute", "liability", "ejari", "court", "regulatory"],
+        "TRADE": ["trade", "customs", "tariff", "mirsal", "container", "port", "shipment", "hs code", "clearance", "freight", "import", "export", "cargo"],
+        "HR": ["hr", "labor", "labour", "employee", "gratuity", "tenure", "salary", "wage", "hiring", "recruitment", "nafis", "emiratisation", "offboarding", "onboarding", "leave"],
+        "PROCUREMENT": ["procurement", "vendor", "supplier", "rfp", "rfq", "purchase order", "po", "bidding", "quote", "sourcing"],
+        "OPERATIONS": ["operations", "ops", "logistics", "facility", "warehouse", "inventory", "transport", "delivery", "dewa", "utility", "it", "security", "infrastructure"],
+    }
+
+    matched_depts = []
+    for dept, keywords in dept_patterns.items():
+        if any(kw in lower for kw in keywords):
+            matched_depts.append(dept)
+
+    if not matched_depts:
+        matched_depts = ["OPERATIONS", "LEGAL"]
+
+    tasks = []
+    action_map = {
+        "FINANCE": "finance_reconciliation_and_tax_audit",
+        "LEGAL": "legal_statutory_and_contract_review",
+        "TRADE": "trade_customs_and_tariff_clearance",
+        "HR": "hr_labor_and_terminal_settlement",
+        "PROCUREMENT": "procurement_vendor_due_diligence",
+        "OPERATIONS": "operations_logistics_execution",
+    }
+    for i, dept in enumerate(matched_depts, 1):
+        tasks.append({
+            "task_id": f"TASK-{dept}-{i:02d}",
+            "department": dept,
+            "action": action_map.get(dept, f"{dept.lower()}_evaluate"),
+            "description": f"Execute executive mandate for {dept}: {text[:100]}",
+            "priority": "HIGH" if dept in ("LEGAL", "FINANCE") else "MEDIUM",
+        })
+
+    t1 = time.perf_counter_ns()
+    return {
+        "tool": "qala_route_department",
+        "mandate_text": text,
+        "target_departments": matched_depts,
+        "decomposed_tasks": tasks,
+        "total_tasks": len(tasks),
+        "routing_verdict": "DECOMPOSED_SUCCESS",
+        "status": "SUCCESS",
+        "execution_time_ms": round((t1 - t0) / 1_000_000.0, 4)
+    }
 
 
 class OpenRouterAgentEngine:
@@ -1131,6 +1528,26 @@ class OpenRouterAgentEngine:
 
         elif tool_name == "airlock_research":
             return self._execute_airlock_tool(args)
+
+        elif tool_name == "dewa_calculate_bill":
+            res = dewa_calculate_bill(args)
+            emit_hud_event("gate_verdict", res)
+            return res
+
+        elif tool_name == "golden_visa_evaluate":
+            res = golden_visa_evaluate(args)
+            emit_hud_event("gate_verdict", res)
+            return res
+
+        elif tool_name == "uae_labor_gratuity":
+            res = uae_labor_gratuity(args)
+            emit_hud_event("gate_verdict", res)
+            return res
+
+        elif tool_name == "qala_route_department":
+            res = qala_route_department(args)
+            emit_hud_event("gate_verdict", res)
+            return res
 
         return {"error": f"Unknown tool {tool_name}", "execution_time_ms": 0.001}
 

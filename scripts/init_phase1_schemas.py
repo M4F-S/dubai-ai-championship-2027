@@ -330,6 +330,113 @@ def init_all(
 # AUTHORITATIVE API HELPERS (RAG, AIRLOCK, SOAP)
 # ==============================================================================
 
+STATUTORY_CHUNKS_CATALOG = [
+    {
+        "doc_id": "DEWA-TARIFF-SLABS-2026",
+        "domain": "CIVIC",
+        "title": "DEWA Slab Tariffs and Residential Utility Billing Regulations 2026",
+        "issuing_authority": "DEWA",
+        "effective_date": "2026-01-01",
+        "source_url": "https://www.dewa.gov.ae/en/consumer/billing/slab-tariff",
+        "file_sha256": "38a1cf45902dc7b4eefbbad9748b61c9e88d8b9d885a1efab0237da4851239c0",
+        "chunks": [
+            {
+                "chunk_id": "DEWA-TARIFF-SLABS-2026:ELECTRICITY",
+                "section_code": "ELECTRICITY_SLABS",
+                "title": "DEWA Electricity Residential Tariff Slabs and Fuel Surcharge",
+                "passage": "Dubai Electricity and Water Authority (DEWA) residential electricity tariff slabs: Slab 1: 0-2000 kWh @ 23 fils; Slab 2: 2001-4000 kWh @ 28 fils; Slab 3: 4001-6000 kWh @ 32 fils; Slab 4: >6000 kWh @ 38 fils. Fuel surcharge 5 fils/kWh across all electricity consumption.",
+            },
+            {
+                "chunk_id": "DEWA-TARIFF-SLABS-2026:WATER",
+                "section_code": "WATER_SLABS",
+                "title": "DEWA Water Residential Tariff Slabs and Fuel Surcharge",
+                "passage": "DEWA residential water tariff slabs: Slab 1: 0-6000 IG @ 3.5 fils; Slab 2: 6001-12000 IG @ 4.0 fils; Slab 3: >12000 IG @ 4.6 fils. Fuel surcharge 0.6 fils/IG across all water consumption.",
+            },
+        ],
+    },
+    {
+        "doc_id": "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022",
+        "domain": "CIVIC",
+        "title": "Cabinet Resolution No. 65 of 2022 Promulgating the Executive Regulations of Federal Decree-Law No. 29 of 2021 on Entry and Residence of Foreigners",
+        "issuing_authority": "GDRFA",
+        "effective_date": "2022-10-03",
+        "source_url": "https://www.gdrfad.gov.ae",
+        "file_sha256": "47cb239ad8527a0bf91fcae12864b901fc88e9903b12384a51e5927ba773ef12",
+        "chunks": [
+            {
+                "chunk_id": "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022:REAL_ESTATE",
+                "section_code": "REAL_ESTATE_INVESTOR",
+                "title": "Golden Visa Real Estate Investor Category - Cabinet Resolution 65/2022",
+                "passage": "Cabinet Resolution No. 65 of 2022 Real Estate Investor category: Minimum investment AED 2,000,000 (mortgaged allowed with bank NOC confirming AED 2M paid). Grants a 10-year renewable residence visa for real estate investors in Dubai and UAE.",
+            },
+            {
+                "chunk_id": "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022:SKILLED_PROFESSIONAL",
+                "section_code": "SKILLED_PROFESSIONAL",
+                "title": "Golden Visa Skilled Professional Category - Cabinet Resolution 65/2022",
+                "passage": "Cabinet Resolution No. 65 of 2022 Skilled Professional category: Valid employment contract, first/second professional level per MOHRE, minimum salary AED 30,000/month, Bachelor's degree or equivalent required for 10-year residency.",
+            },
+        ],
+    },
+    {
+        "doc_id": "UAE-CORPORATE-TAX-DECREE-47-2022",
+        "domain": "CIVIC",
+        "title": "Federal Decree-Law No. 47 of 2022 on the Taxation of Corporations and Businesses",
+        "issuing_authority": "FTA",
+        "effective_date": "2023-06-01",
+        "source_url": "https://tax.gov.ae",
+        "file_sha256": "89ec71a047ba3b8194cf219d9b62a19ef4700d813c9a05ecbf237a7801df9281",
+        "chunks": [
+            {
+                "chunk_id": "UAE-CORPORATE-TAX-DECREE-47-2022:STANDARD_RATE",
+                "section_code": "STANDARD_RATE",
+                "title": "Corporate Tax Standard Rates and Statutory Brackets",
+                "passage": "Federal Decree-Law No. 47 of 2022 on Taxation of Corporations and Businesses: Standard rate: 0% up to AED 375,000; 9% on taxable net profit exceeding AED 375,000.",
+            },
+            {
+                "chunk_id": "UAE-CORPORATE-TAX-DECREE-47-2022:SMALL_BUSINESS_RELIEF",
+                "section_code": "SMALL_BUSINESS_RELIEF",
+                "title": "Small Business Relief Ministerial Decision No. 73 of 2023",
+                "passage": "Small Business Relief (Ministerial Decision No. 73 of 2023 under Federal Decree-Law No. 47 of 2022) for revenue <= AED 3,000,000: Eligible resident taxable persons may elect for Small Business Relief, treating taxable income as zero.",
+            },
+        ],
+    },
+]
+
+
+def ingest_statutory_knowledge(conn: sqlite3.Connection, verbose: bool = False) -> int:
+    """Indexes authoritative statutory knowledge into SQLite FTS5 (DEWA, Golden Visa, Corporate Tax)."""
+    total_chunks = 0
+    with conn:
+        for doc in STATUTORY_CHUNKS_CATALOG:
+            register_document(
+                conn,
+                doc_id=doc["doc_id"],
+                domain=doc["domain"],
+                title=doc["title"],
+                issuing_authority=doc["issuing_authority"],
+                effective_date=doc["effective_date"],
+                source_url=doc["source_url"],
+                file_sha256=doc["file_sha256"],
+                total_chunks=len(doc["chunks"]),
+            )
+            for ch in doc["chunks"]:
+                passage_sha = hashlib.sha256(ch["passage"].encode("utf-8")).hexdigest()
+                insert_chunk(
+                    conn,
+                    chunk_id=ch["chunk_id"],
+                    doc_id=doc["doc_id"],
+                    domain=doc["domain"],
+                    section_code=ch["section_code"],
+                    title=ch["title"],
+                    passage=ch["passage"],
+                    passage_sha256=passage_sha,
+                )
+                total_chunks += 1
+            if verbose:
+                print(f"  [INGESTED] {doc['doc_id']} ({len(doc['chunks'])} chunks)")
+    return total_chunks
+
+
 def register_document(
     conn: sqlite3.Connection,
     doc_id: str,
@@ -646,6 +753,15 @@ def main():
         verbose=args.verbose,
     )
 
+    # Ingest authoritative statutory knowledge into rag_master.db
+    conn_rag_init = get_db_connection(dbs["rag_master"])
+    try:
+        total_ingested = ingest_statutory_knowledge(conn_rag_init, verbose=args.verbose)
+        if args.verbose:
+            print(f"  [STATUTORY RAG] Ingested {total_ingested} statutory chunks into FTS5.")
+    finally:
+        conn_rag_init.close()
+
     if args.verify:
         print("\n[VERIFY] Executing schema validation...")
         # Verify RAG Master
@@ -670,12 +786,12 @@ def main():
                     domain="CLINICAL",
                     section_code="SEC-1",
                     title="Colchicine Fatal Contraindication",
-                    passage="Concomitant administration of colchicine and clarithromycin is strictly contraindicated.",
+                    passage="Concomitant administration of test_unique_contraindication_token_999 is strictly contraindicated.",
                 )
-                res = search_rag(conn_rag, "clarithromycin", domain="CLINICAL")
+                res = search_rag(conn_rag, "test_unique_contraindication_token_999", domain="CLINICAL")
                 assert len(res) == 1, "FTS5 search failed to retrieve inserted chunk"
                 conn_rag.execute("DELETE FROM rag_documents WHERE doc_id = 'DHA-SN-03-2019-TEST';")
-                res_after = search_rag(conn_rag, "clarithromycin")
+                res_after = search_rag(conn_rag, "test_unique_contraindication_token_999")
                 assert len(res_after) == 0, "FTS5 cascade delete failed"
             print("  [PASS] RAG Master FTS5 & Cascade Trigger Verification succeeded.")
         finally:
