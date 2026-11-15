@@ -63,6 +63,7 @@ class TestRAGRuntimeIntegration(unittest.TestCase):
 
         # Start ephemeral HTTP/SSE server on dedicated port for endpoint validation
         cls.port = 8833
+        ChampionshipRequestHandler.engine = OpenRouterAgentEngine(provider="deterministic")
         cls.server = ThreadingHTTPServer((DEFAULT_HOST, cls.port), ChampionshipRequestHandler)
         cls.server_thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.server_thread.start()

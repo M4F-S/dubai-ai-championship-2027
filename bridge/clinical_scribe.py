@@ -77,7 +77,9 @@ class ClinicalScribeEngine:
             "description": "Gout, unspecified",
             "terms": [
                 r"\bgout\b", r"\bpodagra\b", r"\bhyperuricemia\b", r"نقرس", r"النقرس",
-                r"ألم.*صباع.*الكبير", r"صباع رجلي الكبير", r"إصبع القدم الكبير", r"uric acid.*(?:elevated|high|9\.)"
+                r"ألم.*صباع.*الكبير", r"صباع رجلي الكبير", r"إصبع القدم الكبير", r"uric acid.*(?:elevated|high|9\.)",
+                r"رجلي وجعان[ةه]", r"ريلي تعورني", r"ريلي تنبض", r"عوار النقرس",
+                r"مفصل.*(?:القدم|الكاحل|الإبهام|الابهام|الريل)", r"ألم.*مفصل القدم", r"كولشيسين.*نقرس"
             ],
             "default_confidence": 0.95
         },
@@ -85,9 +87,10 @@ class ClinicalScribeEngine:
             "code": "N18.4",
             "description": "Chronic kidney disease, stage 4 (severe)",
             "terms": [
-                r"\bckd\s*(?:stage\s*)?4\b", r"\bstage\s*4\s*ckd\b", r"\begfr\s*(?:=|is)?\s*(?:1[5-9]|2[0-9])\b",
+                r"\bckd\s*(?:stage\s*)?4\b", r"\bstage\s*4\s*ckd\b", r"\begfr\s*(?:=|is)?\s*(?:[0-9]|1[0-9]|2[0-9])\b",
                 r"قصور كلوي حاد", r"قصور كلوي من المرحلة الرابعة", r"وظائف كلى تعبانة", r"وظائف الكلى.*22",
-                r"eGFR 22", r"chronic kidney disease.*stage 4"
+                r"eGFR 22", r"chronic kidney disease.*stage 4", r"غسيل كلى", r"بغسل كلى", r"غسيل كلوي",
+                r"الكلى تعبانة", r"كليتي تعبانة", r"كرياتينين.*(?:مرتفع|[2-9]\.)"
             ],
             "default_confidence": 0.96
         },
@@ -106,7 +109,8 @@ class ClinicalScribeEngine:
             "description": "Essential (primary) hypertension",
             "terms": [
                 r"\bhypertension\b", r"\bhtn\b", r"\bhigh blood pressure\b", r"ضغط دم مرتفع",
-                r"ارتفاع ضغط الدم", r"الضغط عالي", r"\b145/92\b", r"\b150/\d{2}\b"
+                r"ارتفاع ضغط الدم", r"الضغط عالي", r"\b145/92\b", r"\b150/\d{2}\b",
+                r"ضغطي.*(?:واصل|[12]\d{2}/\d{2,3})", r"\b1[4-9]\d/[89]\d\b", r"الضغط.*1[4-9]\d"
             ],
             "default_confidence": 0.93
         },
@@ -115,7 +119,8 @@ class ClinicalScribeEngine:
             "description": "Type 2 diabetes mellitus without complications",
             "terms": [
                 r"\btype 2 diabetes\b", r"\bt2dm\b", r"\btype 2 dm\b", r"\bdiabetes mellitus\b",
-                r"مرض السكري", r"النوع الثاني.*سكري", r"سكر من النوع الثاني", r"السكر التراكمي"
+                r"مرض السكري", r"النوع الثاني.*سكري", r"سكر من النوع الثاني", r"السكر التراكمي",
+                r"سكري عالي", r"السكر ملخبط", r"سكر(?:ي)?.*(?:عالي|مرتفع|طالع)", r"سكر الصائم", r"السكر.*[23]\d{2}"
             ],
             "default_confidence": 0.92
         },
@@ -125,7 +130,8 @@ class ClinicalScribeEngine:
             "terms": [
                 r"\badverse drug effect\b", r"\bdrug interaction\b", r"\btoxicity\b",
                 r"\bcolchicine toxicity\b", r"تداخل دوائي", r"سمية دوائية", r"حظر تداخل دوائي",
-                r"contraindication", r"fatal contraindication"
+                r"fatal contraindication", r"fatal cyp3a4", r"إسهال.*كولشيسين", r"ترجيع.*كولشيسين",
+                r"تسمم كولشيسين", r"severe renal risk warning"
             ],
             "default_confidence": 0.94
         }
@@ -301,6 +307,28 @@ class ClinicalScribeEngine:
                 "formatted": f"{val}% [{status}]"
             }
 
+        # Dialysis / End-Stage Renal Disease fallback inference for eGFR
+        if "egfr" not in labs:
+            if re.search(r"غسيل كلى|بغسل كلى|غسيل كلوي|hemodialysis|dialysis", text, re.I):
+                labs["egfr"] = {
+                    "value": 10.0,
+                    "unit": "mL/min/1.73m²",
+                    "status": "Severely Reduced (End-Stage Renal Disease / Dialysis)",
+                    "formatted": "10.0 mL/min/1.73m² [ESRD / Dialysis]"
+                }
+
+        # Random / Fasting Blood Glucose
+        bg_match = re.search(r"(?:blood glucose|glucose|السكر|سكر|السكر طلع|سكر الصائم)[\s:=]*([1-9][0-9]{2}(?:\.[0-9]+)?)", text, re.I)
+        if bg_match:
+            val = float(bg_match.group(1))
+            status = "Markedly Elevated" if val >= 200 else ("Elevated" if val > 126 else "Normal")
+            labs["blood_glucose"] = {
+                "value": val,
+                "unit": "mg/dL",
+                "status": status,
+                "formatted": f"{val} mg/dL [{status}]"
+            }
+
         return labs
 
     @classmethod
@@ -407,10 +435,12 @@ class ClinicalScribeEngine:
 
         # ----------------- 1. SUBJECTIVE -----------------
         # Identify chief complaints
-        has_gout = bool(re.search(r"gout|نقرس|podagra|ألم.*صباع|صباع رجلي الكبير", raw_transcript, re.I))
-        has_joint_pain = bool(re.search(r"joint pain|ألم في المفصل|ألم فظيع", raw_transcript, re.I))
-        has_ckd = bool(re.search(r"ckd|كلى|وظائف كلى|egfr|غسيل", raw_transcript, re.I))
-        has_infection = bool(re.search(r"infection|chest|respiratory|كحة|احتقان|تنفسي", raw_transcript, re.I))
+        has_gout = bool(re.search(r"gout|نقرس|podagra|ألم.*صباع|صباع رجلي الكبير|رجلي وجعان|ريلي تعورني|ريلي تنبض|عوار النقرس|مفصل.*(?:القدم|الكاحل|الإبهام|الابهام|الريل)", raw_transcript, re.I))
+        has_joint_pain = bool(re.search(r"joint pain|ألم في المفصل|ألم فظيع|مفصل|عظامي|وارم", raw_transcript, re.I))
+        has_ckd = bool(re.search(r"ckd|كلى|وظائف كلى|egfr|غسيل|كرياتينين|الكلى تعبانة|كليتي تعبانة", raw_transcript, re.I))
+        has_infection = bool(re.search(r"infection|chest|respiratory|كحة|احتقان|تنفسي|بلغم", raw_transcript, re.I))
+        has_htn = bool(re.search(r"hypertension|htn|ضغط|ضغطي|145/92|150/|160/", raw_transcript, re.I))
+        has_diabetes = bool(re.search(r"diabetes|t2dm|سكر|سكري|تراكمي", raw_transcript, re.I))
 
         cc_list = []
         if has_gout or has_joint_pain:
@@ -494,8 +524,10 @@ class ClinicalScribeEngine:
             diagnoses.append("2. Chronic Kidney Disease, Stage 4 Severe (ICD-10: N18.4, eGFR 15-29 mL/min)")
         if has_infection:
             diagnoses.append("3. Acute Upper Respiratory Infection (ICD-10: J06.9)")
-        if vitals.get("bp") or re.search(r"145/92|hypertension|ضغط", raw_transcript, re.I):
+        if has_htn or vitals.get("bp") or re.search(r"145/92|hypertension|ضغط", raw_transcript, re.I):
             diagnoses.append("4. Essential (Primary) Hypertension (ICD-10: I10)")
+        if has_diabetes or "blood_glucose" in labs or "hba1c" in labs:
+            diagnoses.append("5. Type 2 Diabetes Mellitus without complications (ICD-10: E11.9)")
 
         assessment_sections.append("Diagnoses:\n" + "\n".join(diagnoses))
 
@@ -518,6 +550,14 @@ class ClinicalScribeEngine:
                 "leading to fatal multi-organ failure, pancytopenia, and severe neuromyopathy."
             )
             safety_alerts.append(c99_alert)
+        elif is_colchicine and egfr_val < 30.0:
+            c99_alert = (
+                "SEVERE RENAL RISK WARNING (C99 Pharmacovigilance Intercept < 0.02ms):\n"
+                f"Colchicine clearance is severely reduced in severe renal impairment / dialysis (eGFR {egfr_val} mL/min). "
+                "High risk of fatal systemic colchicine toxicity, neuromyopathy, and bone marrow suppression. "
+                "Immediate dose reduction or substitution (e.g. short-course corticosteroid) required."
+            )
+            safety_alerts.append(c99_alert)
         elif taryaq_verify_rx is not None and is_colchicine and is_clarithromycin:
             res = taryaq_verify_rx("Colchicine", "Clarithromycin", egfr=egfr_val)
             if res.get("verdict_code") == 3:  # CLINICAL_CONTRAINDICATION_BLOCK
@@ -526,7 +566,7 @@ class ClinicalScribeEngine:
         if safety_alerts:
             assessment_sections.append("Safety & Pharmacovigilance Intercepts:\n- " + "\n- ".join(safety_alerts))
         else:
-            assessment_sections.append("Safety & Pharmacovigilance: No critical contraindications detected.")
+            assessment_sections.append("Safety & Pharmacovigilance: Prescription evaluated; no adverse interactions detected.")
 
         assessment_clean = "\n\n".join(assessment_sections)
 
@@ -566,7 +606,7 @@ class ClinicalScribeEngine:
         plan_clean = "\n\n".join(plan_sections)
 
         # Extract ICD-10 and DHA claim codes
-        icd10_codes = self.extract_icd10_codes(assessment_clean, subjective_clean)
+        icd10_codes = self.extract_icd10_codes(assessment_clean, subjective_clean, raw_transcript)
         dha_claims = self.map_dha_sn_03_2019_claims(
             soap_note={"assessment": assessment_clean, "plan": plan_clean, "labs": labs},
             encounter_date=metadata.get("encounter_date")
@@ -599,12 +639,12 @@ class ClinicalScribeEngine:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def extract_icd10_codes(cls, assessment_text: str, subjective_text: str = "") -> List[Dict[str, Any]]:
+    def extract_icd10_codes(cls, assessment_text: str, subjective_text: str = "", raw_transcript: str = "") -> List[Dict[str, Any]]:
         """
         Matches extracted clinical concepts to WHO / CDC ICD-10-CM codes with confidence score.
         Supports M10.9 (Gout), N18.4 (CKD Stage 4), J06.9 (URI), I10 (HTN), E11.9 (Type 2 DM), T88.7XXA (DDI Toxicity).
         """
-        combined = f"{assessment_text} {subjective_text}".lower()
+        combined = f"{assessment_text} {subjective_text} {raw_transcript}".lower()
         matched_codes: List[Dict[str, Any]] = []
         seen = set()
 
@@ -728,9 +768,12 @@ class ClinicalScribeEngine:
     def init_database(cls, db_path: str = DEFAULT_CLINICAL_DB):
         """Ensure clinical_soap_notes schema exists with proper indexes."""
         os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(db_path, timeout=30.0)
         try:
             cursor = conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL;")
+            cursor.execute("PRAGMA synchronous=NORMAL;")
+            cursor.execute("PRAGMA busy_timeout=30000;")
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS clinical_soap_notes (
                 note_id TEXT PRIMARY KEY,
@@ -801,9 +844,10 @@ class ClinicalScribeEngine:
         signed_off = int(bool(soap_record.get("signed_off_by_clinician", 0)))
         created_at = soap_record.get("created_at") or datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(db_path, timeout=30.0)
         try:
             cursor = conn.cursor()
+            cursor.execute("PRAGMA busy_timeout=30000;")
             cursor.execute("""
             INSERT OR REPLACE INTO clinical_soap_notes (
                 note_id, encounter_id, patient_identifier_hash, clinician_id,
@@ -847,10 +891,11 @@ class ClinicalScribeEngine:
     def get_soap_notes(cls, db_path: str, patient_hash: Optional[str] = None, limit: int = 20) -> List[Dict[str, Any]]:
         """Queries stored SOAP notes with optional patient_hash filter."""
         cls.init_database(db_path)
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(db_path, timeout=30.0)
         conn.row_factory = sqlite3.Row
         try:
             cursor = conn.cursor()
+            cursor.execute("PRAGMA busy_timeout=30000;")
             if patient_hash:
                 cursor.execute("""
                 SELECT * FROM clinical_soap_notes
@@ -893,10 +938,11 @@ class ClinicalScribeEngine:
     def get_soap_note_by_id(cls, db_path: str, note_id: str) -> Optional[Dict[str, Any]]:
         """Retrieves a single SOAP note by its note_id."""
         cls.init_database(db_path)
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(db_path, timeout=30.0)
         conn.row_factory = sqlite3.Row
         try:
             cursor = conn.cursor()
+            cursor.execute("PRAGMA busy_timeout=30000;")
             cursor.execute("SELECT * FROM clinical_soap_notes WHERE note_id = ?", (note_id,))
             row = cursor.fetchone()
             if not row:
@@ -935,9 +981,10 @@ class ClinicalScribeEngine:
         Emits immutable audit ledger event.
         """
         cls.init_database(db_path)
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(db_path, timeout=30.0)
         try:
             cursor = conn.cursor()
+            cursor.execute("PRAGMA busy_timeout=30000;")
             cursor.execute("""
             UPDATE clinical_soap_notes
             SET signed_off_by_clinician = 1

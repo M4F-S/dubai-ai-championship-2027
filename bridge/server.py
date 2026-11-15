@@ -26,6 +26,8 @@ import argparse
 import subprocess
 import urllib.parse
 from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
+# Boost listen backlog from default 5 to 128 to prevent connection drops under concurrency bursts
+ThreadingHTTPServer.request_queue_size = 128
 from typing import Dict, Any, List, Optional, Tuple, Union
 
 from bridge.c99_bindings import get_engine_status
@@ -751,6 +753,19 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
 
         try:
             res = _scribe_engine.parse_dialogue_to_soap(transcript, metadata=metadata)
+            committed_id = None
+            if req_data.get("commit") or req_data.get("auto_commit"):
+                committed_id = ClinicalScribeEngine.commit_soap_to_db(DEFAULT_CLINICAL_DB, {
+                    "encounter_id": res["encounter_id"],
+                    "patient_identifier_hash": res["patient_hash"],
+                    "clinician_id": res["clinician_id"],
+                    "subjective": res["soap"]["subjective"],
+                    "objective": res["soap"]["objective"],
+                    "assessment": res["soap"]["assessment"],
+                    "plan": res["soap"]["plan"],
+                    "icd10": res["icd10"],
+                    "dha_claims": res["dha_claims"]
+                })
             response_payload = {
                 "status": "SUCCESS",
                 "soap": res["soap"],
@@ -762,7 +777,8 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
                 "clinician_id": res["clinician_id"],
                 "vitals": res.get("vitals", {}),
                 "labs": res.get("labs", {}),
-                "medications": res.get("medications", [])
+                "medications": res.get("medications", []),
+                "committed_note_id": committed_id
             }
             self._send_json(response_payload, 200)
         except Exception as e:

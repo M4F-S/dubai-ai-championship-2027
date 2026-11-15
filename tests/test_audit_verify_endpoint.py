@@ -54,7 +54,9 @@ class TestAuditVerifyEndpoint(unittest.TestCase):
         from http.server import ThreadingHTTPServer
         import bridge.server as server_mod
 
+        from bridge.openrouter_client import OpenRouterAgentEngine
         cls.server_mod = server_mod
+        server_mod.ChampionshipRequestHandler.engine = OpenRouterAgentEngine(provider="deterministic")
         cls.httpd = ThreadingHTTPServer(("127.0.0.1", 0), server_mod.ChampionshipRequestHandler)
         cls.port = cls.httpd.server_address[1]
         cls.thread = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
