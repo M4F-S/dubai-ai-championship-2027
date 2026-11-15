@@ -64,7 +64,7 @@ CASE_MEMORY_TEST_BIN = $(BUILD_DIR)/test_case_memory
 POLICY_RAG_BIN = $(BUILD_DIR)/test_policy_rag
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_voice test_clinical_scribe test_unified_cockpit test_civic_and_corporate_tools test_gomaa test_phase1 ingest_rag test_rag_ingest taryaq_agent qala_agent nibras_agent timeline-demo clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden demo golden_eval test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_voice test_clinical_scribe test_unified_cockpit test_civic_and_corporate_tools test_gomaa test_phase1 ingest_rag test_rag_ingest taryaq_agent qala_agent nibras_agent timeline-demo clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(CASE_MEMORY_TEST_BIN) $(POLICY_RAG_BIN) $(LIB_ADAPTERS)
 
@@ -244,6 +244,12 @@ eval_golden: all $(LIB_ADAPTERS)
 	@echo " RUNNING FULL GOLDEN EVALUATION & SECTION 5.4 ABLATION (M-08)"
 	@echo "=================================================================="
 	@python3 benchmarks/golden_eval.py --full
+
+demo:
+	python3 tools/golden_demo_runner.py
+
+golden_eval:
+	python3 tools/golden_demo_runner.py --json bench/results.json --strict
 
 test_pilot:
 	@echo "=================================================================="
