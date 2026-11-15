@@ -392,13 +392,16 @@ class NibrasMemoryNode(ctypes.Structure):
     _fields_ = [
         ("id", ctypes.c_uint64),
         ("summary", ctypes.c_char * 128),
-        ("valence", ctypes.c_int),
+        ("valence", ctypes.c_int32),
         ("initial_intensity", ctypes.c_double),
         ("current_intensity", ctypes.c_double),
         ("created_utc", ctypes.c_uint64),
         ("token_cost", ctypes.c_uint32),
         ("valence_inverted", ctypes.c_bool),
+        ("is_pinned", ctypes.c_bool),
         ("state", ctypes.c_int),
+        ("category", ctypes.c_char * 32),
+        ("raw_arabic", ctypes.c_char * 256),
     ]
 
 class NibrasTelemetrySnapshot(ctypes.Structure):
@@ -495,7 +498,10 @@ def step_fademem(
         c_nodes[i].created_utc = int(n.get("created_utc", now_utc))
         c_nodes[i].token_cost = int(n.get("token_cost", 100))
         c_nodes[i].valence_inverted = bool(n.get("valence_inverted", False))
+        c_nodes[i].is_pinned = bool(n.get("is_pinned", False))
         c_nodes[i].state = int(n.get("state", 1))
+        c_nodes[i].category = n.get("category", "").encode("utf-8")[:31]
+        c_nodes[i].raw_arabic = n.get("raw_arabic", "").encode("utf-8")[:255]
 
     snap = NibrasTelemetrySnapshot()
     _lib.nibras_fademem_step_hardened(
