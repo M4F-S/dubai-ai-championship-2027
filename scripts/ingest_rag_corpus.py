@@ -117,6 +117,27 @@ DEFAULT_DOCUMENT_METADATA: Dict[str, Dict[str, str]] = {
         "effective_date": "2026-01-01",
         "source_url": "https://tau3.finops.local",
     },
+    "DEWA-TARIFF-SLABS-2026": {
+        "domain": "CIVIC",
+        "title": "DEWA Slab Tariffs and Residential Utility Billing Regulations 2026",
+        "issuing_authority": "DEWA",
+        "effective_date": "2026-01-01",
+        "source_url": "https://www.dewa.gov.ae/en/consumer/billing/slab-tariff",
+    },
+    "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022": {
+        "domain": "CIVIC",
+        "title": "Cabinet Resolution No. 65 of 2022 Promulgating the Executive Regulations of Federal Decree-Law No. 29 of 2021 on Entry and Residence of Foreigners",
+        "issuing_authority": "GDRFA",
+        "effective_date": "2022-10-03",
+        "source_url": "https://www.gdrfad.gov.ae",
+    },
+    "UAE-CORPORATE-TAX-DECREE-47-2022": {
+        "domain": "CIVIC",
+        "title": "Federal Decree-Law No. 47 of 2022 on the Taxation of Corporations and Businesses",
+        "issuing_authority": "FTA",
+        "effective_date": "2023-06-01",
+        "source_url": "https://tax.gov.ae",
+    },
 }
 
 CORPUS_FILES_MAP: Dict[str, str] = {
@@ -127,6 +148,9 @@ CORPUS_FILES_MAP: Dict[str, str] = {
     "uae_labor_law_33_2021.txt": "UAE-LABOR-LAW-33-2021",
     "dld_ejari_decree_43_2013.txt": "DLD-EJARI-DECREE-43-2013",
     "dewa_slab_tariffs.txt": "DEWA-SLAB-TARIFFS-2026",
+    "dewa_tariff_slabs_2026.txt": "DEWA-TARIFF-SLABS-2026",
+    "gdrfa_golden_visa_res_65_2022.txt": "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022",
+    "uae_corporate_tax_decree_47_2022.txt": "UAE-CORPORATE-TAX-DECREE-47-2022",
     "desc_isr_v3.1.txt": "DESC-ISR-V3.1",
     "tau3_finops_policy.txt": "TAU3-FINOPS-POLICY-2026",
 }
@@ -620,7 +644,7 @@ def benchmark_search(
         },
         {
             "query": "DEWA electricity green slab 23 fils",
-            "expected_target": "DEWA-SLAB-TARIFFS-2026",
+            "expected_target": ["DEWA-SLAB-TARIFFS-2026", "DEWA-TARIFF-SLABS-2026"],
             "check_field": "doc_id",
             "domain": "CIVIC",
         },
@@ -665,7 +689,10 @@ def benchmark_search(
                 top = results[0]
                 matched_val = top[field]
                 chunk_id = top["chunk_id"]
-                passed = (target in matched_val) or (target in chunk_id) or (target == top["doc_id"]) or (target == top["section_code"])
+                if isinstance(target, (list, tuple, set)):
+                    passed = any((t in matched_val) or (t in chunk_id) or (t == top["doc_id"]) or (t == top["section_code"]) for t in target)
+                else:
+                    passed = (target in matched_val) or (target in chunk_id) or (target == top["doc_id"]) or (target == top["section_code"])
 
             if not passed:
                 all_passed = False

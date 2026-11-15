@@ -1,9 +1,9 @@
 {
   "version": "2.0",
   "description": "Dubai Sovereign Statutory & Clinical Master Corpus Manifest (Taryaq, Qala, Nibras)",
-  "updated_at": "2026-11-11T19:46:27Z",
-  "total_documents": 9,
-  "total_chunks": 38,
+  "updated_at": "2026-11-15T21:41:22Z",
+  "total_documents": 12,
+  "total_chunks": 44,
   "documents": {
     "DHA_SN_03_2019": {
       "file": "dha_sn_03_2019.txt",
@@ -94,6 +94,36 @@
       "source_url": "https://tau3.finops.local",
       "sha256": "85151618844da4002def9461e2844f560a7c81ae23b2578a62da19ebaa67dbc5",
       "chunk_count": 3
+    },
+    "DEWA-TARIFF-SLABS-2026": {
+      "file": "dewa_tariff_slabs_2026.txt",
+      "domain": "CIVIC",
+      "title": "DEWA Slab Tariffs and Residential Utility Billing Regulations 2026",
+      "issuing_authority": "DEWA",
+      "effective_date": "2026-01-01",
+      "source_url": "https://www.dewa.gov.ae/en/consumer/billing/slab-tariff",
+      "sha256": "708e3a207a3e62fb64d7b74c34998937b5eb2b285bdd18159f486575089bc86a",
+      "chunk_count": 2
+    },
+    "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022": {
+      "file": "gdrfa_golden_visa_res_65_2022.txt",
+      "domain": "CIVIC",
+      "title": "Cabinet Resolution No. 65 of 2022 Promulgating the Executive Regulations of Federal Decree-Law No. 29 of 2021 on Entry and Residence of Foreigners",
+      "issuing_authority": "GDRFA",
+      "effective_date": "2022-10-03",
+      "source_url": "https://www.gdrfad.gov.ae",
+      "sha256": "c2952c534d602b61e662850d6fb92251838321417cbd163b7cd0cc43f64d5c96",
+      "chunk_count": 2
+    },
+    "UAE-CORPORATE-TAX-DECREE-47-2022": {
+      "file": "uae_corporate_tax_decree_47_2022.txt",
+      "domain": "CIVIC",
+      "title": "Federal Decree-Law No. 47 of 2022 on the Taxation of Corporations and Businesses",
+      "issuing_authority": "FTA",
+      "effective_date": "2023-06-01",
+      "source_url": "https://tax.gov.ae",
+      "sha256": "e2e2a85f19c34f192d47a83e854fa5dccf0c6018d99791900422872fd1caddd3",
+      "chunk_count": 2
     }
   },
   "chunks": {
@@ -688,6 +718,102 @@
       "passage_sha256": "539d26eccfdc973d127cce6d6dbec4ea3d2225df784f27720b705dd33702a584",
       "token_count": 26,
       "passage_preview": "In the event of an unverified token, expired token, mismatched scope, or token persistence failure, the agent must fail ..."
+    },
+    "DEWA-TARIFF-SLABS-2026:Electricity Slabs": {
+      "doc_id": "DEWA-TARIFF-SLABS-2026",
+      "section": "Electricity Slabs",
+      "title": "Electricity Residential Tariff Slabs and Fuel Surcharge",
+      "passage_sha256": "f337ea972ddaa04acbd1b2becbca632efabb4414ac80451a6410d7ae3b2b07c7",
+      "token_count": 46,
+      "passage_preview": "Dubai Electricity and Water Authority (DEWA) residential electricity tariff slabs: Slab 1: 0-2000 kWh @ 23 fils; Slab 2:..."
+    },
+    "DEWA-TARIFF-SLABS-2026_Electricity_Slabs": {
+      "doc_id": "DEWA-TARIFF-SLABS-2026",
+      "section": "Electricity Slabs",
+      "title": "Electricity Residential Tariff Slabs and Fuel Surcharge",
+      "passage_sha256": "f337ea972ddaa04acbd1b2becbca632efabb4414ac80451a6410d7ae3b2b07c7",
+      "token_count": 46,
+      "passage_preview": "Dubai Electricity and Water Authority (DEWA) residential electricity tariff slabs: Slab 1: 0-2000 kWh @ 23 fils; Slab 2:..."
+    },
+    "DEWA-TARIFF-SLABS-2026:Water Slabs": {
+      "doc_id": "DEWA-TARIFF-SLABS-2026",
+      "section": "Water Slabs",
+      "title": "Water Residential Tariff Slabs and Fuel Surcharge",
+      "passage_sha256": "f5bd8d50c3bf3e3668fa637a84275b6389868b9e50e5977b9ae7b60f5654e4f1",
+      "token_count": 34,
+      "passage_preview": "DEWA residential water tariff slabs: Slab 1: 0-6000 IG @ 3.5 fils; Slab 2: 6001-12000 IG @ 4.0 fils; Slab 3: >12000 IG @..."
+    },
+    "DEWA-TARIFF-SLABS-2026_Water_Slabs": {
+      "doc_id": "DEWA-TARIFF-SLABS-2026",
+      "section": "Water Slabs",
+      "title": "Water Residential Tariff Slabs and Fuel Surcharge",
+      "passage_sha256": "f5bd8d50c3bf3e3668fa637a84275b6389868b9e50e5977b9ae7b60f5654e4f1",
+      "token_count": 34,
+      "passage_preview": "DEWA residential water tariff slabs: Slab 1: 0-6000 IG @ 3.5 fils; Slab 2: 6001-12000 IG @ 4.0 fils; Slab 3: >12000 IG @..."
+    },
+    "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022:Real Estate Investor": {
+      "doc_id": "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022",
+      "section": "Real Estate Investor",
+      "title": "Golden Visa Real Estate Investor Category Requirements",
+      "passage_sha256": "53a1bdf60f73c6e6cc157bbdfb523777fbfe84d3ce2b71775d5f20803406ab16",
+      "token_count": 37,
+      "passage_preview": "Cabinet Resolution No. 65 of 2022 Real Estate Investor category: Minimum investment AED 2,000,000 (mortgaged allowed wit..."
+    },
+    "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022_Real_Estate_Investor": {
+      "doc_id": "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022",
+      "section": "Real Estate Investor",
+      "title": "Golden Visa Real Estate Investor Category Requirements",
+      "passage_sha256": "53a1bdf60f73c6e6cc157bbdfb523777fbfe84d3ce2b71775d5f20803406ab16",
+      "token_count": 37,
+      "passage_preview": "Cabinet Resolution No. 65 of 2022 Real Estate Investor category: Minimum investment AED 2,000,000 (mortgaged allowed wit..."
+    },
+    "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022:Skilled Professional": {
+      "doc_id": "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022",
+      "section": "Skilled Professional",
+      "title": "Golden Visa Skilled Professional Category Requirements",
+      "passage_sha256": "6416599084bcb32c4e21e094f659eb081d9509c2443d58ddc2e662036b9748c9",
+      "token_count": 34,
+      "passage_preview": "Cabinet Resolution No. 65 of 2022 Skilled Professional category: Valid employment contract, first/second professional le..."
+    },
+    "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022_Skilled_Professional": {
+      "doc_id": "GDRFA-GOLDEN-VISA-RESOLUTION-65-2022",
+      "section": "Skilled Professional",
+      "title": "Golden Visa Skilled Professional Category Requirements",
+      "passage_sha256": "6416599084bcb32c4e21e094f659eb081d9509c2443d58ddc2e662036b9748c9",
+      "token_count": 34,
+      "passage_preview": "Cabinet Resolution No. 65 of 2022 Skilled Professional category: Valid employment contract, first/second professional le..."
+    },
+    "UAE-CORPORATE-TAX-DECREE-47-2022:Standard Rates": {
+      "doc_id": "UAE-CORPORATE-TAX-DECREE-47-2022",
+      "section": "Standard Rates",
+      "title": "Corporate Tax Standard Rates and Statutory Brackets",
+      "passage_sha256": "6b876941150c1e05e5dc026dad1b880998e20404998134ffaf377feab026567c",
+      "token_count": 33,
+      "passage_preview": "Federal Decree-Law No. 47 of 2022 on the Taxation of Corporations and Businesses establishes standard corporate tax rate..."
+    },
+    "UAE-CORPORATE-TAX-DECREE-47-2022_Standard_Rates": {
+      "doc_id": "UAE-CORPORATE-TAX-DECREE-47-2022",
+      "section": "Standard Rates",
+      "title": "Corporate Tax Standard Rates and Exemption Thresholds",
+      "passage_sha256": "6b876941150c1e05e5dc026dad1b880998e20404998134ffaf377feab026567c",
+      "token_count": 33,
+      "passage_preview": "Federal Decree-Law No. 47 of 2022 on the Taxation of Corporations and Businesses establishes standard corporate tax rate..."
+    },
+    "UAE-CORPORATE-TAX-DECREE-47-2022:Small Business Relief": {
+      "doc_id": "UAE-CORPORATE-TAX-DECREE-47-2022",
+      "section": "Small Business Relief",
+      "title": "Small Business Relief Ministerial Decision No. 73 of 2023",
+      "passage_sha256": "309eec456a90d8a408b63126ae9fd3db717d4a8171b9c419e281e6715d48e4b0",
+      "token_count": 39,
+      "passage_preview": "Small Business Relief (Ministerial Decision No. 73 of 2023 under Federal Decree-Law No. 47 of 2022) for revenue <= AED 3..."
+    },
+    "UAE-CORPORATE-TAX-DECREE-47-2022_Small_Business_Relief": {
+      "doc_id": "UAE-CORPORATE-TAX-DECREE-47-2022",
+      "section": "Small Business Relief",
+      "title": "Small Business Relief Ministerial Decision No. 73 of 2023",
+      "passage_sha256": "309eec456a90d8a408b63126ae9fd3db717d4a8171b9c419e281e6715d48e4b0",
+      "token_count": 39,
+      "passage_preview": "Small Business Relief (Ministerial Decision No. 73 of 2023 under Federal Decree-Law No. 47 of 2022) for revenue <= AED 3..."
     }
   }
 }

@@ -1,0 +1,14 @@
+# DOCUMENT: DEWA-TARIFF-SLABS-2026
+# TITLE: DEWA Slab Tariffs and Residential Utility Billing Regulations 2026
+# AUTHORITY: DEWA
+# DOMAIN: CIVIC
+# EFFECTIVE_DATE: 2026-01-01
+# SOURCE_URL: https://www.dewa.gov.ae/en/consumer/billing/slab-tariff
+
+[SECTION: Electricity Slabs]
+[TITLE: Electricity Residential Tariff Slabs and Fuel Surcharge]
+Dubai Electricity and Water Authority (DEWA) residential electricity tariff slabs: Slab 1: 0-2000 kWh @ 23 fils; Slab 2: 2001-4000 kWh @ 28 fils; Slab 3: 4001-6000 kWh @ 32 fils; Slab 4: >6000 kWh @ 38 fils. Fuel surcharge 5 fils/kWh across all electricity consumption.
+
+[SECTION: Water Slabs]
+[TITLE: Water Residential Tariff Slabs and Fuel Surcharge]
+DEWA residential water tariff slabs: Slab 1: 0-6000 IG @ 3.5 fils; Slab 2: 6001-12000 IG @ 4.0 fils; Slab 3: >12000 IG @ 4.6 fils. Fuel surcharge 0.6 fils/IG across all water consumption.

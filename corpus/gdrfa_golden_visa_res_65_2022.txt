@@ -1,0 +1,14 @@
+# DOCUMENT: GDRFA-GOLDEN-VISA-RESOLUTION-65-2022
+# TITLE: Cabinet Resolution No. 65 of 2022 Promulgating the Executive Regulations of Federal Decree-Law No. 29 of 2021 on Entry and Residence of Foreigners
+# AUTHORITY: GDRFA
+# DOMAIN: CIVIC
+# EFFECTIVE_DATE: 2022-10-03
+# SOURCE_URL: https://www.gdrfad.gov.ae
+
+[SECTION: Real Estate Investor]
+[TITLE: Golden Visa Real Estate Investor Category Requirements]
+Cabinet Resolution No. 65 of 2022 Real Estate Investor category: Minimum investment AED 2,000,000 (mortgaged allowed with bank NOC confirming AED 2M paid). Grants a 10-year renewable residence visa for real estate investors in Dubai and UAE.
+
+[SECTION: Skilled Professional]
+[TITLE: Golden Visa Skilled Professional Category Requirements]
+Cabinet Resolution No. 65 of 2022 Skilled Professional category: Valid employment contract, first/second professional level per MOHRE, minimum salary AED 30,000/month, Bachelor's degree or equivalent. Grants a 10-year renewable Golden Visa for skilled professionals.

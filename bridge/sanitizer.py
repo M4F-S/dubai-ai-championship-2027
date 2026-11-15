@@ -377,6 +377,57 @@ def sanitize_tool_arguments(tool_name: str, args: Dict[str, Any]) -> Dict[str, A
         if "is_mutating" in sanitized:
             sanitized["is_mutating"] = bool(sanitized["is_mutating"])
 
+    elif tool_name == "dewa_calculate_bill":
+        if "electricity_kwh" in sanitized:
+            try:
+                sanitized["electricity_kwh"] = max(0.0, float(sanitized["electricity_kwh"]))
+            except (ValueError, TypeError):
+                sanitized["electricity_kwh"] = 0.0
+        if "water_gallons" in sanitized:
+            try:
+                sanitized["water_gallons"] = max(0.0, float(sanitized["water_gallons"]))
+            except (ValueError, TypeError):
+                sanitized["water_gallons"] = 0.0
+        if "housing_fee_aed" in sanitized:
+            try:
+                sanitized["housing_fee_aed"] = max(0.0, float(sanitized["housing_fee_aed"]))
+            except (ValueError, TypeError):
+                sanitized["housing_fee_aed"] = 0.0
+
+    elif tool_name == "golden_visa_evaluate":
+        if "category" in sanitized:
+            sanitized["category"] = str(sanitized["category"]).strip().upper()
+        if "real_estate_value_aed" in sanitized:
+            try:
+                sanitized["real_estate_value_aed"] = max(0.0, float(sanitized["real_estate_value_aed"]))
+            except (ValueError, TypeError):
+                sanitized["real_estate_value_aed"] = 0.0
+        if "monthly_salary_aed" in sanitized:
+            try:
+                sanitized["monthly_salary_aed"] = max(0.0, float(sanitized["monthly_salary_aed"]))
+            except (ValueError, TypeError):
+                sanitized["monthly_salary_aed"] = 0.0
+        if "has_bachelor_degree" in sanitized:
+            sanitized["has_bachelor_degree"] = bool(sanitized["has_bachelor_degree"])
+
+    elif tool_name == "uae_labor_gratuity":
+        if "basic_salary_aed" in sanitized:
+            try:
+                sanitized["basic_salary_aed"] = max(0.0, float(sanitized["basic_salary_aed"]))
+            except (ValueError, TypeError):
+                sanitized["basic_salary_aed"] = 0.0
+        if "tenure_years" in sanitized:
+            try:
+                sanitized["tenure_years"] = max(0.0, float(sanitized["tenure_years"]))
+            except (ValueError, TypeError):
+                sanitized["tenure_years"] = 0.0
+        if "is_limited_contract" in sanitized:
+            sanitized["is_limited_contract"] = bool(sanitized["is_limited_contract"])
+
+    elif tool_name == "qala_route_department":
+        if "mandate_text" in sanitized:
+            sanitized["mandate_text"] = strip_unauthorized_scripts(str(sanitized["mandate_text"])).strip()
+
     # General sweep: strip any residual unauthorized script from all string fields
     for k, v in list(sanitized.items()):
         if isinstance(v, str):

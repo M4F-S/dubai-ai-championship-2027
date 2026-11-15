@@ -1,0 +1,14 @@
+# DOCUMENT: UAE-CORPORATE-TAX-DECREE-47-2022
+# TITLE: Federal Decree-Law No. 47 of 2022 on the Taxation of Corporations and Businesses
+# AUTHORITY: FTA
+# DOMAIN: CIVIC
+# EFFECTIVE_DATE: 2023-06-01
+# SOURCE_URL: https://tax.gov.ae
+
+[SECTION: Standard Rates]
+[TITLE: Corporate Tax Standard Rates and Statutory Brackets]
+Federal Decree-Law No. 47 of 2022 on the Taxation of Corporations and Businesses establishes standard corporate tax rates: Standard rate: 0% up to AED 375,000; 9% on taxable net profit exceeding AED 375,000.
+
+[SECTION: Small Business Relief]
+[TITLE: Small Business Relief Ministerial Decision No. 73 of 2023]
+Small Business Relief (Ministerial Decision No. 73 of 2023 under Federal Decree-Law No. 47 of 2022) for revenue <= AED 3,000,000: Eligible resident taxable persons may elect for Small Business Relief, treating taxable income as zero for that period.

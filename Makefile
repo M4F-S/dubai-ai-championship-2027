@@ -1,6 +1,8 @@
 # Master Makefile for Dubai Create AI Agents Championship 2026-2027 Adapters
 # Systems: Qala (Business), Nibras Executive (Personal), Taryaq (Societal)
 
+export SDKROOT ?= $(shell if [ -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk ]; then echo /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk; else xcrun --show-sdk-path 2>/dev/null; fi)
+
 CC ?= cc
 CFLAGS ?= -std=c99 -Wall -Wextra -Werror -O2 -Iadapters -Isrc
 LDFLAGS ?= -lm -lsqlite3
@@ -38,6 +40,7 @@ RAG_RUNTIME_TEST = $(TESTS_DIR)/test_rag_runtime_integration.py
 AIRLOCK_TEST = $(TESTS_DIR)/test_airlock_engine.py
 VOICE_TEST = $(TESTS_DIR)/test_voice_engine.py
 CLINICAL_SCRIBE_TEST = $(TESTS_DIR)/test_clinical_scribe.py
+CIVIC_CORPORATE_TEST = $(TESTS_DIR)/test_civic_and_corporate_tools.py
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -60,7 +63,7 @@ CASE_MEMORY_TEST_BIN = $(BUILD_DIR)/test_case_memory
 POLICY_RAG_BIN = $(BUILD_DIR)/test_policy_rag
 LIB_ADAPTERS = $(BUILD_DIR)/libdubai_adapters.$(LIB_EXT)
 
-.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_voice test_clinical_scribe test_gomaa test_phase1 ingest_rag test_rag_ingest taryaq_agent qala_agent nibras_agent timeline-demo clean
+.PHONY: all test test_qala test_nibras test_taryaq test_grounding test_mcp_curl test_interop test_hud test_bench test_laya test_golden eval_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_voice test_clinical_scribe test_civic_and_corporate_tools test_gomaa test_phase1 ingest_rag test_rag_ingest taryaq_agent qala_agent nibras_agent timeline-demo clean
 
 all: $(QALA_BIN) $(NIBRAS_BIN) $(TARYAQ_BIN) $(GROUNDING_BIN) $(MCP_CURL_BIN) $(INTEROP_BIN) $(TARYAQ_AGENT_BIN) $(QALA_AGENT_BIN) $(NIBRAS_AGENT_BIN) $(NIBRAS_SUITE_BIN) $(CASE_MEMORY_TEST_BIN) $(POLICY_RAG_BIN) $(LIB_ADAPTERS)
 
@@ -116,7 +119,7 @@ nibras_agent: $(NIBRAS_AGENT_BIN)
 timeline-demo: $(TARYAQ_AGENT_BIN)
 	@./$(TARYAQ_AGENT_BIN) --timeline-demo
 
-test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_voice test_clinical_scribe test_gomaa test_phase1 test_rag_ingest
+test: all test_interop test_hud test_bench test_laya test_golden test_pilot test_traceability test_bridge test_multi_turn test_rag_runtime test_airlock test_voice test_clinical_scribe test_civic_and_corporate_tools test_gomaa test_phase1 test_rag_ingest
 	@echo "=================================================================="
 	@echo " RUNNING ALL CHAMPIONSHIP C99 ADAPTER TESTS (-Wall -Wextra -Werror)"
 	@echo "=================================================================="
@@ -178,6 +181,12 @@ test_clinical_scribe: $(LIB_ADAPTERS)
 	@echo " RUNNING PHASE 5 AMBIENT CLINICAL SCRIBING & COPILOT SUITE (M-15)"
 	@echo "=================================================================="
 	@python3 $(CLINICAL_SCRIBE_TEST)
+
+test_civic_and_corporate_tools: $(LIB_ADAPTERS)
+	@echo "=================================================================="
+	@echo " RUNNING SPRINT-17 CIVIC & CORPORATE BRIDGE TOOLS SUITE (M-17)"
+	@echo "=================================================================="
+	@python3 $(CIVIC_CORPORATE_TEST)
 
 test_gomaa: $(LIB_ADAPTERS)
 	@echo "=================================================================="
