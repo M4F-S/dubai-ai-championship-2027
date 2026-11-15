@@ -61,70 +61,179 @@
   </div>
 </header>
 
-<!-- Tri-Modal Segment Switcher Header (Sprint-15 M-15) -->
-<div class="tri-modal-bar" style="display:flex; justify-content:space-between; align-items:center; background:#0c1220; border:1px solid #1e293b; padding:8px 16px; border-radius:8px;">
+<!-- Primary Agent Switcher Bar -->
+<div class="agent-switcher-bar" style="display:flex; justify-content:space-between; align-items:center; background:#0c1220; border:1px solid #1e293b; padding:8px 16px; border-radius:8px;">
   <div style="display:flex; gap:8px;">
-    <button id="btn-hud-clinician" onclick="switchHudClinicalMode('clinician')" style="background:var(--panel); border:1px solid var(--gold); color:var(--gold); padding:6px 12px; font-weight:700;">🩺 [Clinician Scribe]</button>
-    <button id="btn-hud-pharmacist" onclick="switchHudClinicalMode('pharmacist')" style="background:var(--panel); border:1px solid #334155; color:var(--muted); padding:6px 12px; font-weight:700;">🛡️ [Pharmacist Gate]</button>
-    <button id="btn-hud-patient" onclick="switchHudClinicalMode('patient')" style="background:var(--panel); border:1px solid #334155; color:var(--muted); padding:6px 12px; font-weight:700;">💚 [Patient Companion]</button>
+    <button id="tab-hud-taryaq" onclick="switchHudAgent('taryaq')" style="background:var(--panel); border:1px solid var(--emerald); color:var(--emerald); padding:6px 14px; font-weight:700; border-radius:6px; cursor:pointer;">[🏥 TARYAQ (Societal)]</button>
+    <button id="tab-hud-qala" onclick="switchHudAgent('qala')" style="background:var(--panel); border:1px solid #334155; color:var(--muted); padding:6px 14px; font-weight:700; border-radius:6px; cursor:pointer;">[🏰 QALA (Business)]</button>
+    <button id="tab-hud-nibras" onclick="switchHudAgent('nibras')" style="background:var(--panel); border:1px solid #334155; color:var(--muted); padding:6px 14px; font-weight:700; border-radius:6px; cursor:pointer;">[🧭 NIBRAS (Personal)]</button>
   </div>
-  <div id="hud-mode-pill" style="font-size:11px; font-weight:700; color:var(--emerald); font-family:monospace;">
-    TRI-MODAL STATE: CLINICIAN AMBIENT SCRIBING (SOAP + ICD-10 + DHA SN 03/2019)
+  <div id="hud-agent-track-badge" style="font-size:11px; font-weight:700; color:var(--emerald); font-family:monospace;">
+    ACTIVE TRACK: TARYAQ (SOCIETAL HEALTHCARE)
   </div>
 </div>
 
-<!-- Tri-Modal Dynamic Views -->
-<div id="hud-view-clinician" style="display:block; background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:12px; margin-bottom:4px;">
+<!-- DASHBOARD 1: TARYAQ (Societal Track) -->
+<div id="hud-dashboard-taryaq" class="hud-dashboard-track">
+  <!-- Tri-Modal Segment Switcher Header (Sprint-15 M-15) -->
+  <div class="tri-modal-bar" style="display:flex; justify-content:space-between; align-items:center; background:#0c1220; border:1px solid #1e293b; padding:8px 16px; border-radius:8px; margin-top:4px;">
+    <div style="display:flex; gap:8px;">
+      <button id="btn-hud-clinician" onclick="switchHudClinicalMode('clinician')" style="background:var(--panel); border:1px solid var(--gold); color:var(--gold); padding:6px 12px; font-weight:700;">🩺 [Clinician Scribe]</button>
+      <button id="btn-hud-pharmacist" onclick="switchHudClinicalMode('pharmacist')" style="background:var(--panel); border:1px solid #334155; color:var(--muted); padding:6px 12px; font-weight:700;">🛡️ [Pharmacist Gate]</button>
+      <button id="btn-hud-patient" onclick="switchHudClinicalMode('patient')" style="background:var(--panel); border:1px solid #334155; color:var(--muted); padding:6px 12px; font-weight:700;">💚 [Patient Companion]</button>
+    </div>
+    <div id="hud-mode-pill" style="font-size:11px; font-weight:700; color:var(--emerald); font-family:monospace;">
+      TRI-MODAL STATE: CLINICIAN AMBIENT SCRIBING (SOAP + ICD-10 + DHA SN 03/2019)
+    </div>
+  </div>
+
+  <!-- Tri-Modal Dynamic Views -->
+  <div id="hud-view-clinician" style="display:block; background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:12px; margin-top:4px; margin-bottom:4px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <strong style="color:var(--gold); font-size:13px;">MODE 1: CLINICIAN AMBIENT SCRIBE &amp; STATUTORY CODING</strong>
+      <button id="btn-hud-signoff" onclick="signHudSoapNote()" style="background:var(--emerald); border:none; color:#000; font-weight:700; padding:4px 10px; border-radius:4px; cursor:pointer;">✍️ Attest &amp; Sign Note</button>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; font-size:11px;">
+      <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+        <strong style="color:var(--cyan);">[S] Subjective:</strong><br>
+        Chief Complaint: Severe acute gout flare right big toe. Known CKD Stage 4 (eGFR 22).
+      </div>
+      <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+        <strong style="color:var(--emerald);">[O] Objective:</strong><br>
+        BP 145/92 mmHg, HR 88 bpm. eGFR 22 mL/min, Creatinine 2.4 mg/dL, Uric acid 9.2 mg/dL.
+      </div>
+      <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+        <strong style="color:var(--crimson);">[A] Assessment:</strong><br>
+        M10.9 (Gout), N18.4 (CKD 4). <span style="color:#fca5a5;">C99 Fatal DDI Block: Colchicine+Clarithromycin.</span>
+      </div>
+      <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+        <strong style="color:var(--gold);">[P] Plan:</strong><br>
+        Hold Colchicine. CMP (80053), Uric Acid (84550). <span style="color:var(--emerald);">DHA §3.7.1 14-day window active.</span>
+      </div>
+    </div>
+    <div style="margin-top:6px; display:flex; gap:6px; font-size:10px;">
+      <span class="badge" style="background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid var(--cyan);">ICD-10: M10.9</span>
+      <span class="badge" style="background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid var(--cyan);">ICD-10: N18.4</span>
+      <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 99214 (E&amp;M)</span>
+      <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 80053 (CMP)</span>
+      <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 84550 (Uric Acid)</span>
+    </div>
+  </div>
+
+  <div id="hud-view-pharmacist" style="display:none; background:#0f172a; border:1px solid var(--crimson); border-radius:8px; padding:12px; margin-top:4px; margin-bottom:4px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <strong style="color:var(--crimson); font-size:13px;">MODE 2: PHARMACIST GATE &amp; C99 SAFETY INTERCEPT (&lt;0.02ms)</strong>
+      <span style="font-size:10px; color:#fca5a5; font-family:monospace;">BOXED WARNING ACTIVE</span>
+    </div>
+    <div style="font-size:12px; color:#f8fafc; margin-top:6px; line-height:1.4;">
+      <strong>FATAL CONTRAINDICATION:</strong> Colchicine + Clarithromycin co-administration in renal impairment (eGFR 22 mL/min). Airlock Quarantine: 2 items staged. Single-use token: <code>TARYAQ-OVERRIDE-8842-CLIN</code>.
+    </div>
+  </div>
+
+  <div id="hud-view-patient" style="display:none; background:#0f172a; border:1px solid var(--emerald); border-radius:8px; padding:12px; margin-top:4px; margin-bottom:4px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <strong style="color:var(--emerald); font-size:13px;">MODE 3: PATIENT COMPANION (BILINGUAL AR/EN GUIDANCE)</strong>
+      <button onclick="playHudPatientAudio()" style="background:var(--cyan); border:none; color:#000; font-weight:700; padding:4px 10px; border-radius:4px; cursor:pointer;">🔊 استمع للإرشادات (Piper TTS)</button>
+    </div>
+    <div style="font-size:13px; color:#f8fafc; margin-top:6px; line-height:1.5;">
+      <strong>جدول الجرعات:</strong> تناول بريدنيزولون ٢٠ ملغ حبة واحدة يومياً بعد الإفطار. توقف فوراً عن كولشيسين وكلاريثروميسين.<br>
+      <strong>حمية النقرس:</strong> اشرب ٢.٥ لتر ماء وتجنب اللحوم الحمراء والمأكولات البحرية.<br>
+      <span style="color:#fca5a5;">🚨 علامات الطوارئ: توجه للطوارئ فوراً عند حدوث إسهال شديد أو وهن عضلي أو ضيق تنفس.</span>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD 2: QALA (Business Track) -->
+<div id="hud-dashboard-qala" class="hud-dashboard-track" style="display:none; background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:12px; margin-top:4px; margin-bottom:4px;">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-    <strong style="color:var(--gold); font-size:13px;">MODE 1: CLINICIAN AMBIENT SCRIBE &amp; STATUTORY CODING</strong>
-    <button id="btn-hud-signoff" onclick="signHudSoapNote()" style="background:var(--emerald); border:none; color:#000; font-weight:700; padding:4px 10px; border-radius:4px; cursor:pointer;">✍️ Attest &amp; Sign Note</button>
+    <strong style="color:var(--gold); font-size:13px;">🏰 QALA: CORPORATE AGENCY MESH &amp; FINOPS GOVERNANCE</strong>
+    <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">DESC ISR v3.1 JAILED</span>
   </div>
-  <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; font-size:11px;">
-    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
-      <strong style="color:var(--cyan);">[S] Subjective:</strong><br>
-      Chief Complaint: Severe acute gout flare right big toe. Known CKD Stage 4 (eGFR 22).
+
+  <!-- Corporate Agency Mesh Visualizer -->
+  <div style="background:#090e1a; border:1px solid #1e293b; border-radius:6px; padding:8px; margin-bottom:8px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <strong style="color:var(--gold); font-size:11px;">👑 Managing Director (Head Executive Agent)</strong>
+      <span style="font-size:10px; color:#94a3b8;">Orchestrating 6 Departmental Specialists</span>
     </div>
-    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
-      <strong style="color:var(--emerald);">[O] Objective:</strong><br>
-      BP 145/92 mmHg, HR 88 bpm. eGFR 22 mL/min, Creatinine 2.4 mg/dL, Uric acid 9.2 mg/dL.
-    </div>
-    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
-      <strong style="color:var(--crimson);">[A] Assessment:</strong><br>
-      M10.9 (Gout), N18.4 (CKD 4). <span style="color:#fca5a5;">C99 Fatal DDI Block: Colchicine+Clarithromycin.</span>
-    </div>
-    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
-      <strong style="color:var(--gold);">[P] Plan:</strong><br>
-      Hold Colchicine. CMP (80053), Uric Acid (84550). <span style="color:var(--emerald);">DHA §3.7.1 14-day window active.</span>
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; font-size:10.5px;">
+      <div style="background:#050811; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+        <strong style="color:var(--gold);">Finance &amp; FinOps:</strong><br>
+        UAE Corporate Tax 9%, VAT 5%, and three-way invoice matching.
+      </div>
+      <div style="background:#050811; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+        <strong style="color:var(--gold);">Legal &amp; Compliance:</strong><br>
+        DESC ISR v3.1 Path Sandbox &amp; contract compliance.
+      </div>
+      <div style="background:#050811; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+        <strong style="color:var(--gold);">Trade &amp; Customs:</strong><br>
+        Mirsal II 10.25% landed tax &amp; DP World container clearance status.
+      </div>
+      <div style="background:#050811; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+        <strong style="color:var(--gold);">HR &amp; People Ops:</strong><br>
+        UAE Labor Law Article 51 gratuity &amp; WPS tracking.
+      </div>
+      <div style="background:#050811; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+        <strong style="color:var(--gold);">Procure &amp; Vendor:</strong><br>
+        Supplier vetting and PO approval.
+      </div>
+      <div style="background:#050811; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+        <strong style="color:var(--gold);">Operations &amp; Facilities:</strong><br>
+        Corporate SOP retrieval.
+      </div>
     </div>
   </div>
-  <div style="margin-top:6px; display:flex; gap:6px; font-size:10px;">
-    <span class="badge" style="background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid var(--cyan);">ICD-10: M10.9</span>
-    <span class="badge" style="background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid var(--cyan);">ICD-10: N18.4</span>
-    <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 99214 (E&amp;M)</span>
-    <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 80053 (CMP)</span>
-    <span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid var(--gold);">CPT: 84550 (Uric Acid)</span>
+
+  <!-- Dual Widgets: Circuit Breaker & Landed Tax Calculator -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11px;">
+    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+      <strong style="color:var(--gold);">⚡ Tau-3 FinOps Circuit Breaker Card:</strong><br>
+      Status: &lt; AED 50,000 autonomous approval vs &ge; AED 50,000 hard lock requiring administrative override <code>QALA-CONFIRM-50K</code>.<br>
+      <span style="color:var(--crimson); font-weight:700;">CURRENT: HARD LOCK (AED 125,000.00)</span>
+    </div>
+    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+      <strong style="color:var(--cyan);">🧮 Landed Tax Calculator Widget:</strong><br>
+      CIF Valuation returning 5% Customs Duty + 5% VAT (10.25% landed tax).<br>
+      <span style="color:var(--emerald);">CIF AED 100,000 &rarr; Tax AED 10,250 (10.25%) | Total AED 110,250</span>
+    </div>
   </div>
 </div>
 
-<div id="hud-view-pharmacist" style="display:none; background:#0f172a; border:1px solid var(--crimson); border-radius:8px; padding:12px; margin-bottom:4px;">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <strong style="color:var(--crimson); font-size:13px;">MODE 2: PHARMACIST GATE &amp; C99 SAFETY INTERCEPT (&lt;0.02ms)</strong>
-    <span style="font-size:10px; color:#fca5a5; font-family:monospace;">BOXED WARNING ACTIVE</span>
+<!-- DASHBOARD 3: NIBRAS (Personal Track) -->
+<div id="hud-dashboard-nibras" class="hud-dashboard-track" style="display:none; background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:12px; margin-top:4px; margin-bottom:4px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <strong style="color:var(--cyan); font-size:13px;">🧭 NIBRAS: DUBAI CIVIC NAVIGATOR &amp; FADEMEM COGNITIVE SHIELD</strong>
+    <span class="badge" style="background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid var(--cyan);">SOVEREIGN OS</span>
   </div>
-  <div style="font-size:12px; color:#f8fafc; margin-top:6px; line-height:1.4;">
-    <strong>FATAL CONTRAINDICATION:</strong> Colchicine + Clarithromycin co-administration in renal impairment (eGFR 22 mL/min). Airlock Quarantine: 2 items staged. Single-use token: <code>TARYAQ-OVERRIDE-8842-CLIN</code>.
-  </div>
-</div>
 
-<div id="hud-view-patient" style="display:none; background:#0f172a; border:1px solid var(--emerald); border-radius:8px; padding:12px; margin-bottom:4px;">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <strong style="color:var(--emerald); font-size:13px;">MODE 3: PATIENT COMPANION (BILINGUAL AR/EN GUIDANCE)</strong>
-    <button onclick="playHudPatientAudio()" style="background:var(--cyan); border:none; color:#000; font-weight:700; padding:4px 10px; border-radius:4px; cursor:pointer;">🔊 استمع للإرشادات (Piper TTS)</button>
+  <!-- Dubai Civic Navigator Card -->
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; font-size:10.5px; margin-bottom:8px;">
+    <div style="background:#090e1a; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+      <strong style="color:var(--cyan);">DEWA progressive tariff calculator:</strong><br>
+      Electricity 23-44 fils/kWh, Water 3.5-4.6 fils/IG. Dynamic slab billing model.
+    </div>
+    <div style="background:#090e1a; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+      <strong style="color:var(--cyan);">DLD Ejari Decree 43/2013 rent dispute verification calculator:</strong><br>
+      Statutory rental index band verification: 0% to 20% cap based on market delta.
+    </div>
+    <div style="background:#090e1a; padding:6px; border-radius:4px; border:1px solid #1e293b;">
+      <strong style="color:var(--cyan);">GDRFA Golden Visa eligibility boundary checker:</strong><br>
+      Real Estate AED 2M, Skilled Professional AED 30k/mo. 10-year residency boundary.
+    </div>
   </div>
-  <div style="font-size:13px; color:#f8fafc; margin-top:6px; line-height:1.5;">
-    <strong>جدول الجرعات:</strong> تناول بريدنيزولون ٢٠ ملغ حبة واحدة يومياً بعد الإفطار. توقف فوراً عن كولشيسين وكلاريثروميسين.<br>
-    <strong>حمية النقرس:</strong> اشرب ٢.٥ لتر ماء وتجنب اللحوم الحمراء والمأكولات البحرية.<br>
-    <span style="color:#fca5a5;">🚨 علامات الطوارئ: توجه للطوارئ فوراً عند حدوث إسهال شديد أو وهن عضلي أو ضيق تنفس.</span>
+
+  <!-- FadeMem Cognitive Shield & Sovereign Vault -->
+  <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:8px; font-size:11px;">
+    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+      <strong style="color:var(--emerald);">🧠 Biologically Grounded Cognitive Shield (FadeMem):</strong><br>
+      Token Reduction Efficiency: &gt;85% reduction. Ebbinghaus retention decay curve visualizer (R = e^{-t/S}) showing ephemeral chatter decay (I &lt; 0.25) vs. pinned statutory rules (I = 1.0).<br>
+      <span style="color:var(--cyan);">Cognitive Friction Index (CFI): 0.08 (Optimal)</span>
+    </div>
+    <div style="background:#090e1a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+      <strong style="color:var(--gold);">🔒 Sovereign Family Office Vault:</strong><br>
+      Encrypted file status badge: <strong>AES-256-GCM authenticated encryption at rest</strong>.<br>
+      <span style="color:var(--emerald);">Zero cloud exfiltration / Tamper-evident SHA-256 seal</span>
+    </div>
   </div>
 </div>
 
@@ -618,6 +727,46 @@ function playHudPatientAudio() {
     body: JSON.stringify({ text: text, lang: 'ar' })
   }).then(r => r.blob()).then(blob => {
     new Audio(URL.createObjectURL(blob)).play().catch(() => {});
+  }).catch(() => {});
+}
+
+function switchHudAgent(agent) {
+  ['taryaq', 'qala', 'nibras'].forEach(a => {
+    const tab = document.getElementById(`tab-hud-${a}`);
+    const dash = document.getElementById(`hud-dashboard-${a}`);
+    if (a === agent) {
+      if (tab) {
+        tab.style.borderColor = a === 'taryaq' ? 'var(--emerald)' : (a === 'qala' ? 'var(--gold)' : 'var(--cyan)');
+        tab.style.color = a === 'taryaq' ? 'var(--emerald)' : (a === 'qala' ? 'var(--gold)' : 'var(--cyan)');
+      }
+      if (dash) dash.style.display = 'block';
+    } else {
+      if (tab) {
+        tab.style.borderColor = '#334155';
+        tab.style.color = 'var(--muted)';
+      }
+      if (dash) dash.style.display = 'none';
+    }
+  });
+
+  const badge = document.getElementById('hud-agent-track-badge');
+  if (badge) {
+    if (agent === 'taryaq') {
+      badge.textContent = 'ACTIVE TRACK: TARYAQ (SOCIETAL HEALTHCARE)';
+      badge.style.color = 'var(--emerald)';
+    } else if (agent === 'qala') {
+      badge.textContent = 'ACTIVE TRACK: QALA (BUSINESS & CORPORATE MESH)';
+      badge.style.color = 'var(--gold)';
+    } else {
+      badge.textContent = 'ACTIVE TRACK: NIBRAS (PERSONAL CIVIC & FADEMEM)';
+      badge.style.color = 'var(--cyan)';
+    }
+  }
+
+  fetch('/api/agent/switch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ agent: agent })
   }).catch(() => {});
 }
 </script>
