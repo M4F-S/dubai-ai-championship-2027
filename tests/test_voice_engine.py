@@ -70,6 +70,7 @@ class TestBiDirectionalVoiceEngine(unittest.TestCase):
 
         # Start ephemeral test HTTP server on port 8844
         cls.port = 8844
+        ChampionshipRequestHandler.engine = OpenRouterAgentEngine(provider="deterministic")
         cls.server = ThreadingHTTPServer((DEFAULT_HOST, cls.port), ChampionshipRequestHandler)
         cls.server_thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.server_thread.start()

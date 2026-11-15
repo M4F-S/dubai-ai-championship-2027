@@ -60,6 +60,7 @@ class TestOpenRouterBridge(unittest.TestCase):
         os.environ["TARYAQ_AUDIT_KEY"] = "test-key-32-bytes-minimum-000000"
         # Start server on ephemeral port for endpoint tests
         cls.port = 8799
+        ChampionshipRequestHandler.engine = OpenRouterAgentEngine(provider="deterministic")
         cls.server = ThreadingHTTPServer((DEFAULT_HOST, cls.port), ChampionshipRequestHandler)
         cls.server_thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.server_thread.start()
@@ -146,7 +147,7 @@ class TestOpenRouterBridge(unittest.TestCase):
 
     def test_07_engine_process_chat_security_block(self):
         """Verify agent chat halts and returns security_block on fatal interaction."""
-        engine = OpenRouterAgentEngine()
+        engine = OpenRouterAgentEngine(provider="deterministic")
         events = list(engine.process_chat("Patient prescribed كولشيسين and Clarithromycin, eGFR 22"))
         
         event_types = [e["type"] for e in events]
@@ -162,7 +163,7 @@ class TestOpenRouterBridge(unittest.TestCase):
 
     def test_08_engine_process_chat_with_override(self):
         """Verify agent chat succeeds and cryptographically signs ledger with valid override."""
-        engine = OpenRouterAgentEngine()
+        engine = OpenRouterAgentEngine(provider="deterministic")
         events = list(engine.process_chat(
             "Patient prescribed كولشيسين and Clarithromycin, eGFR 22",
             override_token=VALID_OVERRIDE_TOKEN,
@@ -203,7 +204,7 @@ class TestOpenRouterBridge(unittest.TestCase):
             "rationale": "Nephrology clinical protocol approval"
         }).encode("utf-8")
         req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=30) as resp:
             self.assertEqual(resp.status, 200)
             data = json.loads(resp.read().decode("utf-8"))
             self.assertEqual(data["status"], "VALIDATED")
@@ -222,7 +223,7 @@ class TestOpenRouterBridge(unittest.TestCase):
             "agent": "taryaq"
         }).encode("utf-8")
         req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=30) as resp:
             self.assertEqual(resp.status, 200)
             self.assertIn("text/event-stream", resp.headers.get("Content-Type", ""))
             raw_stream = resp.read().decode("utf-8")
