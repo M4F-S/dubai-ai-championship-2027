@@ -26,7 +26,7 @@ import argparse
 import subprocess
 import urllib.parse
 from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Tuple, Union
 
 from bridge.c99_bindings import get_engine_status
 from bridge.openrouter_client import (
@@ -38,6 +38,26 @@ from bridge.openrouter_client import (
 )
 from bridge.voice_stt import transcribe_audio, validate_wav_pcm
 from bridge.voice_tts import synthesize_speech, validate_tts_wav, VOICE_CACHE_DIR
+from bridge.clinical_scribe import ClinicalScribeEngine, DEFAULT_CLINICAL_DB
+
+# Active Tri-Modal Copilot Mode ('clinician' | 'pharmacist' | 'patient')
+_active_clinical_mode = "clinician"
+_scribe_engine = ClinicalScribeEngine()
+
+
+def get_clinical_mode() -> str:
+    """Return the current active tri-modal copilot mode."""
+    global _active_clinical_mode
+    return _active_clinical_mode
+
+
+def set_clinical_mode(mode: str) -> str:
+    """Set the active tri-modal copilot mode."""
+    global _active_clinical_mode
+    mode = str(mode).strip().lower()
+    if mode in ("clinician", "pharmacist", "patient"):
+        _active_clinical_mode = mode
+    return _active_clinical_mode
 
 DEFAULT_PORT = 8080
 DEFAULT_HOST = "127.0.0.1"
@@ -128,6 +148,16 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self._serve_airlock_quarantine()
         elif url_path == "/api/voice/synthesize":
             self._handle_voice_synthesize()
+        elif url_path == "/api/clinical/mode":
+            self._handle_get_clinical_mode()
+        elif url_path in ("/api/clinical/soap/notes", "/api/clinical/soap/list"):
+            self._handle_get_soap_notes()
+        elif url_path.startswith("/api/clinical/soap/"):
+            note_id = url_path[len("/api/clinical/soap/"):].strip("/")
+            if note_id and not note_id.endswith("/sign") and note_id not in ("notes", "list"):
+                self._handle_get_soap_note_by_id(note_id)
+            else:
+                self.send_error(404, "Endpoint not found")
         else:
             self.send_error(404, "Endpoint not found")
 
@@ -145,6 +175,17 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self._handle_voice_transcribe()
         elif url_path == "/api/voice/synthesize":
             self._handle_voice_synthesize()
+        elif url_path in ("/api/clinical/soap/generate", "/api/clinical/soap/parse"):
+            self._handle_soap_generate()
+        elif url_path == "/api/clinical/soap/commit":
+            self._handle_soap_commit()
+        elif url_path == "/api/clinical/soap/signoff":
+            self._handle_soap_signoff()
+        elif url_path.startswith("/api/clinical/soap/") and url_path.endswith("/sign"):
+            note_id = url_path[len("/api/clinical/soap/"):-len("/sign")].strip("/")
+            self._handle_soap_signoff(note_id_from_path=note_id)
+        elif url_path == "/api/clinical/mode":
+            self._handle_post_clinical_mode()
         else:
             self.send_error(404, "Endpoint not found")
 
@@ -188,6 +229,8 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             "tts": "piper-tts (bilingual ar/en 22.05 kHz WAV)",
             "cache_dir": VOICE_CACHE_DIR
         }
+        status["clinical_mode"] = _active_clinical_mode
+        status["scribe_engine"] = "ClinicalScribeEngine (ICD-10 + DHA SN 03/2019)"
         if self.engine.provider == "ollama":
             status["mode"] = "LOCAL_OLLAMA_AIRGAP_C99_SHIELD"
         elif self.engine.provider == "openrouter":
@@ -611,6 +654,201 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(wav_bytes)
         except Exception as e:
             self._send_json({"status": "ERROR", "message": f"Synthesis error: {str(e)}"}, 500)
+
+    # -------------------------------------------------------------------------
+    # Ambient Clinical Scribing & Tri-Modal Copilot Endpoints (M-15)
+    # -------------------------------------------------------------------------
+
+    def _handle_soap_generate(self):
+        """POST /api/clinical/soap/generate (or /api/clinical/soap/parse):
+        Parses multi-turn clinical dialogue into structured SOAP note, ICD-10 codes, and DHA claims.
+        """
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else ""
+        try:
+            req_data = json.loads(body) if body else {}
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"Invalid JSON body: {e}"}, 400)
+            return
+
+        transcript = req_data.get("transcript") or req_data.get("dialogue") or req_data.get("text", "")
+        if not transcript:
+            self._send_json({"status": "ERROR", "message": "Missing 'transcript' in request body"}, 400)
+            return
+
+        metadata = {
+            "encounter_id": req_data.get("encounter_id"),
+            "patient_id": req_data.get("patient_id") or req_data.get("emirates_id"),
+            "patient_name": req_data.get("patient_name"),
+            "clinician_id": req_data.get("clinician_id"),
+            "encounter_date": req_data.get("encounter_date")
+        }
+
+        try:
+            res = _scribe_engine.parse_dialogue_to_soap(transcript, metadata=metadata)
+            response_payload = {
+                "status": "SUCCESS",
+                "soap": res["soap"],
+                "icd10": res["icd10"],
+                "dha_claims": res["dha_claims"],
+                "safety_alerts": res["safety_alerts"],
+                "encounter_id": res["encounter_id"],
+                "patient_hash": res["patient_hash"],
+                "clinician_id": res["clinician_id"],
+                "vitals": res.get("vitals", {}),
+                "labs": res.get("labs", {}),
+                "medications": res.get("medications", [])
+            }
+            self._send_json(response_payload, 200)
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"SOAP parsing error: {e}"}, 500)
+
+    def _handle_soap_commit(self):
+        """POST /api/clinical/soap/commit:
+        Commits SOAP note to sovereign SQLite database with SHA-256 patient pseudonymization.
+        """
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else ""
+        try:
+            req_data = json.loads(body) if body else {}
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"Invalid JSON body: {e}"}, 400)
+            return
+
+        # If payload contains nested 'soap', unwrap it
+        if "soap" in req_data and isinstance(req_data["soap"], dict):
+            for k in ("subjective", "objective", "assessment", "plan"):
+                if k in req_data["soap"] and k not in req_data:
+                    req_data[k] = req_data["soap"][k]
+
+        patient_raw = (
+            req_data.get("patient_identifier_hash")
+            or req_data.get("patient_hash")
+            or req_data.get("patient_id")
+            or req_data.get("emirates_id", "")
+        )
+        if len(patient_raw) == 64 and re.match(r"^[0-9a-fA-F]{64}$", patient_raw):
+            patient_hash = patient_raw.lower()
+        else:
+            patient_hash = ClinicalScribeEngine.pseudonymize_patient_identity(patient_raw)
+
+        req_data["patient_identifier_hash"] = patient_hash
+
+        try:
+            note_id = ClinicalScribeEngine.commit_soap_to_db(DEFAULT_CLINICAL_DB, req_data)
+            self._send_json({
+                "status": "COMMITTED",
+                "note_id": note_id,
+                "patient_hash": patient_hash
+            }, 200)
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"Commit failed: {e}"}, 500)
+
+    def _handle_get_soap_notes(self):
+        """GET /api/clinical/soap/notes (or /api/clinical/soap/list):
+        Retrieves list of stored clinical records with optional filtering.
+        """
+        parsed_url = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed_url.query)
+
+        patient_hash = qs.get("patient_hash", [qs.get("patient_id", [None])[0]])[0]
+        if patient_hash and (len(patient_hash) != 64 or not re.match(r"^[0-9a-fA-F]{64}$", patient_hash)):
+            patient_hash = ClinicalScribeEngine.pseudonymize_patient_identity(patient_hash)
+
+        limit_val = 20
+        if "limit" in qs:
+            try:
+                limit_val = int(qs["limit"][0])
+            except (ValueError, TypeError):
+                limit_val = 20
+
+        try:
+            notes = ClinicalScribeEngine.get_soap_notes(
+                DEFAULT_CLINICAL_DB,
+                patient_hash=patient_hash,
+                limit=limit_val
+            )
+            self._send_json(notes, 200)
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"Failed to retrieve notes: {e}"}, 500)
+
+    def _handle_get_soap_note_by_id(self, note_id: str):
+        """GET /api/clinical/soap/{note_id}:
+        Retrieves a single SOAP note by ID.
+        """
+        try:
+            note = ClinicalScribeEngine.get_soap_note_by_id(DEFAULT_CLINICAL_DB, note_id)
+            if note is None:
+                self._send_json({"status": "ERROR", "message": f"SOAP note '{note_id}' not found"}, 404)
+            else:
+                self._send_json(note, 200)
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"Failed to retrieve note: {e}"}, 500)
+
+    def _handle_soap_signoff(self, note_id_from_path: Optional[str] = None):
+        """POST /api/clinical/soap/signoff (or /api/clinical/soap/{note_id}/sign):
+        Attests and locks a clinical SOAP note.
+        """
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else ""
+        try:
+            req_data = json.loads(body) if body else {}
+        except Exception:
+            req_data = {}
+
+        note_id = note_id_from_path or req_data.get("note_id")
+        if not note_id:
+            self._send_json({"status": "ERROR", "message": "Missing 'note_id' parameter"}, 400)
+            return
+
+        clinician_id = req_data.get("clinician_id", "DHA-MD-88124")
+        sig_token = req_data.get("signature_token") or "CLINICIAN_DIGITAL_SIG"
+
+        try:
+            ok = ClinicalScribeEngine.signoff_soap_note(
+                DEFAULT_CLINICAL_DB,
+                note_id=note_id,
+                clinician_id=clinician_id,
+                signature_token=sig_token
+            )
+            if ok:
+                self._send_json({
+                    "status": "SIGNED",
+                    "note_id": note_id,
+                    "locked": True
+                }, 200)
+            else:
+                self._send_json({"status": "ERROR", "message": f"SOAP note '{note_id}' not found"}, 404)
+        except Exception as e:
+            self._send_json({"status": "ERROR", "message": f"Signoff error: {e}"}, 500)
+
+    def _handle_get_clinical_mode(self):
+        """GET /api/clinical/mode: Returns current active UI mode."""
+        self._send_json({"mode": get_clinical_mode()}, 200)
+
+    def _handle_post_clinical_mode(self):
+        """POST /api/clinical/mode: Sets current active UI mode."""
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else ""
+        try:
+            req_data = json.loads(body) if body else {}
+        except Exception:
+            self._send_json({"status": "ERROR", "message": "Invalid JSON body"}, 400)
+            return
+
+        target_mode = str(req_data.get("mode", "")).strip().lower()
+        if target_mode not in ("clinician", "pharmacist", "patient"):
+            self._send_json({
+                "status": "ERROR",
+                "message": f"Invalid mode '{target_mode}'. Must be 'clinician', 'pharmacist', or 'patient'."
+            }, 400)
+            return
+
+        current = set_clinical_mode(target_mode)
+        self._send_json({
+            "mode": current,
+            "status": "MODE_SWITCHED"
+        }, 200)
 
 
 def run_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, provider: str = "auto"):

@@ -666,6 +666,235 @@
       font-weight: 700;
       font-size: 12px;
     }
+
+    /* Tri-Modal Copilot Styles (Sprint-15 M-15) */
+    .tri-modal-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 24px;
+      background: rgba(15, 23, 42, 0.9);
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: blur(10px);
+      z-index: 40;
+    }
+    .tri-modal-nav {
+      display: flex;
+      gap: 8px;
+    }
+    .mode-tab {
+      padding: 6px 14px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .mode-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+    .mode-tab.active {
+      background: var(--bg-elevated);
+      color: var(--gold);
+      border-color: var(--gold);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+    }
+    .tri-modal-status {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--emerald);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    /* Tri-Modal Views Container */
+    .tri-modal-view {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .tri-modal-view.active-view {
+      display: flex;
+    }
+
+    /* Mode 1: Clinician Scribe View */
+    .scribe-waveform-box {
+      background: #040812;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .waveform-canvas {
+      width: 100%;
+      height: 40px;
+      background: #020409;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .soap-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .soap-card {
+      background: #0c1220;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .soap-card-header {
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .soap-subjective { border-top: 3px solid var(--cyan); }
+    .soap-objective { border-top: 3px solid var(--emerald); }
+    .soap-assessment { border-top: 3px solid var(--crimson); }
+    .soap-plan { border-top: 3px solid var(--gold); }
+
+    .tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .pill-icd10 {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+    .pill-dha-cpt {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+    .btn-signoff {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+    .btn-signoff:hover {
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    }
+    .btn-signoff:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Mode 2: Pharmacist Gate View */
+    .pharmacist-banner {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid var(--crimson);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .safety-intercept-header {
+      color: var(--crimson);
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+    }
+
+    /* Mode 3: Patient Companion View */
+    .patient-companion-card {
+      background: #09101d;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 10px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .patient-headline {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--emerald);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .patient-section {
+      background: #040812;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .patient-section h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .patient-section p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+    .btn-tts-patient {
+      background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      align-self: flex-start;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);
+    }
   </style>
 </head>
 <body>
@@ -710,6 +939,24 @@
     </div>
   </header>
 
+  <!-- Tri-Modal Segment Switcher Header (Sprint-15 M-15) -->
+  <div class="tri-modal-bar">
+    <div class="tri-modal-nav">
+      <button class="mode-tab active" id="btn-mode-clinician" onclick="switchClinicalMode('clinician')">
+        🩺 <span id="lbl-mode-clinician">Clinician Scribe</span>
+      </button>
+      <button class="mode-tab" id="btn-mode-pharmacist" onclick="switchClinicalMode('pharmacist')">
+        🛡️ <span id="lbl-mode-pharmacist">Pharmacist Gate</span>
+      </button>
+      <button class="mode-tab" id="btn-mode-patient" onclick="switchClinicalMode('patient')">
+        💚 <span id="lbl-mode-patient">Patient Companion</span>
+      </button>
+    </div>
+    <div class="tri-modal-status" id="tri-modal-badge">
+      ACTIVE: CLINICIAN AMBIENT SCRIBE (SOAP + ICD-10 + DHA SN 03/2019)
+    </div>
+  </div>
+
   <!-- Main Grid Workspace -->
   <main>
     <!-- Left: Conversational Agent Execution Section -->
@@ -720,6 +967,183 @@
         </div>
         <div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">
           <span id="lbl-model-badge">Model: Qwen 2.5 7B (UM790 Equiv)</span>
+        </div>
+      </div>
+
+      <!-- Mode 1: Clinician Scribe View -->
+      <div id="view-clinician" class="tri-modal-view active-view" style="padding: 10px 16px;">
+        <div class="scribe-waveform-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; font-weight:700; color:var(--gold); font-family:var(--font-mono);">
+              🎙️ AMBIENT CONVERSATION CAPTURE &amp; REAL-TIME WAVEFORM (PCM 16kHz)
+            </span>
+            <button class="btn-lang" style="font-size:11px; padding:3px 10px;" onclick="generateSoapFromTranscript()">
+              ⚡ Synthesize SOAP &amp; Claims
+            </button>
+          </div>
+          <canvas id="waveform-canvas" class="waveform-canvas" width="600" height="40"></canvas>
+          <textarea id="scribe-transcript" style="width:100%; height:65px; background:#020409; border:1px solid var(--border-subtle); border-radius:6px; color:#cbd5e1; font-size:12px; font-family:var(--font-mono); padding:6px; resize:none;" placeholder="Doctor-patient dialogue stream will appear here in real-time... (Click '⚡ Synthesize SOAP' or choose a scenario)">Doctor: Patient Ahmed presented with severe acute right big toe pain.
+Patient: يا دكتور ألم فظيع في صباع رجلي الكبير، ومبقدرش أدوس عليه، وعندي وظائف كلى تعبانة eGFR 22. وباخد كولشيسين 0.5mg وكلاريثروميسين 500mg.
+Doctor: Vitals: BP 145/92 mmHg, HR 88 bpm. Labs: eGFR 22, Creatinine 2.4, Uric acid 9.2 mg/dL.</textarea>
+        </div>
+
+        <!-- Rendered SOAP Cards -->
+        <div class="soap-grid">
+          <div class="soap-card soap-subjective">
+            <div class="soap-card-header" style="color:var(--cyan);">
+              <span>[S] Subjective (Narrative PII Scrubbed)</span>
+              <span style="font-size:10px; color:var(--text-dim);">OLDCARTS</span>
+            </div>
+            <div id="soap-val-subjective" style="color:#cbd5e1; line-height:1.4;">
+              Chief Complaint: Severe acute right first MTP joint pain, erythema, and inability to bear weight (acute gout flare). Patient reports sudden onset of agonizing pain in big toe with baseline CKD Stage 4 (eGFR 22).
+            </div>
+          </div>
+
+          <div class="soap-card soap-objective">
+            <div class="soap-card-header" style="color:var(--emerald);">
+              <span>[O] Objective (Vitals &amp; Labs)</span>
+              <span style="font-size:10px; color:var(--text-dim);">QUANTITATIVE</span>
+            </div>
+            <div id="soap-val-objective" style="color:#cbd5e1; line-height:1.4;">
+              Vitals: BP 145/92 mmHg, HR 88 bpm, Temp 37.2°C, SpO2 97%.<br>
+              Labs: eGFR 22 mL/min [Severely Reduced], Creatinine 2.4 mg/dL [High], Uric Acid 9.2 mg/dL [Elevated].
+            </div>
+          </div>
+
+          <div class="soap-card soap-assessment">
+            <div class="soap-card-header" style="color:var(--crimson);">
+              <span>[A] Assessment &amp; C99 Safety</span>
+              <span style="font-size:10px; color:var(--crimson);">DDI INTERCEPT</span>
+            </div>
+            <div id="soap-val-assessment" style="color:#cbd5e1; line-height:1.4;">
+              <strong>1. Acute Gout Flare (M10.9)</strong> | <strong>2. CKD Stage 4 (N18.4)</strong><br>
+              <span style="color:#fca5a5; font-size:11px;">⚠️ FATAL CONTRAINDICATION: Colchicine + Clarithromycin in eGFR &lt; 30 mL/min blocked by C99 Safety Engine (&lt;0.02ms).</span>
+            </div>
+            <div class="tag-container" id="soap-icd-tags">
+              <span class="pill-icd10">ICD-10: M10.9 (Gout)</span>
+              <span class="pill-icd10">ICD-10: N18.4 (CKD Stage 4)</span>
+              <span class="pill-icd10">ICD-10: J06.9 (Acute URI)</span>
+              <span class="pill-icd10">ICD-10: I10 (HTN)</span>
+            </div>
+          </div>
+
+          <div class="soap-card soap-plan">
+            <div class="soap-card-header" style="color:var(--gold);">
+              <span>[P] Plan &amp; DHA SN 03/2019 Claims</span>
+              <span style="font-size:10px; color:var(--gold);">STATUTORY</span>
+            </div>
+            <div id="soap-val-plan" style="color:#cbd5e1; line-height:1.4;">
+              - DISCONTINUE Colchicine immediately.<br>
+              - Substitute Clarithromycin for non-CYP3A4 antibiotic.<br>
+              - Initiate low-dose Prednisolone 20mg taper.<br>
+              - Order CMP (80053), Uric Acid (84550), CBC (85025).
+            </div>
+            <div class="tag-container" id="soap-dha-tags">
+              <span class="pill-dha-cpt">CPT: 99214 (E&amp;M Mod-High)</span>
+              <span class="pill-dha-cpt">CPT: 80053 (CMP Panel)</span>
+              <span class="pill-dha-cpt">CPT: 84550 (Uric Acid)</span>
+              <span class="pill-dha-cpt" style="background:rgba(16,185,129,0.15); border-color:var(--emerald); color:var(--emerald);">DHA §3.7.1: 14-Day Submission Window</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);" id="soap-note-status">
+            Record Status: DRAFT ENCOUNTER (Awaiting Clinician Attestation)
+          </span>
+          <button class="btn-signoff" id="btn-sign-soap" onclick="attestAndSignCurrentNote()">
+            <span>✍️ Attest &amp; Sign Note (Lock Record)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode 2: Pharmacist Gate View -->
+      <div id="view-pharmacist" class="tri-modal-view" style="padding: 10px 16px;">
+        <div class="pharmacist-banner">
+          <div class="safety-intercept-header">
+            <span>🛡️ C99 MICROSECOND SAFETY INTERCEPT ENGINE (&lt;0.02ms)</span>
+            <span style="margin-left:auto; background:rgba(239,68,68,0.25); color:#fca5a5; padding:2px 8px; border-radius:4px; font-size:10px;">
+              FATAL CONTRAINDICATION TRIGGERED
+            </span>
+          </div>
+          <div style="font-size:13px; color:#fee2e2; line-height:1.5;">
+            <strong>Boxed Drug Interaction Warning:</strong> Co-administration of <code>Colchicine 0.5mg</code> and strong CYP3A4 inhibitor <code>Clarithromycin 500mg</code> in patient with severe renal impairment (<code>eGFR = 22 mL/min</code>, CKD Stage 4) causes rapid, fatal colchicine accumulation leading to multi-organ failure.
+          </div>
+        </div>
+
+        <div style="background:#0c1220; border:1px solid var(--border-subtle); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:700; color:var(--gold);">
+              🔑 Single-Use Clinician Emergency Override Verification
+            </span>
+            <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">
+              TARYAQ-OVERRIDE-8842-CLIN
+            </span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="gate-override-input" class="modal-input" style="flex:1;" placeholder="Enter single-use code..." value="TARYAQ-OVERRIDE-8842-CLIN">
+            <button class="btn-override" onclick="verifyGateOverrideToken()">
+              Verify Token
+            </button>
+          </div>
+          <div id="gate-override-status" style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">
+            Airlock status: 1 single-use code staged in memory. Constant-time verification enabled.
+          </div>
+        </div>
+
+        <div style="background:#0c1220; border:1px solid var(--border-subtle); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:700; color:var(--cyan);">
+              📦 Curated Web Airlock Quarantine Queue (HITL Pharmacist Gate)
+            </span>
+            <button class="btn-lang" style="font-size:10px; padding:2px 8px;" onclick="refreshAirlockQueue()">
+              Refresh Queue
+            </button>
+          </div>
+          <div id="airlock-queue-list" style="max-height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+            <div style="font-size:11px; color:#94a3b8; padding:6px; background:#04070e; border-radius:4px; border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center;">
+              <span><strong>DHA-SN-03-2019:</strong> Colchicine renal contraindication dosage advisory</span>
+              <span style="color:var(--emerald); font-weight:700;">APPROVED (HITL)</span>
+            </div>
+            <div style="font-size:11px; color:#94a3b8; padding:6px; background:#04070e; border-radius:4px; border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center;">
+              <span><strong>PubMed ID 3491204:</strong> Macrolide drug interaction kinetic profile</span>
+              <span style="color:var(--gold); font-weight:700;">QUARANTINED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode 3: Patient Companion View -->
+      <div id="view-patient" class="tri-modal-view" style="padding: 10px 16px;">
+        <div class="patient-companion-card">
+          <div class="patient-headline">
+            <span>💚 دليل المريض الصحي الإرشادي (Patient Guidance)</span>
+            <button class="btn-tts-patient" onclick="playPatientGuidanceAudio()">
+              🔊 استمع للإرشادات الصوتية (Piper TTS)
+            </button>
+          </div>
+
+          <div class="patient-section">
+            <h4>📋 جدول الجرعات العلاجية (Medication Schedule)</h4>
+            <p id="patient-dose-schedule">
+              <strong>بريدنيزولون (Prednisolone) ٢٠ ملغ:</strong> تناول حبة واحدة يومياً بعد وجبة الإفطار مباشرة لمدة ٥ أيام، ثم راجع الطبيب.<br>
+              <span style="color:#fca5a5;">⚠️ تنبيه عاجل: توقف فوراً عن تناول أقراص كولشيسين وكلاريثروميسين وفق تعليمات الطبيب لحماية الكلى.</span>
+            </p>
+          </div>
+
+          <div class="patient-section">
+            <h4>🥗 إرشادات النظام الغذائي لحمض اليوريك (Purine Dietary Guidance)</h4>
+            <p>
+              احرص على شرب ما لا يقل عن ٢ إلى ٢.٥ لتر من الماء يومياً. تجنب تماماً اللحوم الحمراء، والمأكولات البحرية (كالروبيان والمحار)، والمشروبات المحلاة بشراب الذرة عالي الفركتوز لتقليل نوبات النقرس.
+            </p>
+          </div>
+
+          <div class="patient-section">
+            <h4 style="color:var(--crimson);">🚨 علامات الطوارئ والإنذار المبكر (Emergency Red Flags)</h4>
+            <p style="color:#fee2e2;">
+              توجه فوراً إلى أقرب قسم طوارئ في حال شعورك بأي من الأعراض التالية: إسهال حاد ومستمر، غثيان شديد، ضعف أو خدر في العضلات، أو صعوبة في التنفس.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -1386,12 +1810,265 @@ ${JSON.stringify(rec, null, 2)}
       }
     }
 
+    // -------------------------------------------------------------------------
+    // Tri-Modal Copilot State & Handlers (Sprint-15 M-15)
+    // -------------------------------------------------------------------------
+    let currentClinicalMode = 'clinician';
+    let currentSoapNote = null;
+    let waveformAnimId = null;
+
+    async function switchClinicalMode(mode) {
+      currentClinicalMode = mode;
+      document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-mode-${mode}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.querySelectorAll('.tri-modal-view').forEach(v => v.classList.remove('active-view'));
+      const activeView = document.getElementById(`view-${mode}`);
+      if (activeView) activeView.classList.add('active-view');
+
+      const badge = document.getElementById('tri-modal-badge');
+      if (badge) {
+        if (mode === 'clinician') {
+          badge.textContent = 'ACTIVE: CLINICIAN AMBIENT SCRIBE (SOAP + ICD-10 + DHA SN 03/2019)';
+          badge.style.color = 'var(--emerald)';
+        } else if (mode === 'pharmacist') {
+          badge.textContent = 'ACTIVE: PHARMACIST SAFETY GATE (C99 <0.02ms + AIRLOCK REVIEW)';
+          badge.style.color = 'var(--crimson)';
+        } else {
+          badge.textContent = 'ACTIVE: PATIENT COMPANION (BILINGUAL GUIDANCE + PIPER TTS)';
+          badge.style.color = 'var(--cyan)';
+        }
+      }
+
+      // Sync state with backend
+      try {
+        await fetch('/api/clinical/mode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: mode })
+        });
+      } catch (e) {}
+
+      if (mode === 'clinician') {
+        drawWaveform();
+      }
+    }
+
+    function drawWaveform() {
+      const canvas = document.getElementById('waveform-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let offset = 0;
+
+      function render() {
+        ctx.fillStyle = '#020409';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#10b981';
+        ctx.beginPath();
+        const sliceWidth = canvas.width / 50;
+        let x = 0;
+        for (let i = 0; i < 50; i++) {
+          const v = Math.sin((i + offset) * 0.3) * 12 + Math.cos((i * 2 + offset) * 0.2) * 5;
+          const y = canvas.height / 2 + v;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+          x += sliceWidth;
+        }
+        ctx.stroke();
+        offset += 0.8;
+        if (currentClinicalMode === 'clinician') {
+          waveformAnimId = requestAnimationFrame(render);
+        }
+      }
+      if (waveformAnimId) cancelAnimationFrame(waveformAnimId);
+      render();
+    }
+
+    async function generateSoapFromTranscript() {
+      const transcriptBox = document.getElementById('scribe-transcript');
+      const transcript = (transcriptBox ? transcriptBox.value : '') || document.getElementById('chat-input').value;
+      const statusSpan = document.getElementById('soap-note-status');
+      if (statusSpan) statusSpan.textContent = 'Parsing clinical dialogue via C99 engine...';
+
+      try {
+        const res = await fetch('/api/clinical/soap/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript: transcript,
+            encounter_id: `ENC-${Math.floor(Math.random() * 9000 + 1000)}`,
+            patient_id: '784-1985-1234567-1',
+            clinician_id: 'DHA-MD-88124'
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentSoapNote = data;
+
+          if (data.soap) {
+            document.getElementById('soap-val-subjective').innerHTML = (data.soap.subjective || '').replace(/\n/g, '<br>');
+            document.getElementById('soap-val-objective').innerHTML = (data.soap.objective || '').replace(/\n/g, '<br>');
+            document.getElementById('soap-val-assessment').innerHTML = (data.soap.assessment || '').replace(/\n/g, '<br>');
+            document.getElementById('soap-val-plan').innerHTML = (data.soap.plan || '').replace(/\n/g, '<br>');
+          }
+
+          // Render ICD-10 tags
+          const icdContainer = document.getElementById('soap-icd-tags');
+          if (icdContainer && data.icd10) {
+            icdContainer.innerHTML = '';
+            data.icd10.forEach(code => {
+              const pill = document.createElement('span');
+              pill.className = 'pill-icd10';
+              pill.textContent = `ICD-10: ${code.code} (${code.description})`;
+              icdContainer.appendChild(pill);
+            });
+          }
+
+          // Render DHA claim tags
+          const dhaContainer = document.getElementById('soap-dha-tags');
+          if (dhaContainer && data.dha_claims) {
+            dhaContainer.innerHTML = '';
+            data.dha_claims.forEach(claim => {
+              const pill = document.createElement('span');
+              pill.className = 'pill-dha-cpt';
+              pill.textContent = `CPT: ${claim.code || claim.cpt_code} (${claim.description})`;
+              dhaContainer.appendChild(pill);
+            });
+            const windowBadge = document.createElement('span');
+            windowBadge.className = 'pill-dha-cpt';
+            windowBadge.style.cssText = 'background:rgba(16,185,129,0.15); border-color:var(--emerald); color:var(--emerald);';
+            windowBadge.textContent = 'DHA SN 03/2019 §3.7.1: 14-Day Initial Submission Window Active';
+            dhaContainer.appendChild(windowBadge);
+          }
+
+          if (statusSpan) {
+            statusSpan.textContent = `Record Status: DRAFT (ID: ${data.encounter_id} | Hash: ${data.patient_hash ? data.patient_hash.slice(0, 10) : 'EID'}... Ready for Attestation)`;
+          }
+
+          const btnSign = document.getElementById('btn-sign-soap');
+          if (btnSign) {
+            btnSign.disabled = false;
+            btnSign.innerHTML = '<span>✍️ Attest &amp; Sign Note (Lock Record)</span>';
+          }
+        }
+      } catch (err) {
+        console.error('SOAP generate error:', err);
+      }
+    }
+
+    async function attestAndSignCurrentNote() {
+      if (!currentSoapNote) {
+        await generateSoapFromTranscript();
+      }
+      if (!currentSoapNote) return;
+
+      const btnSign = document.getElementById('btn-sign-soap');
+      const statusSpan = document.getElementById('soap-note-status');
+      if (btnSign) btnSign.disabled = true;
+
+      try {
+        // Step 1: Commit SOAP Note to DB
+        const commitRes = await fetch('/api/clinical/soap/commit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentSoapNote)
+        });
+        const commitData = await commitRes.json();
+        const noteId = commitData.note_id;
+
+        // Step 2: Signoff SOAP Note
+        const signRes = await fetch('/api/clinical/soap/signoff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            note_id: noteId,
+            clinician_id: 'DHA-MD-88124',
+            signature_token: 'CLIN-ATT-2026-DXB'
+          })
+        });
+
+        if (signRes.ok) {
+          if (statusSpan) {
+            statusSpan.innerHTML = `<strong style="color:var(--emerald);">✅ DIGITALLY ATTESTED &amp; LOCKED UNDER UAE PDPL</strong> (Note ID: <code>${noteId.slice(0,8)}...</code> | SHA-256 Chained)`;
+          }
+          if (btnSign) {
+            btnSign.innerHTML = '<span>🔒 Attested &amp; Locked</span>';
+          }
+          refreshAuditLog();
+        }
+      } catch (err) {
+        console.error('Signoff error:', err);
+      }
+    }
+
+    async function verifyGateOverrideToken() {
+      const tokInput = document.getElementById('gate-override-input');
+      const statusDiv = document.getElementById('gate-override-status');
+      const token = tokInput ? tokInput.value.trim() : '';
+
+      try {
+        const res = await fetch('/api/override', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: token,
+            rationale: 'ICU hemodialysis unit verified; override authorized by nephrology'
+          })
+        });
+        const data = await res.json();
+        if (statusDiv) {
+          if (res.ok) {
+            statusDiv.innerHTML = `<span style="color:var(--emerald);">✅ ${data.message || 'Token accepted. Gated barrier unblocked.'}</span>`;
+            refreshAuditLog();
+          } else {
+            statusDiv.innerHTML = `<span style="color:var(--crimson);">❌ ${data.message || 'Token verification failed.'}</span>`;
+          }
+        }
+      } catch (err) {
+        if (statusDiv) statusDiv.innerHTML = `<span style="color:var(--crimson);">Error: ${err}</span>`;
+      }
+    }
+
+    async function refreshAirlockQueue() {
+      const container = document.getElementById('airlock-queue-list');
+      if (!container) return;
+      try {
+        const res = await fetch('/api/airlock/quarantine');
+        if (res.ok) {
+          const data = await res.json();
+          const items = data.quarantine || [];
+          if (items.length === 0) {
+            container.innerHTML = '<div style="font-size:11px; color:#64748b; padding:8px;">Airlock quarantine queue is currently clear. Zero pending artifacts.</div>';
+          } else {
+            container.innerHTML = '';
+            items.forEach(it => {
+              const row = document.createElement('div');
+              row.style.cssText = 'font-size:11px; color:#94a3b8; padding:6px; background:#04070e; border-radius:4px; border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center;';
+              row.innerHTML = `<span><strong>${it.authority}:</strong> ${escapeHtml(it.query || it.title || 'Research Artifact')}</span><span style="color:${it.status === 'APPROVED' ? 'var(--emerald)' : 'var(--gold)'}; font-weight:700;">${it.status}</span>`;
+              container.appendChild(row);
+            });
+          }
+        }
+      } catch (e) {}
+    }
+
+    function playPatientGuidanceAudio() {
+      const text = "عزيزي المريض، يرجى الالتزام بتناول دواء بريدنيزولون حبة واحدة صباحاً بعد الإفطار، والتوقف فوراً عن تناول أقراص كولشيسين وكلاريثروميسين لحماية وظائف الكلى. كما يرجى التوجه للطوارئ فوراً عند الشعور بأي إسهال حاد أو ضعف عضلي.";
+      const url = `/api/voice/synthesize?lang=ar&text=${encodeURIComponent(text)}`;
+      const audio = new Audio(url);
+      audio.play().catch(e => console.warn('Audio playback error:', e));
+    }
+
     // Initialize UI on load
     window.addEventListener('DOMContentLoaded', () => {
       loadScenarios();
       refreshAuditLog();
       checkEngineHealth();
       initWebSocketTelemetry();
+      drawWaveform();
       setInterval(checkEngineHealth, 10000);
     });
   </script>
