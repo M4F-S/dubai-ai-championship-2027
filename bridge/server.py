@@ -110,6 +110,15 @@ DEMO_SCENARIOS = [
         "prompt": "صاحب الشقة رفع عليا الايجار 20%، هل هذا قانوني وفق مرسوم إيجاري رقم 43 لسنة 2013 الصادر عن دائرة الأراضي والأملاك؟",
         "expected": "Dynamic RAG retrieval of DLD-EJARI-DECREE-43-2013:Article 1 tiers with cryptographic SHA-256 proof",
         "override_code": ""
+    },
+    {
+        "id": "scenario_qala_tax_gratuity",
+        "agent": "qala",
+        "title_en": "6. Qala: UAE Corporate Tax 9% & Gratuity Audit (Art. 51)",
+        "title_ar": "٦. القلعة: تدقيق ضريبة الشركات ٩٪ ومكافأة نهاية الخدمة (مادة ٥١)",
+        "prompt": "Audit corporate tax liability under UAE Federal Decree-Law No. 47/2022 on taxable net profit AED 850,000 (AED 375,000 threshold deduction) and calculate end-of-service gratuity under Labor Law Article 51 for senior engineer with 4.5 years tenure and basic salary AED 18,000.",
+        "expected": "Corporate Tax 9% on AED 475,000 = AED 42,750; Gratuity 94.5 days = AED 56,700 with DESC ISR v3.1 audit trail",
+        "override_code": ""
     }
 ]
 
@@ -132,18 +141,22 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handle GET requests."""
-        url_path = self.path.split("?")[0]
+        parsed_url = urllib.parse.urlparse(self.path)
+        url_path = parsed_url.path
+        query_params = urllib.parse.parse_qs(parsed_url.query)
 
         if url_path == "/" or url_path == "/index.html":
             self._serve_ui()
         elif url_path == "/api/health":
             self._serve_health()
+        elif url_path == "/api/agent/active":
+            self._handle_get_active_agent()
         elif url_path == "/api/audit":
             self._serve_audit()
         elif url_path == "/api/audit/verify":
             self._serve_audit_verify()
         elif url_path == "/api/scenarios":
-            self._serve_scenarios()
+            self._serve_scenarios(query_params)
         elif url_path == "/api/airlock/quarantine":
             self._serve_airlock_quarantine()
         elif url_path == "/api/voice/synthesize":
@@ -167,6 +180,8 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
 
         if url_path == "/api/chat":
             self._handle_chat_stream()
+        elif url_path == "/api/agent/switch":
+            self._handle_switch_agent()
         elif url_path == "/api/override":
             self._handle_override()
         elif url_path == "/api/airlock/review":
@@ -269,15 +284,65 @@ class ChampionshipRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _serve_scenarios(self):
-        """Return predefined championship demonstration scenarios."""
-        body = json.dumps({"scenarios": DEMO_SCENARIOS}, indent=2).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-        self.wfile.write(body)
+    def _handle_get_active_agent(self):
+        """Return the current active primary agent."""
+        active = getattr(self.engine, "active_agent", "taryaq") if self.engine else "taryaq"
+        self._send_json({"active_agent": active})
+
+    def _handle_switch_agent(self):
+        """Switch the active agent across taryaq, qala, and nibras."""
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8")
+        try:
+            req_data = json.loads(body)
+        except Exception:
+            self.send_error(400, "Invalid JSON body")
+            return
+
+        agent = req_data.get("agent", "").strip().lower()
+        if agent not in ("taryaq", "qala", "nibras"):
+            self.send_error(400, f"Unsupported agent: '{agent}'. Must be 'taryaq', 'qala', or 'nibras'.")
+            return
+
+        if self.engine is not None:
+            self.engine.set_agent(agent)
+            active = self.engine.active_agent
+        else:
+            active = agent
+
+        self._send_json({
+            "status": "success",
+            "active_agent": active,
+            "message": f"Successfully switched to {active.upper()} agent track"
+        })
+
+    def _serve_scenarios(self, query_params: Optional[Dict[str, List[str]]] = None):
+        """Return predefined championship demonstration scenarios with optional agent filtering."""
+        categorized = {
+            "taryaq": [s for s in DEMO_SCENARIOS if s.get("agent") == "taryaq"],
+            "qala": [s for s in DEMO_SCENARIOS if s.get("agent") == "qala"],
+            "nibras": [s for s in DEMO_SCENARIOS if s.get("agent") == "nibras"],
+        }
+        agent_filter = None
+        if query_params and "agent" in query_params:
+            vals = query_params.get("agent", [])
+            if vals and vals[0]:
+                agent_filter = vals[0].strip().lower()
+
+        if agent_filter:
+            filtered = [s for s in DEMO_SCENARIOS if s.get("agent") == agent_filter]
+            payload = {
+                "scenarios": filtered,
+                "agent": agent_filter,
+                "categorized": categorized
+            }
+        else:
+            payload = {
+                "scenarios": DEMO_SCENARIOS,
+                "categorized": categorized
+            }
+
+        self._send_json(payload)
 
     def _handle_chat_stream(self):
         """Stream SSE chunks for chat interactions."""
